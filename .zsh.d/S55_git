@@ -4,10 +4,12 @@ export __CURRENT_GIT_REPO=
 export __CURRENT_GIT_BRANCH=
 
 parse_git_repo() {
-    export __CURRENT_GIT_BRANCH="$(git branch --no-color 2> /dev/null | \
-        sed -e '/^[^*]/d; s/^* //;')"
-    export __CURRENT_GIT_REPO="$(git remote -v 2> /dev/null | \
-        awk -F '[[:space:]]+|[/.]' '/\(fetch\)$/ {print $(NF - 2)}')"
+    if [[ $(pwd) != $HOME ]]; then
+        export __CURRENT_GIT_BRANCH="$(git branch --no-color 2> /dev/null | \
+            sed -e '/^[^*]/d; s/^* //;')"
+        export __CURRENT_GIT_REPO="$(git remote -v 2> /dev/null | \
+            awk -F '[[:space:]]+|[/.]' '/\(fetch\)$/ {print $(NF - 2)}')"
+    fi
 }
 
 zsh_update_git_vars() {
