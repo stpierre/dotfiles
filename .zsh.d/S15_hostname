@@ -1,0 +1,33 @@
+#!/bin/zsh
+
+# get short hostname callback
+if [ -e hostname.local ]; then
+    source hostname.local
+fi
+
+if ! type short_hostname >& /dev/null; then
+    function short_hostname() {
+        return 1
+    }
+fi
+
+# Get the short hostname if the machine is in the current site; use
+# the long hostname otherwise
+__CURRENT_HOSTNAME=
+domain=$(hostname --domain 2>&1)
+rv=$?
+if short_hostname; then
+    __CURRENT_HOSTNAME=$(hostname -s)
+elif [[ $rv != 0 || $(echo $domain | wc -l) > 1 ]]; then
+    # the second part of this is a very silly check for a "stupid"
+    # hostname executable that doesn't understand --domain or --fqdn
+    # (e.g., on AIX).  More than one line would seem to indicate an
+    # error message.  At least on AIX, hostname does _not_ return
+    # non-0 if you give it bogus arguments, so we can't depend on
+    # return value
+    __CURRENT_HOSTNAME=$(hostname)
+else
+    __CURRENT_HOSTNAME=$(hostname --fqdn)
+fi
+
+export __CURRENT_HOSTNAME

@@ -1,0 +1,31 @@
+#!/bin/zsh
+
+set_screen_title() {
+    print -Pn "\ek$__CURRENT_HOSTNAME\e\\"
+}
+
+screen() {
+    # some commands run within screen change the value of $COLUMNS, so
+    # we save that variable and then restore it
+    oldcols=$COLUMNS
+    /usr/bin/screen $@
+    export COLUMNS=$oldcols
+}
+
+zsh_preexec_update_screen_title() {
+    case "$(history -1)" in 
+        *ssh*)
+            set_screen_title
+            ;;
+    esac
+}
+
+if [[ $TERM == "screen" ]]; then
+    set_screen_title
+    preexec_functions[$(($#preexec_functions + 1))]='zsh_preexec_update_screen_title'
+
+    if [[ $(uname -s) == 'AIX' ]]; then
+        # "screen" is not a sane term type on AIX
+        export TERM=xterm
+    fi
+fi

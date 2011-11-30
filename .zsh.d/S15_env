@@ -1,0 +1,25 @@
+#!/bin/zsh
+
+export LESS_TERMCAP_mb=$'\E[01;31m'
+export LESS_TERMCAP_md=$'\E[01;31m'
+export LESS_TERMCAP_me=$'\E[0m'
+export LESS_TERMCAP_se=$'\E[0m'
+export LESS_TERMCAP_so=$'\E[01;44;33m'
+export LESS_TERMCAP_ue=$'\E[0m'
+export LESS_TERMCAP_us=$'\E[01;32m'
+
+# less options:
+# -i: Make searches case-sensitive unless they contain uppercase
+# -F: Quit if file is less than one full screen
+# -M: Use verbose prompt
+# -R: Output color sequences in raw form (useful for git diff, e.g.)
+# -X: Do not clear the screen on quit
+export LESS="-iFMRX"
+
+if type xmodmap >& /dev/null; then
+    if [[ -n "$DISPLAY" && -e ~/.Xmodmap ]]; then
+        xmodmap ~/.Xmodmap
+    fi
+fi
+
+__zsh_version=$(zsh --version | awk '{print $2}')

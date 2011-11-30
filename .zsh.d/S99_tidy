@@ -1,0 +1,37 @@
+#!/bin/zsh
+
+# remove duplicates from hooks
+typeset -U preexec_functions precmd_functions postexec_functions postcmd_functions chpwd_functions
+
+# build magical functions on old zsh
+if [[ $__zsh_version < 4.3.4 ]]; then
+    preexec() {
+        for func in $preexec_functions; do
+            $func
+        done
+    }
+
+    precmd() {
+        for func in $precmd_functions; do
+            $func
+        done
+    }
+
+    postexec() {
+        for func in $postexec_functions; do
+            $func
+        done
+    }
+
+    postcmd() {
+        for func in $postcmd_functions; do
+            $func
+        done
+    }
+
+    chpwd() {
+        for func in $chpwd_functions; do
+            $func
+        done
+    }
+fi

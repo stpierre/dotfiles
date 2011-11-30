@@ -1,0 +1,36 @@
+#!/bin/zsh
+
+export __CURRENT_GIT_REPO=
+export __CURRENT_GIT_BRANCH=
+
+parse_git_repo() {
+    export __CURRENT_GIT_BRANCH="$(git branch --no-color 2> /dev/null | \
+        sed -e '/^[^*]/d; s/^* //;')"
+    export __CURRENT_GIT_REPO="$(git remote -v 2> /dev/null | \
+        awk -F '[[:space:]]+|[/.]' '/\(fetch\)$/ {print $(NF - 2)}')"
+}
+
+zsh_update_git_vars() {
+    case "$1" in
+        *git*)
+            parse_git_repo
+            ;;
+    esac
+}
+
+if type git >& /dev/null; then
+    # we run parse_git_repo and parse_git_branch on three occasions:
+    #
+    # 1.  When this file is first loaded;
+    # 2.  When a git command is run; and
+    # 3.  When cd is run
+    parse_git_repo
+    preexec_functions[$(($#preexec_functions + 1))]='zsh_update_git_vars'
+    chpwd_functions[$(($#chpwd_functions + 1))]='parse_git_repo'
+fi
+
+get_git_prompt_info() {
+    if [[ -n $__CURRENT_GIT_REPO && -n $__CURRENT_GIT_BRANCH ]]; then
+        echo " (${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH})"
+    fi
+}

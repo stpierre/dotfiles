@@ -1,0 +1,17 @@
+#!/bin/zsh
+
+# include host-specific files
+
+# make a list of long hostname, short hostname, and short hostname
+# without numbers
+typeset -a hostnames
+hostnames=($(hostname) $(hostname -s) \
+           $(hostname | sed 's/[[:digit:]]*$//') \
+           $(hostname -s | sed 's/[[:digit:]]*$//'))
+typeset -U hostnames
+
+for hostname in $hostnames; do
+    if [[ -e ~/.zsh.d/zshrc.$hostname ]]; then
+        source ~/.zsh.d/zshrc.$hostname
+    fi
+done

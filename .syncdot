@@ -1,0 +1,3 @@
+DOTFILES=".zshrc .zsh.d/S* .zsh.d/zshrc.* .zshenv .bashrc .emacs .emacs.d/*.el .ssh/config .Xmodmap bin/* .screenrc .gnupg/gpg.conf .gitconfig"
+DESTS=""
+HOSTDESTS=""

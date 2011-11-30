@@ -1,0 +1,12 @@
+#!/bin/zsh
+
+alias rm='rm -i'
+alias mv='mv -i'
+alias cp='cp -i'
+alias .=source
+
+if type alpine >& /dev/null; then
+    alias pine='alpine -i'
+fi
+
+[ -e aliases.local ] && source aliases.local

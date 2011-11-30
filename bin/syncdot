@@ -1,0 +1,33 @@
+#!/bin/bash
+
+pushd $HOME
+
+DESTS=""
+HOSTDESTS=""
+DOTFILES=".zshrc .zsh.d .bashrc .emacs .emacs.d"
+
+. .syncdot
+
+if [[ -n "$@" ]]; then
+    HOSTDESTS="$@"
+fi
+
+for dest in $DESTS; do
+    echo "copying to $dest"
+    for file in $DOTFILES; do
+        dir=$(dirname $file)
+        if [[ -n $dir ]]; then
+            mkdir -p $dest/$dir
+            cp -R $file $dest/$dir
+        else
+            cp -R $file $dest
+        fi
+    done
+done
+
+for host in $HOSTDESTS; do
+    echo "copying to $host"
+    tar -cf - $DOTFILES | ssh -q $host 'tar -xf -'
+done
+
+popd

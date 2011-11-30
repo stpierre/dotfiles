@@ -1,0 +1,42 @@
+hardstatus alwayslastline '%{= kr}%-Lw%{=b kg}%50>%n%f* %t%{= kr}%+Lw%<'
+defscrollback 2000
+startup_message off
+
+# make screen play nice(r) with Emacs by changing the escape key from
+# C-a to C-b
+escape ^bb
+
+# make C-b, t change the title instead of C-b, A
+bind t title
+
+# make C-b, k kill a window
+bind k kill
+
+# make Konsole scroll bars work
+termcapinfo xterm* ti@:te@
+
+# protect screen with a password
+password
+
+# messages to display when activity or a bell is detected in another
+# window
+activity              "activity in %n (%t)"
+bell_msg              "bell in %n (%t)"
+vbell_msg             "bell in %n (%t)"
+
+# set silence wait time to 15 seconds
+silencewait 15
+
+# make it easy to select terminals above 9 by doing C-b, -, #
+bind -c selectHighs 0 select 10
+bind -c selectHighs 1 select 11
+bind -c selectHighs 2 select 12
+bind -c selectHighs 3 select 13
+bind -c selectHighs 4 select 14
+bind -c selectHighs 5 select 15
+bind -c selectHighs 6 select 16
+bind -c selectHighs 7 select 17
+bind -c selectHighs 8 select 18
+bind -c selectHighs 9 select 19
+
+bind - command -c selectHighs

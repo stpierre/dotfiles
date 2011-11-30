@@ -1,0 +1,14 @@
+[user]
+	name = Chris St. Pierre
+	email = chris.a.st.pierre@gmail.com
+
+[color]
+	diff = auto
+	status = auto
+	branch = auto
+	ui = auto
+
+[alias]
+        ci = commit
+        co = checkout
+        st = status

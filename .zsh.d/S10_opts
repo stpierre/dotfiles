@@ -1,0 +1,27 @@
+#!/bin/zsh
+
+umask 077
+
+autoload -U compinit && compinit
+autoload -U colors && colors
+
+typeset -ga preexec_functions
+typeset -ga precmd_functions
+typeset -ga postexec_functions
+typeset -ga postcmd_functions
+typeset -ga chpwd_functions
+
+# change behavior of cd
+setopt auto_cd
+setopt auto_pushd
+setopt pushd_silent
+setopt pushd_to_home
+
+# change behavior of history
+setopt share_history
+export HISTSIZE=1500
+export HISTCONTROL=erasedups
+
+# other misc. options
+setopt noclobber
+setopt extended_glob
