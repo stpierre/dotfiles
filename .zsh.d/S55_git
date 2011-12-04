@@ -9,6 +9,8 @@ parse_git_repo() {
     if [[ $__CURRENT_GIT_REPO != "dotfiles" ]]; then
         export __CURRENT_GIT_BRANCH="$(git branch --no-color 2> /dev/null | \
             sed -e '/^[^*]/d; s/^* //;')"
+    else
+        export __CURRENT_GIT_BRANCH=
     fi
 }
 
