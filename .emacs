@@ -185,7 +185,9 @@
 ;; better mode line
 (line-number-mode t)
 (column-number-mode t)
-(size-indication-mode t)
+(if (and (boundp 'size-indication-mode)
+         (fboundp 'size-indication-mode))
+    (size-indication-mode t))
 
 ;; enable y/n answers
 (fset 'yes-or-no-p 'y-or-n-p)
