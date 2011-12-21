@@ -13,8 +13,10 @@ exec 2>>(while read line; do
 function snow() {
     clear
     while :; do
-        echo $LINES $COLUMNS $(($RANDOM%$COLUMNS));
-        sleep 0.1;
+        LINES=$(tput lines)
+        COLUMNS=$(tput cols)
+        echo $LINES $COLUMNS $(($RANDOM%$COLUMNS))
+        sleep 0.1
     done | gawk '{
                   a[$3]=0;
                   for (x in a) {
