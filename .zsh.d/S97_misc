@@ -1,0 +1,27 @@
+#!/bin/zsh
+
+# tab-complete hosts in .ssh/known_hosts
+local _myhosts
+_myhosts=( ${${${${(f)"$(<$HOME/.ssh/known_hosts)"}:#[0-9]*}%%\ *}%%,*} )
+zstyle ':completion:*' hosts $_myhosts
+
+# color stderr output red
+exec 2>>(while read line; do
+    print '\e[91m'${(q)line}'\e[0m' > /dev/tty; print -n $'\0'; done &)
+
+# fun snowflake effect.  'tis the season and all that
+function snow() {
+    clear
+    while :; do
+        echo $LINES $COLUMNS $(($RANDOM%$COLUMNS));
+        sleep 0.1;
+    done | gawk '{
+                  a[$3]=0;
+                  for (x in a) {
+                      o=a[x];
+                      a[x]=a[x]+1;
+                      printf "\033[%s;%sH ",o,x;
+                      printf "\033[%s;%sH*\033[0;0H",a[x],x;
+                  }
+                 }'
+}
