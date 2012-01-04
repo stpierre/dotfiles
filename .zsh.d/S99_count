@@ -1,0 +1,90 @@
+#!/bin/zsh
+
+# Usage subroutine
+__count_usage() {
+    echo "Count occurrences of a pattern in syslog by days (-D), hours (-H),"
+    echo "minutes (-M), or seconds (-S)."
+    echo "Usage: count [-z] [-s] [-D|-H|-M|-S]"
+    echo "   -z: Do not display time periods with 0 hits"
+    echo "   -s: Produce output suitable for piping to spark"
+}
+
+# usage: output "time period" count
+#
+# outputs a record in the correct format
+__count_output() {
+    time=$1
+    count=$2
+    if [[ $count > 0 || $skipzero != 1 ]]; then
+        if [[ $spark == 1 ]]; then
+            echo -n "$count,"
+        else
+            echo "$time    $count"
+        fi
+    fi
+}
+
+# Count occurences of a string in syslog by days, hours, minutes, or
+# seconds
+
+count() {
+    # Process arguments
+    grep=G
+    collect=H
+    spark=
+    skipzero=
+    while getopts "hzsDHMS:" option; do
+        case $option in
+            [DHMS] )
+                collect=$option
+                ;;
+            z )
+                skipzero=1
+                ;;
+            s )
+                spark=1
+                ;;
+            h | \? )
+                __count_usage
+                return 1
+                ;;
+            * ) 
+                echo "Option $option not understood"
+                __count_usage
+                return 1
+                ;;
+        esac
+    done
+
+    # the awk-fu we use to get the string that uniquely identifies
+    # each time period
+    csplit='[[:space:]]+|:'
+    if [[ $collect == "D" ]]; then
+        csplit='[[:space:]]+'
+        cfunc='$1,$2'
+    elif [[ $collect == 'H' ]]; then
+        cfunc='$1, $2, $3 ":00"'
+    elif [[ $collect == 'M' ]]; then
+        cfunc='$1, $2, $3 ":" $4 ":00"'
+    elif [[ $collect == 'S' ]]; then
+        cfunc='$1, $2, $3 ":" $4 ":" $5'
+    fi
+
+    last=
+    current=
+    count=0
+    while read line; do
+        current=$(echo $line | awk -F "$csplit" "{ print $cfunc }")
+        if [[ -z $last ]]; then
+            last=$current
+            count=$(($count + 1))
+        elif [[ $current != $last ]]; then
+            __count_output "$last" $count
+            last=$current
+            count=0
+        else
+            count=$(($count + 1))
+        fi
+    done
+    __count_output "$last" $count
+}
