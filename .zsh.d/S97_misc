@@ -5,10 +5,6 @@ local _myhosts
 _myhosts=( ${${${${(f)"$(<$HOME/.ssh/known_hosts)"}:#[0-9]*}%%\ *}%%,*} )
 zstyle ':completion:*' hosts $_myhosts
 
-# color stderr output red
-exec 2>>(while read line; do
-    print '\e[91m'${(q)line}'\e[0m' > /dev/tty; print -n $'\0'; done &)
-
 # fun snowflake effect.  'tis the season and all that
 function snow() {
     clear
