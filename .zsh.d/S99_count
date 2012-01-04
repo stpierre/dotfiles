@@ -1,5 +1,25 @@
 #!/bin/zsh
 
+# Count occurences of a string in syslog by days, hours, minutes, or
+# seconds.  For instance:
+
+# % grep -E 'Packages: Got [[:digit:]]{3,} unknown entries' \
+#     /var/log/messages | count
+# Jan 1 03:00    1
+# Jan 1 04:00    3
+# Jan 1 05:00    2
+# Jan 1 06:00    1
+# Jan 1 07:00    0
+# Jan 1 08:00    4
+# Jan 1 09:00    2
+# Jan 1 10:00    1
+# ...
+#
+# Also includes an output mode (-s) suitable for use with spark
+# (https://github.com/holman/spark)
+#
+# This should most likely work in bash, too.
+
 # Usage subroutine
 __count_usage() {
     echo "Count occurrences of a pattern in syslog by days (-D), hours (-H),"
@@ -23,9 +43,6 @@ __count_output() {
         fi
     fi
 }
-
-# Count occurences of a string in syslog by days, hours, minutes, or
-# seconds
 
 count() {
     # Process arguments
