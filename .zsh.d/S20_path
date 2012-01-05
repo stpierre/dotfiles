@@ -21,6 +21,6 @@ fi
 pathmunge /sbin after
 pathmunge /usr/sbin after
 
-[ -e path.local ] && source path.local
+[ -e $HOME/.zsh.d/path.local ] && source $HOME/.zsh.d/path.local
 
 export PATH

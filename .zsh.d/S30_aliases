@@ -9,4 +9,4 @@ if type alpine >& /dev/null; then
     alias pine='alpine -i'
 fi
 
-[ -e aliases.local ] && source aliases.local
+[ -e $HOME/.zsh.d/aliases.local ] && source $HOME/.zsh.d/aliases.local

@@ -1,9 +1,7 @@
 #!/bin/zsh
 
 # get short hostname callback
-if [ -e hostname.local ]; then
-    source hostname.local
-fi
+[ -e $HOME/.zsh.d/hostname.local ] && source $HOME/.zsh.d/hostname.local
 
 if ! type short_hostname >& /dev/null; then
     function short_hostname() {
