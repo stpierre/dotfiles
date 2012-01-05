@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 # tab-complete hosts in .ssh/known_hosts
-local _myhosts
+local _myhosts >& /dev/null
 _myhosts=( ${${${${(f)"$(<$HOME/.ssh/known_hosts)"}:#[0-9]*}%%\ *}%%,*} )
 zstyle ':completion:*' hosts $_myhosts
 
