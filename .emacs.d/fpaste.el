@@ -23,13 +23,11 @@
                       (concat " -n '" user-full-name "'"))
                   " -d '" (buffer-name) "'"
                   "2>&1"))
-    (princ (concat "Running: " fpaste-command))
     (setq fpaste-output
           (shell-command-on-region-to-string
            (region-beginning)
            (region-end)
            fpaste-command))
-    (princ (concat "Got output: " fpaste-output))
     (dolist (line (split-string fpaste-output "\n"))
       (when (string-match "http" line)
         (progn
