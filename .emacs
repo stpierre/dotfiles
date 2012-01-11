@@ -156,8 +156,8 @@
       (make-directory backups)))
 
 ;; set email address and fullname properly
-(defun user-mail-address () "chris.a.st.pierre@gmail.com")
-(defun user-full-name () "Chris St. Pierre")
+(setq user-mail-address "chris.a.st.pierre@gmail.com")
+(setq user-full-name "Chris St. Pierre")
 
 ;; Handle .gz files
 (auto-compression-mode t)
@@ -203,3 +203,5 @@
 ;; load local (site-specific) stuff
 (if (file-exists-p "~/.emacs.local")
     (load "~/.emacs.local"))
+
+(require 'fpaste)
