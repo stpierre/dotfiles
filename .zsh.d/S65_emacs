@@ -1,13 +1,18 @@
 #!/bin/zsh
 
+function __start_emacs_server() {
+    # start emacs server
+    if ! pgrep -f 'emacs --daemon' >& /dev/null; then
+        \emacs --daemon >& /dev/null
+    fi
+}
+
 if type emacs >& /dev/null; then
     version=$(emacs --version | head -n 1 | \
         awk '{ split($NF, v, "."); print v[1] "." v[2]; }')
     if type emacsclient >& /dev/null && [[ $version -ge 23.1 ]]; then
-        # start emacs server
-        if ! pgrep -f 'emacs --daemon' >& /dev/null; then
-            \emacs --daemon >& /dev/null
-        fi
+        __start_emacs_server
+        alias emacsclient="__start_emacs_server; emacsclient"
 
         export ALTERNATIVE_EDITOR=""
         if [[ -n $DISPLAY ]]; then
