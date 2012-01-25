@@ -104,9 +104,9 @@
       (autoload 'genshi-mode
         (concat user-emacs-directory "genshi-mode.el")
         "Genshi mode." t)
-      (setq auto-mode-alist (append '(("\.newtxt" . genshi-mode))
+      (setq auto-mode-alist (append '(("\\.newtxt\\'" . genshi-mode))
                                     auto-mode-alist))
-      (setq auto-mode-alist (append '(("\.genshi" . genshi-mode))
+      (setq auto-mode-alist (append '(("\\.genshi\\'" . genshi-mode))
                                     auto-mode-alist))))
 
 ;; CSS mode settings
@@ -179,8 +179,10 @@
 
 ;; set initial window size
 (setq default-frame-alist
-      (append (list '(width  . 80) '(height . 80))
+      (append (list '(width  . 164)
+                    '(height . 80))
               default-frame-alist))
+(split-window-horizontally)
 
 ;; better mode line
 (line-number-mode t)
