@@ -10,3 +10,8 @@ if type alpine >& /dev/null; then
 fi
 
 [ -e $HOME/.zsh.d/aliases.local ] && source $HOME/.zsh.d/aliases.local
+
+function socks() {
+    # todo: make port configurable
+    ssh -D 8000 -fCqN "$@" && echo "proxy started on port 8000"
+}
