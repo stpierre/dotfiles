@@ -1,7 +1,24 @@
 #!/bin/zsh
 
-set_screen_title() {
-    print -Pn "\ek$__CURRENT_HOSTNAME\e\\"
+__RESET_SCREEN_TITLE=
+
+__set_screen_title() {
+    # set screen title
+    if [[ -n $1 ]]; then
+        print -Pn "\ek$1\e\\"
+    fi
+}
+
+set_screen_hostname() {
+    # set screen title to hostname
+    __set_screen_title $__CURRENT_HOSTNAME
+}
+
+set_screen_screen_session() {
+    # set screen title to the name of the screen sub-session
+    set -- $(echo $1 | sed 's/.*\sscreen\s\s*//;')
+    zparseopts -E -- S:=session r:=session d=d
+    __set_screen_title $(echo $session | sed -e 's/.*\s\s*\(\d+\.\)*//')
 }
 
 screen() {
@@ -13,16 +30,29 @@ screen() {
 }
 
 zsh_preexec_update_screen_title() {
-    case "$(history -1)" in 
+    case "$1" in 
         *ssh*)
-            set_screen_title
+            set_screen_hostname
+            __RESET_SCREEN_TITLE=1
+            ;;
+        *screen*)
+            set_screen_screen_session "$1"
+            __RESET_SCREEN_TITLE=1
             ;;
     esac
 }
 
+zsh_precmd_update_screen_title() {
+    if [[ $__RESET_SCREEN_TITLE == 1 ]]; then
+        set_screen_hostname
+        __RESET_SCREEN_TITLE=
+    fi
+}
+
 if [[ $TERM == "screen" ]]; then
-    set_screen_title
+    set_screen_hostname
     preexec_functions[$(($#preexec_functions + 1))]='zsh_preexec_update_screen_title'
+    precmd_functions[$(($#precmd_functions + 1))]='zsh_precmd_update_screen_title'
 
     if [[ $(uname -s) == 'AIX' ]]; then
         # "screen" is not a sane term type on AIX
