@@ -8,29 +8,39 @@ function __start_emacs_server() {
 }
 
 if type emacs >& /dev/null; then
-    version=$(emacs --version | head -n 1 | \
-        awk '{ split($NF, v, "."); print v[1] "." v[2]; }')
-    if type emacsclient >& /dev/null && [[ $version -ge 23.1 ]]; then
-        __start_emacs_server
-        alias emacsclient="__start_emacs_server; emacsclient"
-
-        export ALTERNATIVE_EDITOR=""
-        if [[ -n $DISPLAY ]]; then
-            alias emacs="emacsclient -c"
-            alias vi="emacsclient -t"
-        else
-            alias emacs="emacsclient -t"
-            alias vi=emacs
+    if [[ -z $__emacs_bin ]]; then
+        if [[ $(type emacs) == "emacs is a shell function" ]]; then
+            unfunction emacs
         fi
+        __emacs_bin=$(which emacs)
+    fi
+    __emacs_version=$($__emacs_bin --version | head -n 1 | \
+        awk '{ split($NF, v, "."); print v[1] "." v[2]; }')
+
+    if type emacsclient >& /dev/null && [[ $__emacs_version -ge 23.1 ]]; then
+        function emacs() {
+            __start_emacs_server
+            if [[ -n $DISPLAY ]]; then
+                args="-c $@"
+            else
+                args="-t $@"
+            fi
+            emacsclient ${=args}
+        }
+
+        function emacs-kill() {
+            emacsclient -e '(kill-emacs)'
+        }
+
+        __start_emacs_server
+        export ALTERNATIVE_EDITOR=""
     fi
     export EDITOR=emacs
-    alias emcas=emacs
 elif type vim >& /dev/null; then
     export EDITOR=vim
-    alias vi=vim
-    alias emacs=vim
 else
     export EDITOR=vi
-    alias emacs=vi
 fi
 
+alias emcas=$EDITOR
+alias vi=$EDITOR
