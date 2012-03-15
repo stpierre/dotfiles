@@ -182,7 +182,7 @@
       (append (list '(width  . 164)
                     '(height . 80))
               default-frame-alist))
-(split-window-horizontally)
+;;(split-window-horizontally)
 
 ;; better mode line
 (line-number-mode t)
@@ -226,3 +226,19 @@
              (setq graphviz-dot-auto-indent-on-newline nil)
              (setq graphviz-dot-auto-indent-on-braces nil)
              (setq graphviz-dot-auto-indent-on-semi nil)))
+
+;; define function to shutdown emacs server instance
+(defun server-shutdown ()
+  "Save buffers, Quit, and Shutdown (kill) server"
+  (interactive)
+  (save-some-buffers)
+  (kill-emacs)
+  )
+
+;; create a python-scratch buffer that's just like *scratch*, but with
+;; the python major mode
+(with-current-buffer
+    (generate-new-buffer "*python-scratch*")
+  (progn
+    (require 'python-mode)
+    (python-mode)))
