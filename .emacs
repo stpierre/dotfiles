@@ -234,3 +234,11 @@
   (save-some-buffers)
   (kill-emacs)
   )
+
+;; create a python-scratch buffer that's just like *scratch*, but with
+;; the python major mode
+(with-current-buffer
+    (generate-new-buffer "*python-scratch*")
+  (progn
+    (require 'python-mode)
+    (python-mode)))
