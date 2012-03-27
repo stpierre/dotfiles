@@ -5,7 +5,7 @@ export __CURRENT_GIT_BRANCH=
 
 parse_git_repo() {
     export __CURRENT_GIT_REPO="$(git remote -v 2> /dev/null | \
-        awk -F '[[:space:]]+|[/.]' '/\(fetch\)$/ {print $(NF - 2)}' | \
+        awk '/\(fetch\)$/ { split($2,a,"/"); sub(/\.git$/, "", a[length(a)]); print a[length(a)]; }' | \
         sort | uniq -c | sort -n | tail -n 1 | awk '{print $NF}')"
     if [[ $__CURRENT_GIT_REPO != "dotfiles" ]]; then
         export __CURRENT_GIT_BRANCH="$(git branch --no-color 2> /dev/null | \
