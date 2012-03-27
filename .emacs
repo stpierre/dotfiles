@@ -228,6 +228,4 @@
 ;; the python major mode
 (with-current-buffer
     (generate-new-buffer "*python-scratch*")
-  (progn
-    (require 'python-mode)
-    (python-mode)))
+  (python-mode))
