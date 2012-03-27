@@ -5,7 +5,7 @@
 
 ;; open Alpine temp files (pico.NNNNN) in text-mode
 (setq auto-mode-alist (append '(("pico\\." . text-mode))
-			      auto-mode-alist))
+                              auto-mode-alist))
 
 ;; enable text-fill by default (good for composing in Alpine)
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
@@ -30,12 +30,12 @@
 (if (not (boundp 'user-emacs-directory))
     (setq user-emacs-directory "~/.emacs.d"))
 (if (file-exists-p user-emacs-directory)
-      (add-to-list 'load-path user-emacs-directory))
+    (add-to-list 'load-path user-emacs-directory))
 
 ;; perl mode settings
 (add-hook 'perl-mode-hook
-	  '(lambda () 
-	     (local-set-key "\C-c\C-k" 'perlcritic)
+          '(lambda () 
+             (local-set-key "\C-c\C-k" 'perlcritic)
              (require 'compile)
              (hs-minor-mode)
              (set (make-local-variable 'compile-command)
@@ -44,26 +44,15 @@
 
 ;; xml mode settings
 (setq auto-mode-alist (append '(("\\.xsd\\'" . xml-mode))
-			      auto-mode-alist))
+                              auto-mode-alist))
 (add-hook 'sgml-mode-hook
-	  '(lambda () 
-             (setq tab-width 2)
-             (turn-on-auto-fill)
-             (hs-minor-mode)
-             (unless (assoc 'sgml-mode hs-special-modes-alist)
-               (setq hs-special-modes-alist
-                     (cons
-                      (list 'sgml-mode
-                            "^\\s-*<\\w+\\(\\s-\\w+=\\s\".*?\\s\"\\)?" nil
-                            "<!--"
-                            (lambda (arg)
-                              (sgml-skip-tag-forward))
-                            nil)
-                      hs-special-modes-alist)))))
+          '(lambda () 
+             (setq tab-width 4)
+             (turn-on-auto-fill)))
 
 ;; org mode settings
 (add-hook 'org-mode-hook
-	  '(lambda () 
+          '(lambda () 
              (org-indent-mode)
              (local-set-key "\C-cl" 'org-store-link)))
 
@@ -72,7 +61,7 @@
 
 ;; python mode settings
 (add-hook 'python-mode-hook
-	  '(lambda ()
+          '(lambda ()
              (local-set-key "\C-c\C-k" 'pylint)
              (setq tab-width 4)
              (hs-minor-mode)
@@ -90,7 +79,7 @@
 
 ;; PHP mode settings
 (add-hook 'php-mode-hook
-	  '(lambda () 
+          '(lambda () 
              (setq tab-width 4)
              (require 'compile)
              (hs-minor-mode)
@@ -220,7 +209,7 @@
 
 ;; graphviz mode settings
 (add-hook 'graphviz-dot-mode-hook
-	  '(lambda ()
+          '(lambda ()
              (setq tab-width 4)
              (setq graphviz-dot-indent-width 4)
              (setq graphviz-dot-auto-indent-on-newline nil)
