@@ -1,0 +1,5 @@
+#!/usr/bin/zsh
+if [[ -e ~/devel/bcfg2 ]]; then
+    pathmunge ~/devel/bcfg2/src/sbin
+    export PYTHONPATH=$PYTHONPATH:~/devel/bcfg2/src/lib
+fi

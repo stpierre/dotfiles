@@ -1,0 +1,6 @@
+#!/usr/bin/zsh
+
+if [[ -e ~/devel/pulp ]]; then
+    pathmunge ~/devel/pulp/bin
+    export PYTHONPATH=$PYTHONPATH:~/devel/pulp/src
+fi
