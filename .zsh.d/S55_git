@@ -29,14 +29,15 @@ get_git_prompt_info() {
     fi
 }
 
-git_topdir() {
-     readlink -f $(git rev-parse --show-cdup)
-}
-
 git_submodule_update() {
-    pushd $(git_topdir)
+    topdir=$(git rev-parse --show-cdup)
+    if [[ -n $topdir ]]; then
+        pushd $topdir
+    fi
     git submodule update
-    popd
+    if [[ -n $topdir ]]; then
+        popd
+    fi
 }
 
 if type git >& /dev/null; then
