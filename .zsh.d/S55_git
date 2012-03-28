@@ -30,38 +30,7 @@ get_git_prompt_info() {
 }
 
 git_topdir() {
-    # this function finds the top-level directory for the current git
-    # working copy
-
-    # first, let's find the origin URL and hope that perhaps, just
-    # perhaps, this WC was checked out into a directory named after
-    # the repo (i.e., the default behavior)
-    rname="$(git config --get remote.origin.url | \
-             awk -F/ '{ sub(/\.git$/, "", $NF); print $NF; }')"
-    basepath=""
-    for dir in $(pwd -P | sed 's/^\///; s/\// /g'); do
-        basepath="$basepath/$dir"
-        if [[ "$dir" == "$rname" && -e "$basepath/.git" ]]; then
-            echo $basepath
-            return 0
-        fi
-    done
-
-    # if that didn't work, work through the parent directories and see
-    # which one has a .git in it.  if we're inside a submodule, this
-    # obviously won't work -- at least, not for some value of "work."
-    # you could say that it works perfectly
-    cwd=$(pwd -P)
-
-    while [[ -n "$cwd" ]]; do
-        if [[ -e "$cwd/.git" ]]; then
-            echo $cwd
-            return 0
-        fi
-        cwd=$(echo $cwd | sed 's/\(.*\)\/[^/\]*/\1/')
-    done
-    
-    return 1
+     readlink -f $(git rev-parse --show-cdup)
 }
 
 git_submodule_update() {
