@@ -23,7 +23,61 @@ zsh_update_git_vars() {
     esac
 }
 
+get_git_prompt_info() {
+    if [[ -n $__CURRENT_GIT_REPO && -n $__CURRENT_GIT_BRANCH ]]; then
+        echo " (${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH})"
+    fi
+}
+
+git_topdir() {
+    # this function finds the top-level directory for the current git
+    # working copy
+
+    # first, let's find the origin URL and hope that perhaps, just
+    # perhaps, this WC was checked out into a directory named after
+    # the repo (i.e., the default behavior)
+    rname="$(git config --get remote.origin.url | \
+             awk -F/ '{ sub(/\.git$/, "", $NF); print $NF; }')"
+    basepath=""
+    for dir in $(pwd -P | sed 's/^\///; s/\// /g'); do
+        basepath="$basepath/$dir"
+        if [[ "$dir" == "$rname" && -e "$basepath/.git" ]]; then
+            echo $basepath
+            return 0
+        fi
+    done
+
+    # if that didn't work, work through the parent directories and see
+    # which one has a .git in it.  if we're inside a submodule, this
+    # obviously won't work -- at least, not for some value of "work."
+    # you could say that it works perfectly
+    cwd=$(pwd -P)
+
+    while [[ -n "$cwd" ]]; do
+        if [[ -e "$cwd/.git" ]]; then
+            echo $cwd
+            return 0
+        fi
+        cwd=$(echo $cwd | sed 's/\(.*\)\/[^/\]*/\1/')
+    done
+    
+    return 1
+}
+
+git_submodule_update() {
+    pushd $(git_topdir)
+    git submodule update
+    popd
+}
+
 if type git >& /dev/null; then
+    if [[ -z $__git_bin ]]; then
+        if [[ $(type git) == "git is a shell function" ]]; then
+            unfunction git
+        fi
+        __git_bin=$(which git)
+    fi
+
     # we run parse_git_repo and parse_git_branch on three occasions:
     #
     # 1.  When this file is first loaded;
@@ -32,10 +86,16 @@ if type git >& /dev/null; then
     parse_git_repo
     preexec_functions[$(($#preexec_functions + 1))]='zsh_update_git_vars'
     chpwd_functions[$(($#chpwd_functions + 1))]='parse_git_repo'
-fi
 
-get_git_prompt_info() {
-    if [[ -n $__CURRENT_GIT_REPO && -n $__CURRENT_GIT_BRANCH ]]; then
-        echo " (${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH})"
-    fi
-}
+    git() {
+        cmd=$1
+        if [[ -n $cmd && ($cmd == "co" || $cmd == "checkout") ]]; then
+            $__git_bin $*
+            rv=$?
+            git_submodule_update
+            return $rv
+        else
+            $__git_bin $*
+        fi
+    }
+fi
