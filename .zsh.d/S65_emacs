@@ -3,7 +3,7 @@
 function __start_emacs_server() {
     # start emacs server
     if ! pgrep -f 'emacs --daemon' >& /dev/null; then
-        \emacs --daemon >& /dev/null
+        $__emacs_bin --daemon >& /dev/null
     fi
 }
 
