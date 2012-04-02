@@ -7,8 +7,9 @@
 (setq auto-mode-alist (append '(("pico\\." . text-mode))
                               auto-mode-alist))
 
-;; enable text-fill by default (good for composing in Alpine)
+;; enable text-fill by default (good for composing email)
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
+(add-hook 'tbemail-mode-hook 'turn-on-auto-fill)
 
 ;; set M-x compile to something handier.  this lets you run C-x C-m
 ;; C-m to compile
@@ -229,3 +230,6 @@
 (with-current-buffer
     (generate-new-buffer "*python-scratch*")
   (python-mode))
+
+;; Thunderbird External Editor mode
+(require 'tbemail)
