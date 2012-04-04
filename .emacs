@@ -35,7 +35,7 @@
 
 ;; perl mode settings
 (add-hook 'perl-mode-hook
-          '(lambda () 
+          '(lambda ()
              (local-set-key "\C-c\C-k" 'perlcritic)
              (require 'compile)
              (hs-minor-mode)
@@ -46,14 +46,20 @@
 ;; xml mode settings
 (setq auto-mode-alist (append '(("\\.xsd\\'" . xml-mode))
                               auto-mode-alist))
-(add-hook 'sgml-mode-hook
-          '(lambda () 
+(add-hook 'nxml-mode-hook
+          '(lambda ()
+             (setq show-trailing-whitespace t)
              (setq tab-width 4)
+             (setq nxml-child-indent tab-width)
+             (add-hook 'write-file-functions 'delete-trailing-whitespace)))
+
+(add-hook 'sgml-mode-hook
+          '(lambda ()
              (turn-on-auto-fill)))
 
 ;; org mode settings
 (add-hook 'org-mode-hook
-          '(lambda () 
+          '(lambda ()
              (org-indent-mode)
              (local-set-key "\C-cl" 'org-store-link)))
 
@@ -71,7 +77,7 @@
                (setq hs-special-modes-alist
                      (cons
                       (list 'python-mode
-                            "^\\s-*def\\>" nil "#" 
+                            "^\\s-*def\\>" nil "#"
                             (lambda (arg)
                               (py-end-of-def-or-class)
                               (skip-chars-backward " \t\n"))
@@ -80,7 +86,7 @@
 
 ;; PHP mode settings
 (add-hook 'php-mode-hook
-          '(lambda () 
+          '(lambda ()
              (setq tab-width 4)
              (require 'compile)
              (hs-minor-mode)
