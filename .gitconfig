@@ -13,4 +13,4 @@
         co = checkout
         st = status
         review = !git push origin HEAD:refs/for/$(git rev-parse --abbrev-ref HEAD)
-        story  = "!git push origin origin:refs/heads/story/fb$1_$2; git fetch origin; git co --track origin/story/fb$1_$2"
+        story  = "!git push origin origin:refs/heads/story/fb$1_$2; git fetch origin; git co story/fb$1_$2"
