@@ -4,7 +4,15 @@ pushd $HOME
 
 DESTS=""
 HOSTDESTS=""
-DOTFILES=".zshrc .zsh.d .bashrc .emacs .emacs.d"
+
+# build a list of dotfiles to copy from git.  we explicitly include
+# .zsh.d and .emacs.d because git doesn't list directories and we want
+# to make sure to copy everything in those directories, including
+# stuff that's not committed to git
+DOTFILES=".zsh.d .emacs.d bin sw"
+pushd $HOME
+DOTFILES="$DOTFILES $(git ls-files | grep -v 'README\|\.zsh\.d/\|\.emacs\.d/')"
+popd
 
 . .syncdot
 
