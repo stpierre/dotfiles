@@ -13,8 +13,8 @@ pathmunge () {
 if [ -e ~/bin ]; then
     pathmunge ~/bin
 fi
-if [ -e ~/nfs/bin ]; then
-    pathmunge ~/nfs/bin after
+if [ -e ~/sw/$(uname -s)-$(uname -r | cut -d. -f 1,2)-$(uname -m) ]; then
+    pathmunge ~/sw/$(uname -s)-$(uname -r | cut -d. -f 1,2)-$(uname -m)
 fi
 
 # these need to go after /usr/bin to make mock work properly
