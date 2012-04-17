@@ -1,0 +1,25 @@
+#!/bin/zsh
+
+if type ssh >& /dev/null; then
+    if [[ -z $__ssh_bin ]]; then
+        if [[ $(type ssh) == "ssh is a shell function" ]]; then
+            unfunction ssh
+        fi
+        __ssh_bin=$(which ssh)
+    fi
+fi
+
+function ssh() {
+    if [[ ${#@} == 1 ]]; then
+        # only do funny stuff if we had a single argument; don't try
+        # to be clever if ssh is being used in a clever way already
+        if [[ -e $HOME/.ssh/id_rsa.pub ]]; then
+            ssh-copy-id -i $HOME/.ssh/id_rsa.pub $1 > /dev/null
+        fi
+
+        # syncdot takes a long time to run; we need to effectively
+        # track where we've copied to recently and not copy every time
+        #$HOME/bin/syncdot $1
+    fi
+    $__ssh_bin $*
+}
