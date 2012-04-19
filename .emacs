@@ -33,6 +33,31 @@
 (if (file-exists-p user-emacs-directory)
     (add-to-list 'load-path user-emacs-directory))
 
+;; function to run pre-save checks
+(defun presave-process-check (command &rest args)
+  "Call an external process on the contents of the buffer"
+  (setq buffer (get-buffer-create (concat "*" command "*")))
+  (save-excursion
+    (set-buffer buffer)
+    (delete-region (point-min) (point-max)))
+  (if (/= 0 (apply 'call-process-region
+                   (point-min) (point-max)
+                   command nil buffer t args))
+        (pop-to-buffer buffer)))
+
+;; conf mode settings
+(setq auto-mode-alist (append '(("sudoers" . conf-mode)
+                                ("sudoers\\." . conf-mode))
+                              auto-mode-alist))
+(add-hook 'conf-mode-hook
+          '(lambda ()
+             (if (and (buffer-file-name)
+                      (string-match "\\bsudoers\\b" (buffer-file-name)))
+                 (add-hook 'local-write-file-hooks
+                           '(lambda ()
+                              (presave-process-check
+                               "visudo" "-c" "-f" "-"))))))
+
 ;; perl mode settings
 (add-hook 'perl-mode-hook
           '(lambda ()
@@ -43,7 +68,7 @@
                   (concat "perl -c "
                           (file-name-nondirectory buffer-file-name)))))
 
-;; xml mode settings
+;; xml-mode settings
 (setq auto-mode-alist (append '(("\\.xsd\\'" . xml-mode))
                               auto-mode-alist))
 (add-hook 'nxml-mode-hook
@@ -51,7 +76,14 @@
              (setq show-trailing-whitespace t)
              (setq tab-width 4)
              (setq nxml-child-indent tab-width)
-             (add-hook 'write-file-functions 'delete-trailing-whitespace)))
+             (require 'compile)
+             (set (make-local-variable 'compile-command)
+                  (concat "xmllint --noout "
+                          (file-name-nondirectory buffer-file-name)))
+             (add-hook 'local-write-file-hooks
+                       '(lambda()
+                          (delete-trailing-whitespace)
+                          (presave-process-check "xmllint" "--noout" "-")))))
 
 (add-hook 'sgml-mode-hook
           '(lambda ()
