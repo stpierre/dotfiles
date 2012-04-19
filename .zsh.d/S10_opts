@@ -19,8 +19,15 @@ setopt pushd_to_home
 
 # change behavior of history
 setopt share_history
+setopt extended_history
+setopt hist_ignore_dups
+setopt hist_expire_dups_first
+setopt hist_allow_clobber
+setopt hist_reduce_blanks
 export HISTSIZE=1500
+export SAVEHIST=$HISTSIZE
 export HISTCONTROL=erasedups
+export HISTFILE=~/.history
 
 # other misc. options
 setopt noclobber
