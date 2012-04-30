@@ -1,10 +1,16 @@
 #!/bin/zsh
 
-# get short hostname callback
+# get short hostname callback and/or domain
+KNOWN_DOMAINS=
 [ -e $HOME/.zsh.d/hostname.local ] && source $HOME/.zsh.d/hostname.local
 
 if ! type short_hostname >& /dev/null; then
     function short_hostname() {
+        for d in ${=KNOWN_DOMAINS}; do
+            if [[ -n $domain && $domain == $d ]]; then
+                return 0
+            fi
+        done
         return 1
     }
 fi
