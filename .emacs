@@ -46,8 +46,7 @@
         (pop-to-buffer buffer)))
 
 ;; conf mode settings
-(setq auto-mode-alist (append '(("sudoers" . conf-mode)
-                                ("sudoers\\." . conf-mode))
+(setq auto-mode-alist (append '(("\\bsudoers\\b" . conf-mode))
                               auto-mode-alist))
 (add-hook 'conf-mode-hook
           '(lambda ()
