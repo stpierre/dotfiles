@@ -1,1 +1,22 @@
+! compose key: Compose on Sun Type 7, Menu button on Windows keyboards
 keycode 135 = Multi_key
+
+! settings for the Sun Type 7, the greatest keyboard ever built.  many
+! of these keys work in X, but I don't like to depend on them in case
+! I'm forced to use a lesser keyboard
+! keycode 146 = ! Help
+! keycode 136 = ! Stop
+! keycode 137 = ! Again
+! keycode 138 = ! Props
+! keycode 139 = ! Undo
+! keycode 140 = ! Front
+! keycode 141 = ! Copy
+! set up audio controls on bottom four extra keys
+! Open
+keycode 142 = XF86AudioStop
+! Paste
+keycode 143 = XF86AudioPlay
+! Find
+keycode 144 = XF86AudioPrev
+! Cut
+keycode 145 = XF86AudioNext
