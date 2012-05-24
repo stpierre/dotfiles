@@ -270,3 +270,7 @@
 
 ;; Thunderbird External Editor mode
 (require 'tbemail)
+
+;; EasyPG settings
+(require 'epa-file)
+(epa-file-enable)

@@ -1,0 +1,27 @@
+#!/bin/zsh
+
+function start-gpg-agent() {
+    GPG_AGENT_FILE=$(readlink -f ~/.gpg-agent-info)
+    rv=0
+    if type gpg-agent >& /dev/null; then
+        if [[ -e $GPG_AGENT_FILE ]]; then
+            source $GPG_AGENT_FILE
+            GPG_AGENT_PID=$(echo $GPG_AGENT_INFO | \
+                awk -F: '{ print $(NF - 1) }')
+            proc=$(ps -p $GPG_AGENT_PID -o comm=)
+            if [[ $proc != "gpg-agent" ]]; then
+                export GPG_AGENT_INFO=
+                rm -f $GPG_AGENT_FILE
+            else
+                export GPG_AGENT_INFO
+                return $rv
+            fi
+        fi
+        eval $(gpg-agent --daemon --write-env-file $GPG_AGENT_FILE)
+        export GPG_AGENT_INFO
+        export GPG_TTY=$(tty)
+    fi
+    return $rv
+}
+
+start-gpg-agent
