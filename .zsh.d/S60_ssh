@@ -9,6 +9,32 @@ if type ssh >& /dev/null; then
     fi
 fi
 
+function start-ssh-agent() {
+    SSH_AGENT_FILE=$(readlink -f ~/.ssh-agent-info)
+    rv=0
+    if type ssh-agent >& /dev/null; then
+        if [[ -e $SSH_AGENT_FILE ]]; then
+            source $SSH_AGENT_FILE
+            proc=$(ps -p $SSH_AGENT_PID -o comm=)
+            if [[ $proc != "ssh-agent" ]]; then
+                export SSH_AUTH_SOCK=
+                export SSH_AGENT_PID=
+                rm -f $SSH_AGENT_FILE
+            else
+                return $rv
+            fi
+        fi
+        cmds=$(ssh-agent | grep -v '^echo')
+        rv=$(($rv + $?))
+        eval $cmds
+        rv=$(($rv + $?))
+        echo $cmds >| $SSH_AGENT_FILE
+    fi
+    return $rv
+}
+
+start-ssh-agent
+
 function ssh() {
     if [[ ${#@} == 1 ]]; then
         # only do funny stuff if we had a single argument; don't try
