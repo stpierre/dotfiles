@@ -73,7 +73,7 @@
 (add-hook 'nxml-mode-hook
           '(lambda ()
              (setq show-trailing-whitespace t)
-             (setq tab-width 4)
+             (setq tab-width 2)
              (setq nxml-child-indent tab-width)
              (require 'compile)
              (set (make-local-variable 'compile-command)
