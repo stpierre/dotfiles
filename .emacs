@@ -274,3 +274,4 @@
 ;; EasyPG settings
 (require 'epa-file)
 (epa-file-enable)
+(put 'scroll-left 'disabled nil)
