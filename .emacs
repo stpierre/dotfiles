@@ -292,12 +292,60 @@
                         temp-file
                         (file-name-directory buffer-file-name))))
       (list "~/.emacs.d/pyflymake.py" (list local-file))))
-      ;;     check path
-
   (add-to-list 'flymake-allowed-file-name-masks
                '("\\.py\\'" flymake-pylint-init)))
 
 (add-hook 'find-file-hook 'flymake-find-file-hook)
+
+;; keep state for flymake-display-err-in-minibuffer so multiple
+;; invocations cycle through the errors for a given line
+(setq flymake-error-idx 0)
+(setq flymake-error-line 0)
+
+(defun flymake-display-err-in-minibuffer ()
+  (interactive)
+  (let* ((line-no (flymake-current-line-no))
+         (line-err-info-list (car (flymake-find-err-info flymake-err-info
+                                                         line-no))))
+    (if line-err-info-list
+        (progn
+          (if (= line-no flymake-error-line)
+              (setq flymake-error-idx (1+ flymake-error-idx))
+            (setq flymake-error-idx 0))
+          (setq flymake-error-line line-no)
+          (setq err (nth flymake-error-idx line-err-info-list))
+          (if err nil
+            (progn
+              ;; went past the end of the error list -- start over
+              (setq flymake-error-idx -1)
+              (setq err (car line-err-info-list))))
+          (princ (format "%s (%d)" (flymake-ler-text err) line-no)))
+      (princ (format "No errors on line %d" line-no)))))
+
+(defun flymake-pylint-error-list (err-info-list)
+  (if err-info-list
+      (let ((err-text (flymake-ler-text (car err-info-list))))
+        (if (string-match "pylint/\\([A-Z][[:digit:]]\\{4\\}\\)" err-text)
+            (cons (match-string 1 err-text)
+                  (flymake-pylint-error-list (cdr err-info-list)))
+          (flymake-pylint-error-list (cdr err-info-list))))
+    '()))
+
+(defun flymake-disable-pylint-on-line ()
+  (interactive)
+  (end-of-line)
+  (insert
+   (format "  # pylint: disable=%s"
+           (mapconcat 'identity
+                      (flymake-pylint-error-list
+                       (car (flymake-find-err-info flymake-err-info
+                                                   (flymake-current-line-no))))
+                      ","))))
+
+(define-prefix-command 'flymake-map)
+(global-set-key "\C-xe" 'flymake-map)
+(define-key flymake-map "s" 'flymake-display-err-in-minibuffer)
+(define-key flymake-map "d" 'flymake-disable-pylint-on-line)
 
 ;; auto-complete settings
 (add-to-list 'load-path "~/.emacs.d/")
