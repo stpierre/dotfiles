@@ -268,10 +268,45 @@
     (generate-new-buffer "*python-scratch*")
   (python-mode))
 
+(put 'scroll-left 'disabled nil)
+
 ;; Thunderbird External Editor mode
 (require 'tbemail)
 
 ;; EasyPG settings
 (require 'epa-file)
 (epa-file-enable)
-(put 'scroll-left 'disabled nil)
+
+;; yaml-mode settings
+(require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
+
+;; flymake and pyflymake settings
+(add-to-list 'load-path "~/.emacs.d")
+
+(when (load "flymake" t)
+  (defun flymake-pylint-init ()
+    (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))
+           (local-file (file-relative-name
+                        temp-file
+                        (file-name-directory buffer-file-name))))
+      (list "~/.emacs.d/pyflymake.py" (list local-file))))
+      ;;     check path
+
+  (add-to-list 'flymake-allowed-file-name-masks
+               '("\\.py\\'" flymake-pylint-init)))
+
+(add-hook 'find-file-hook 'flymake-find-file-hook)
+
+;; auto-complete settings
+(add-to-list 'load-path "~/.emacs.d/")
+(require 'auto-complete-config)
+(add-to-list 'ac-dictionary-directories "~/.emacs.d//ac-dict")
+(ac-config-default)
+
+;; which-function-mode settings
+(require 'which-func)
+(add-to-list 'which-func-modes 'org-mode)
+(add-to-list 'which-func-modes 'python-mode)
+(which-func-mode 1)
