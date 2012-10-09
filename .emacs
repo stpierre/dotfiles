@@ -234,25 +234,25 @@
     (load "~/.emacs.local"))
 
 ;; load fpaste magic
-(require 'fpaste)
+(if (file-exists-p (concat user-emacs-directory "fpaste.el"))
+    (require 'fpaste))
 
-;; load graphviz mode
+;; graphviz mode settings
 (if (file-exists-p (concat user-emacs-directory "graphviz-dot-mode.el"))
     (progn
       (autoload 'graphviz-dot-mode
         (concat user-emacs-directory "graphviz-dot-mode.el")
         "Graphviz mode." t)
       (add-to-list 'auto-mode-alist '("\\.dot\\'" . graphviz-dot-mode))
-      (add-to-list 'auto-mode-alist '("\\.gv\\'" . graphviz-dot-mode))))
+      (add-to-list 'auto-mode-alist '("\\.gv\\'" . graphviz-dot-mode)))
 
-;; graphviz mode settings
-(add-hook 'graphviz-dot-mode-hook
-          '(lambda ()
-             (setq tab-width 4)
-             (setq graphviz-dot-indent-width 4)
-             (setq graphviz-dot-auto-indent-on-newline nil)
-             (setq graphviz-dot-auto-indent-on-braces nil)
-             (setq graphviz-dot-auto-indent-on-semi nil)))
+  (add-hook 'graphviz-dot-mode-hook
+            '(lambda ()
+               (setq tab-width 4)
+               (setq graphviz-dot-indent-width 4)
+               (setq graphviz-dot-auto-indent-on-newline nil)
+               (setq graphviz-dot-auto-indent-on-braces nil)
+               (setq graphviz-dot-auto-indent-on-semi nil))))
 
 ;; define function to shutdown emacs server instance
 (defun server-shutdown ()
@@ -271,7 +271,8 @@
 (put 'scroll-left 'disabled nil)
 
 ;; Thunderbird External Editor mode
-(require 'tbemail)
+(if (file-exists-p (concat user-emacs-directory "tbemail.el"))
+    (require 'tbemail))
 
 ;; EasyPG settings
 (require 'epa-file)
