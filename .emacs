@@ -206,7 +206,7 @@
 
 ;; set initial window size
 (setq default-frame-alist
-      (append (list '(width  . 164)
+      (append (list '(width  . 162)
                     '(height . 80))
               default-frame-alist))
 ;;(split-window-horizontally)
