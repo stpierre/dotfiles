@@ -183,8 +183,8 @@
       (make-directory backups)))
 
 ;; set email address and fullname properly
-(setq user-mail-address "chris.a.st.pierre@gmail.com")
-(setq user-full-name "Chris St. Pierre")
+(defun user-mail-address () "chris.a.st.pierre@gmail.com")
+(defun user-full-name () "Chris St. Pierre")
 
 ;; Handle .gz files
 (auto-compression-mode t)
