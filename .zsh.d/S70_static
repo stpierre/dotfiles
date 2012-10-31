@@ -1,0 +1,13 @@
+#!/bin/zsh
+
+# helpers for compiling stuff statically
+
+export PREFIX="$HOME/sw/$(uname -s)-$(uname -r | cut -d. -f 1,2)-$(uname -m)"
+export STATIC_CFLAGS="-static -static-libgcc"
+export STATIC_LDFLAGS="-static -static-libgcc"
+
+function static_configure() {
+    CFLAGS="$STATIC_CFLAGS" \
+        LDFLAGS="$STATIC_LDFLAGS" \
+        ./configure --prefix="$PREFIX" $*
+}
