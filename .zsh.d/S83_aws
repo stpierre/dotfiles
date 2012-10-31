@@ -1,0 +1,21 @@
+#!/bin/zsh
+
+if [[ -e ~/bin/aws ]]; then
+
+    export AWS_CLOUDFORMATION_HOME=$(find ~/bin/aws/*CloudFormation* -maxdepth 0 -type d)
+    export AWS_AUTO_SCALING_HOME=$(find ~/bin/aws/*AutoScaling* -maxdepth 0 -type d)
+    export AWS_CLOUDWATCH_HOME=$(find ~/bin/aws/*CloudWatch* -maxdepth 0 -type d)
+    export AWS_IAM_HOME=$(find ~/bin/aws/*IAMCli* -maxdepth 0 -type d)
+
+    pathmunge $AWS_CLOUDFORMATION_HOME/bin after
+    pathmunge $AWS_AUTO_SCALING_HOME/bin after
+    pathmunge $AWS_CLOUDWATCH_HOME/bin after
+    pathmunge $AWS_IAM_HOME/bin after
+
+    if [[ -e ~/bin/aws/credentials ]]; then
+        export AWS_CREDENTIAL_FILE=~/bin/aws/credentials
+    fi
+    if [[ -z $JAVA_HOME ]]; then
+        export JAVA_HOME=$(dirname $(which java))/..
+    fi
+fi
