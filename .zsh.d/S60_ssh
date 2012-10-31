@@ -9,7 +9,7 @@ if type ssh >& /dev/null; then
     fi
 fi
 
-function start-ssh-agent() {
+start-ssh-agent() {
     SSH_AGENT_FILE=$(readlink -f ~/.ssh-agent-info)
     rv=0
     if type ssh-agent >& /dev/null; then
@@ -35,7 +35,7 @@ function start-ssh-agent() {
 
 start-ssh-agent
 
-function ssh() {
+ssh() {
     if [[ ${#@} == 1 ]]; then
         # only do funny stuff if we had a single argument; don't try
         # to be clever if ssh is being used in a clever way already
@@ -48,4 +48,13 @@ function ssh() {
         #$HOME/bin/syncdot $1
     fi
     $__ssh_bin $*
+}
+
+scp_via() {
+    # scp a file or files from one host to another via the current
+    # host
+    tmpdir=$(mktemp -d)
+    scp $1 $tmpdir/
+    scp $tmpdir/* $2
+    rm -rf $tmpdir
 }
