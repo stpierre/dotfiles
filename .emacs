@@ -43,7 +43,11 @@
   (if (/= 0 (apply 'call-process-region
                    (point-min) (point-max)
                    command nil buffer t args))
-        (pop-to-buffer buffer)))
+      (pop-to-buffer buffer)))
+
+;; autopair settings
+(autoload 'autopair-global-mode "autopair" nil t)
+(autopair-global-mode)
 
 ;; conf mode settings
 (setq auto-mode-alist (append '(("\\bsudoers\\b" . conf-mode))
@@ -98,22 +102,36 @@
   '(perlcritic-severity 4))
 
 ;; python mode settings
+(setq pylookup-db-file (concat user-emacs-directory "pylookup.db"))
+(autoload 'pylookup-lookup "pylookup"
+  "Lookup SEARCH-TERM in the Python HTML indexes." t)
+(autoload 'pylookup-update "pylookup" 
+  "Run pylookup-update and create the database at `pylookup-db-file'." t)
+
 (add-hook 'python-mode-hook
           '(lambda ()
              (local-set-key "\C-c\C-k" 'pylint)
+             (local-set-key (kbd "<C-tab>") 'rope-lucky-assist)
              (setq tab-width 4)
              (hs-minor-mode)
              (setq python-indent 4)
+             (push '(?' . ?') (getf autopair-extra-pairs :code))
+             (setq autopair-handle-action-fns
+                   (list 'autopair-default-handle-action
+                         'autopair-python-triple-quote-action))
+             (add-hook 'before-save-hook 'delete-trailing-whitespace)
              (unless (assoc 'python-mode hs-special-modes-alist)
                (setq hs-special-modes-alist
-                     (cons
-                      (list 'python-mode
-                            "^\\s-*def\\>" nil "#"
-                            (lambda (arg)
-                              (py-end-of-def-or-class)
-                              (skip-chars-backward " \t\n"))
-                            nil)
-                      hs-special-modes-alist)))))
+                     (cons (list 'python-mode
+                                 "^\\s-*def\\>" nil "#"
+                                 (lambda (arg)
+                                   (py-end-of-def-or-class)
+                                   (skip-chars-backward " \t\n"))
+                                 nil)
+                           hs-special-modes-alist)))))
+
+(require 'pymacs)
+(pymacs-load "ropemacs" "rope-")
 
 ;; PHP mode settings
 (add-hook 'php-mode-hook
@@ -126,15 +144,13 @@
                           (file-name-nondirectory buffer-file-name)))))
 
 ;; Genshi template settings
-(if (file-exists-p (concat user-emacs-directory "genshi-mode.el"))
-    (progn
-      (autoload 'genshi-mode
-        (concat user-emacs-directory "genshi-mode.el")
-        "Genshi mode." t)
-      (setq auto-mode-alist (append '(("\\.newtxt\\'" . genshi-mode))
-                                    auto-mode-alist))
-      (setq auto-mode-alist (append '(("\\.genshi\\'" . genshi-mode))
-                                    auto-mode-alist))))
+(autoload 'genshi-mode
+  (concat user-emacs-directory "genshi-mode.el")
+  "Genshi mode." t)
+(setq auto-mode-alist (append '(("\\.newtxt\\'" . genshi-mode))
+                              auto-mode-alist))
+(setq auto-mode-alist (append '(("\\.genshi\\'" . genshi-mode))
+                              auto-mode-alist))
 
 ;; CSS mode settings
 (add-hook 'css-mode-hook
@@ -154,13 +170,10 @@
 (put 'upcase-region 'disabled nil)
 
 ;; load RPM specfile mode
-(if (file-exists-p (concat user-emacs-directory "rpm-spec-mode.el"))
-    (progn
-      (autoload 'rpm-spec-mode
-        (concat user-emacs-directory "rpm-spec-mode.el")
-        "RPM spec mode." t)
-      (setq auto-mode-alist
-            (append '(("\\.spec" . rpm-spec-mode)) auto-mode-alist))))
+(autoload 'rpm-spec-mode
+  (concat user-emacs-directory "rpm-spec-mode.el")
+  "RPM spec mode." t)
+(setq auto-mode-alist (append '(("\\.spec" . rpm-spec-mode)) auto-mode-alist))
 
 ;; Always end a file with a newline
 (setq require-final-newline t)
@@ -234,33 +247,29 @@
     (load "~/.emacs.local"))
 
 ;; load fpaste magic
-(if (file-exists-p (concat user-emacs-directory "fpaste.el"))
-    (require 'fpaste))
+(require 'fpaste)
 
 ;; graphviz mode settings
-(if (file-exists-p (concat user-emacs-directory "graphviz-dot-mode.el"))
-    (progn
-      (autoload 'graphviz-dot-mode
-        (concat user-emacs-directory "graphviz-dot-mode.el")
-        "Graphviz mode." t)
-      (add-to-list 'auto-mode-alist '("\\.dot\\'" . graphviz-dot-mode))
-      (add-to-list 'auto-mode-alist '("\\.gv\\'" . graphviz-dot-mode)))
+(autoload 'graphviz-dot-mode
+  (concat user-emacs-directory "graphviz-dot-mode.el")
+  "Graphviz mode." t)
+(add-to-list 'auto-mode-alist '("\\.dot\\'" . graphviz-dot-mode))
+(add-to-list 'auto-mode-alist '("\\.gv\\'" . graphviz-dot-mode))
 
-  (add-hook 'graphviz-dot-mode-hook
-            '(lambda ()
-               (setq tab-width 4)
-               (setq graphviz-dot-indent-width 4)
-               (setq graphviz-dot-auto-indent-on-newline nil)
-               (setq graphviz-dot-auto-indent-on-braces nil)
-               (setq graphviz-dot-auto-indent-on-semi nil))))
+(add-hook 'graphviz-dot-mode-hook
+          '(lambda ()
+             (setq tab-width 4)
+             (setq graphviz-dot-indent-width 4)
+             (setq graphviz-dot-auto-indent-on-newline nil)
+             (setq graphviz-dot-auto-indent-on-braces nil)
+             (setq graphviz-dot-auto-indent-on-semi nil)))
 
 ;; define function to shutdown emacs server instance
 (defun server-shutdown ()
   "Save buffers, Quit, and Shutdown (kill) server"
   (interactive)
   (save-some-buffers)
-  (kill-emacs)
-  )
+  (kill-emacs))
 
 ;; create a python-scratch buffer that's just like *scratch*, but with
 ;; the python major mode
@@ -271,8 +280,7 @@
 (put 'scroll-left 'disabled nil)
 
 ;; Thunderbird External Editor mode
-(if (file-exists-p (concat user-emacs-directory "tbemail.el"))
-    (require 'tbemail))
+(require 'tbemail)
 
 ;; EasyPG settings
 (require 'epa-file)
@@ -282,79 +290,84 @@
 (require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
 
+;; json-mode settings
+(require 'json-mode)
+(add-to-list 'auto-mode-alist '("\\.json$" . json-mode))
+(add-hook 'json-mode-hook
+          '(lambda ()
+             (setq show-trailing-whitespace t)
+             (setq js-indent-level 2)
+             (add-hook 'before-save-hook 'delete-trailing-whitespace)))
+
+
 ;; flymake and pyflymake settings
-(princ (concat "checking for " user-emacs-directory "flymake.el"))
-(if (file-exists-p (concat user-emacs-directory "flymake.el"))
-    (progn
-      (when (load "flymake" t)
-        (defun flymake-pylint-init ()
-          (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                             'flymake-create-temp-inplace))
-                 (local-file (file-relative-name
-                              temp-file
-                              (file-name-directory buffer-file-name))))
-            (list "~/.emacs.d/pyflymake.py" (list local-file))))
-        (add-to-list 'flymake-allowed-file-name-masks
-                     '("\\.py\\'" flymake-pylint-init)))
+(when (load "flymake" t)
+  (defun flymake-pylint-init ()
+    (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))
+           (local-file (file-relative-name
+                        temp-file
+                        (file-name-directory buffer-file-name))))
+      (list "~/.emacs.d/pyflymake.py" (list local-file))))
+  (add-to-list 'flymake-allowed-file-name-masks
+               '("\\.py\\'" flymake-pylint-init)))
 
-      (add-hook 'find-file-hook 'flymake-find-file-hook)
+(add-hook 'find-file-hook 'flymake-find-file-hook)
 
-      ;; keep state for flymake-display-err-in-minibuffer so multiple
-      ;; invocations cycle through the errors for a given line
-      (setq flymake-error-idx 0)
-      (setq flymake-error-line 0)
-      
-      (defun flymake-display-err-in-minibuffer ()
-        (interactive)
-        (let* ((line-no (flymake-current-line-no))
-               (line-err-info-list (car (flymake-find-err-info flymake-err-info
-                                                               line-no))))
-          (if line-err-info-list
-              (progn
-                (if (= line-no flymake-error-line)
-                    (setq flymake-error-idx (1+ flymake-error-idx))
-                  (setq flymake-error-idx 0))
-                (setq flymake-error-line line-no)
-                (setq err (nth flymake-error-idx line-err-info-list))
-                (if err nil
-                  (progn
-                    ;; went past the end of the error list -- start over
-                    (setq flymake-error-idx -1)
-                    (setq err (car line-err-info-list))))
-                (princ (format "%s (%d)" (flymake-ler-text err) line-no)))
-            (princ (format "No errors on line %d" line-no)))))
-      
-      (defun flymake-pylint-error-list (err-info-list)
-        (if err-info-list
-            (let ((err-text (flymake-ler-text (car err-info-list))))
-              (if (string-match "pylint/\\([A-Z][[:digit:]]\\{4\\}\\)"
-                                err-text)
-                  (cons (match-string 1 err-text)
-                        (flymake-pylint-error-list (cdr err-info-list)))
-                (flymake-pylint-error-list (cdr err-info-list))))
-          '()))
-      
-      (defun flymake-disable-pylint-on-line ()
-        (interactive)
-        (end-of-line)
-        (insert
-         (format "  # pylint: disable=%s"
-                 (mapconcat
-                  'identity
-                  (flymake-pylint-error-list
-                   (car
-                    (flymake-find-err-info flymake-err-info
-                                           (flymake-current-line-no))))
-                  ","))))
-      
-      (define-prefix-command 'flymake-map)
-      (global-set-key "\C-xe" 'flymake-map)
-      (define-key flymake-map "s" 'flymake-display-err-in-minibuffer)
-      (define-key flymake-map "d" 'flymake-disable-pylint-on-line)
-      (define-key flymake-map "p" 'flymake-goto-prev-error)
-      (define-key flymake-map "n" 'flymake-goto-next-error)
-      )
-  )
+;; keep state for flymake-display-err-in-minibuffer so multiple
+;; invocations cycle through the errors for a given line
+(setq flymake-error-idx 0)
+(setq flymake-error-line 0)
+
+(defun flymake-display-err-in-minibuffer ()
+  (interactive)
+  (let* ((line-no (flymake-current-line-no))
+         (line-err-info-list (car (flymake-find-err-info flymake-err-info
+                                                         line-no))))
+    (if line-err-info-list
+        (progn
+          (if (= line-no flymake-error-line)
+              (setq flymake-error-idx (1+ flymake-error-idx))
+            (setq flymake-error-idx 0))
+          (setq flymake-error-line line-no)
+          (setq err (nth flymake-error-idx line-err-info-list))
+          (if err nil
+            (progn
+              ;; went past the end of the error list -- start over
+              (setq flymake-error-idx -1)
+              (setq err (car line-err-info-list))))
+          (princ (format "%s (%d)" (flymake-ler-text err) line-no)))
+      (princ (format "No errors on line %d" line-no)))))
+
+(defun flymake-pylint-error-list (err-info-list)
+  (if err-info-list
+      (let ((err-text (flymake-ler-text (car err-info-list))))
+        (if (string-match "pylint/\\([A-Z][[:digit:]]\\{4\\}\\)"
+                          err-text)
+            (cons (match-string 1 err-text)
+                  (flymake-pylint-error-list (cdr err-info-list)))
+          (flymake-pylint-error-list (cdr err-info-list))))
+    '()))
+
+(defun flymake-disable-pylint-on-line ()
+  (interactive)
+  (end-of-line)
+  (insert
+   (format "  # pylint: disable=%s"
+           (mapconcat
+            'identity
+            (flymake-pylint-error-list
+             (car
+              (flymake-find-err-info flymake-err-info
+                                     (flymake-current-line-no))))
+            ","))))
+
+(define-prefix-command 'flymake-map)
+(global-set-key "\C-xe" 'flymake-map)
+(define-key flymake-map "s" 'flymake-display-err-in-minibuffer)
+(define-key flymake-map "d" 'flymake-disable-pylint-on-line)
+(define-key flymake-map "p" 'flymake-goto-prev-error)
+(define-key flymake-map "n" 'flymake-goto-next-error)
 
 ;; which-function-mode settings
 (require 'which-func)
@@ -363,10 +376,8 @@
 (which-func-mode 1)
 
 ;; selinux .te file settings
-(if (file-exists-p (concat user-emacs-directory "selinux-mode.el"))
-    (progn
-      (autoload 'selinux-te-mode
-        (concat user-emacs-directory "selinux-mode.el")
-        "SELinux TE mode." t)
-      (setq auto-mode-alist (append '(("\\.te\\'" . selinux-te-mode))
-                                    auto-mode-alist))))
+(autoload 'selinux-te-mode
+  (concat user-emacs-directory "selinux-mode.el")
+  "SELinux TE mode." t)
+(setq auto-mode-alist (append '(("\\.te\\'" . selinux-te-mode))
+                              auto-mode-alist))
