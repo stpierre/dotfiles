@@ -1,21 +1,52 @@
 #!/bin/zsh
 
-if [[ -e ~/bin/aws ]]; then
+AWS_HOME=$(readlink -f ~/bin/aws)
 
-    export AWS_CLOUDFORMATION_HOME=$(find ~/bin/aws/*CloudFormation* -maxdepth 0 -type d)
-    export AWS_AUTO_SCALING_HOME=$(find ~/bin/aws/*AutoScaling* -maxdepth 0 -type d)
-    export AWS_CLOUDWATCH_HOME=$(find ~/bin/aws/*CloudWatch* -maxdepth 0 -type d)
-    export AWS_IAM_HOME=$(find ~/bin/aws/*IAMCli* -maxdepth 0 -type d)
+if [[ -e "$AWS_HOME" ]]; then
+    export AWS_CLOUDFORMATION_HOME=$(find "$AWS_HOME"/*CloudFormation* -maxdepth 0 -type d)
+    export AWS_AUTO_SCALING_HOME=$(find "$AWS_HOME"/*AutoScaling* -maxdepth 0 -type d)
+    export AWS_CLOUDWATCH_HOME=$(find "$AWS_HOME"/*CloudWatch* -maxdepth 0 -type d)
+    export AWS_IAM_HOME=$(find "$AWS_HOME"/*IAMCli* -maxdepth 0 -type d)
+    export AWS_ELB_HOME=$(find "$AWS_HOME"/*ElasticLoadBalancing* -maxdepth 0 -type d)
 
     pathmunge $AWS_CLOUDFORMATION_HOME/bin after
     pathmunge $AWS_AUTO_SCALING_HOME/bin after
     pathmunge $AWS_CLOUDWATCH_HOME/bin after
     pathmunge $AWS_IAM_HOME/bin after
+    pathmunge $AWS_ELB_HOME/bin after
 
-    if [[ -e ~/bin/aws/credentials ]]; then
-        export AWS_CREDENTIAL_FILE=~/bin/aws/credentials
-    fi
     if [[ -z $JAVA_HOME ]]; then
         export JAVA_HOME=$(dirname $(which java))/..
     fi
+fi
+
+_get_aws_envs() {
+    find "$AWS_HOME" -maxdepth 1 -type f -name credentials.\* -printf '%f\n' |\
+        sed 's/^credentials\.//'
+}
+
+_get_aws_default_env() {
+    if [[ -L "$AWS_HOME"/credentials.default ]]; then
+        readlink -f "$AWS_HOME"/credentials.default | sed 's/.*credentials\.//'
+    fi
+}
+
+aws_env() {
+    if [[ -z $1 ]]; then
+        echo "Available AWS environments:"
+        _get_aws_envs | \
+            sed "s/^\(.*\)$/  \1/;
+                 s/^  \($__AWS_ENV\)$/* \1/;
+                 s/^\(..$(_get_aws_default_env)\)\$/\1 (default)/"
+    elif [[ -e "$AWS_HOME/credentials.$1" ]]; then
+        export AWS_CREDENTIAL_FILE="$AWS_HOME/credentials.$1"
+        export __AWS_ENV="$1"
+    else
+        echo "AWS environment $1 not found"
+        aws_env
+    fi
+}
+
+if [[ -n _get_aws_default_env ]]; then
+    aws_env "$(_get_aws_default_env)"
 fi
