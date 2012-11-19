@@ -20,6 +20,25 @@ if [[ -e "$AWS_HOME" ]]; then
     fi
 fi
 
+cfn-watch-stack-events() {
+    if [[ -z $1 ]]; then
+        echo "Usage: $0 <stack name>"
+        return 1
+    fi
+
+    new=
+    output=$(cfn-describe-stack-events --stack-name=$1 | tac)
+    echo $output
+    sleep 2
+
+    while true; do
+        new=$(cfn-describe-stack-events --stack-name=dev-webapp-elb-test | tac)
+        echo $new | diff - <(echo $output) | sed -n '/^< / { s/^< //; p; }'
+        output="$new"
+        sleep 2
+    done
+}
+
 _get_aws_envs() {
     find "$AWS_HOME" -maxdepth 1 -type f -name credentials.\* -printf '%f\n' |\
         sed 's/^credentials\.//'
