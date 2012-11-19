@@ -45,22 +45,6 @@
                    command nil buffer t args))
       (pop-to-buffer buffer)))
 
-;; autopair settings
-(autoload 'autopair-global-mode "autopair" nil t)
-(autopair-global-mode)
-
-;; conf mode settings
-(setq auto-mode-alist (append '(("\\bsudoers\\b" . conf-mode))
-                              auto-mode-alist))
-(add-hook 'conf-mode-hook
-          '(lambda ()
-             (if (and (buffer-file-name)
-                      (string-match "\\bsudoers\\b" (buffer-file-name)))
-                 (add-hook 'local-write-file-hooks
-                           '(lambda ()
-                              (presave-process-check
-                               "visudo" "-c" "-f" "-"))))))
-
 ;; perl mode settings
 (add-hook 'perl-mode-hook
           '(lambda ()
@@ -105,7 +89,7 @@
 (setq pylookup-db-file (concat user-emacs-directory "pylookup.db"))
 (autoload 'pylookup-lookup "pylookup"
   "Lookup SEARCH-TERM in the Python HTML indexes." t)
-(autoload 'pylookup-update "pylookup" 
+(autoload 'pylookup-update "pylookup"
   "Run pylookup-update and create the database at `pylookup-db-file'." t)
 
 (add-hook 'python-mode-hook
@@ -115,10 +99,6 @@
              (setq tab-width 4)
              (hs-minor-mode)
              (setq python-indent 4)
-             (push '(?' . ?') (getf autopair-extra-pairs :code))
-             (setq autopair-handle-action-fns
-                   (list 'autopair-default-handle-action
-                         'autopair-python-triple-quote-action))
              (add-hook 'before-save-hook 'delete-trailing-whitespace)
              (unless (assoc 'python-mode hs-special-modes-alist)
                (setq hs-special-modes-alist
