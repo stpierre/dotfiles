@@ -1,0 +1,16 @@
+_ZSHRC_LOGDIR=$HOME/.zshrc.log
+
+_zshrc_log() {
+    local _logfile="$_ZSHRC_LOGDIR/$(date +%F).log"
+    if [[ ! -e $_logfile ]]; then
+        echo "$(date +%c) Created $_logfile" > "$_logfile"
+    fi
+    echo "$(date +%c) $1" >> "$_logfile"
+}
+
+if [[ ! -e "$_ZSHRC_LOGDIR" ]]; then
+    mkdir -p "$_ZSHRC_LOGDIR"
+    _zshrc_log "Created $_ZSHRC_LOGDIR"
+fi
+
+_zshrc_log "Started reading .zshrc"

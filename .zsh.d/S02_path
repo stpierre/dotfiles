@@ -3,8 +3,10 @@
 pathmunge () {
     if ! echo $PATH | /bin/egrep -q "(^|:)$1($|:)" ; then
 	if [ "$2" = "after" ] ; then
+            _zshrc_log "Adding $1 to end of PATH"
 	    PATH=$PATH:$1
 	else
+            _zshrc_log "Adding $1 to PATH"
 	    PATH=$1:$PATH
 	fi
     fi
