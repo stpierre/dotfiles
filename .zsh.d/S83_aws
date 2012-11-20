@@ -1,19 +1,37 @@
 #!/bin/zsh
 
+_zshrc_log "Loading AWS toolsets"
+
+# Explicitly list AWS CLI toolsets that don't have README files, or
+# for which the necessary environment variable cannot be determined
+# from the README.  Keys are toolset names, values are _HOME variable
+# names
+typeset -A _AWS_TOOLSETS
+_AWS_TOOLSETS=(ec2-api-tools EC2)
+
 AWS_HOME=$(readlink -f ~/bin/aws)
 
 if [[ -e "$AWS_HOME" ]]; then
-    export AWS_CLOUDFORMATION_HOME=$(find "$AWS_HOME"/*CloudFormation* -maxdepth 0 -type d)
-    export AWS_AUTO_SCALING_HOME=$(find "$AWS_HOME"/*AutoScaling* -maxdepth 0 -type d)
-    export AWS_CLOUDWATCH_HOME=$(find "$AWS_HOME"/*CloudWatch* -maxdepth 0 -type d)
-    export AWS_IAM_HOME=$(find "$AWS_HOME"/*IAMCli* -maxdepth 0 -type d)
-    export AWS_ELB_HOME=$(find "$AWS_HOME"/*ElasticLoadBalancing* -maxdepth 0 -type d)
-
-    pathmunge $AWS_CLOUDFORMATION_HOME/bin after
-    pathmunge $AWS_AUTO_SCALING_HOME/bin after
-    pathmunge $AWS_CLOUDWATCH_HOME/bin after
-    pathmunge $AWS_IAM_HOME/bin after
-    pathmunge $AWS_ELB_HOME/bin after
+    for tooldir in $(find "$AWS_HOME" -mindepth 1 -maxdepth 1 -type d); do
+        toolname=$(basename $tooldir | sed 's/-[.[:digit:]]*$//')
+        readme=$(find "$tooldir" -maxdepth 1 -iname readme\*)
+        if [[ -n $_AWS_TOOLSETS[$toolname] ]]; then
+            var=$_AWS_TOOLSETS[$toolname]
+            _zshrc_log "$toolname: Using variable name from _AWS_TOOLSETS"
+        elif [[ -n $readme ]]; then
+            var=$(grep -o 'AWS_[A-Z_]*_HOME' "$readme" | head -n 1)
+            _zshrc_log "$toolname: Determined variable name from $readme"
+        else
+            echo "No README found in $tooldir"
+        fi
+        if [[ -n $var ]]; then
+            _zshrc_log "Registering AWS toolset $toolname with $var"
+            eval "export $var='$tooldir'"
+            pathmunge $tooldir/bin after
+        else
+            echo "Could not determine environment variable for $toolname"
+        fi
+    done
 
     if [[ -z $JAVA_HOME ]]; then
         export JAVA_HOME=$(dirname $(which java))/..
