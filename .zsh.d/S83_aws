@@ -50,7 +50,7 @@ cfn-watch-stack-events() {
     sleep 2
 
     while true; do
-        new=$(cfn-describe-stack-events --stack-name=dev-webapp-elb-test | tac)
+        new=$(cfn-describe-stack-events --stack-name=$1 | tac)
         echo $new | diff - <(echo $output) | sed -n '/^< / { s/^< //; p; }'
         output="$new"
         sleep 2
