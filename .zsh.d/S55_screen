@@ -1,6 +1,13 @@
 #!/bin/zsh
 
 __RESET_SCREEN_TITLE=
+__EXPLICIT_SCREEN_TITLE=
+
+screen_title() {
+    __EXPLICIT_SCREEN_TITLE=$1
+    __set_screen_title $1
+    __RESET_SCREEN_TITLE=
+}
 
 __set_screen_title() {
     # set screen title
@@ -30,16 +37,20 @@ screen() {
 }
 
 zsh_preexec_update_screen_title() {
-    case "$1" in 
-        *ssh*)
-            set_screen_hostname
-            __RESET_SCREEN_TITLE=1
-            ;;
-        *screen*)
-            set_screen_screen_session "$1"
-            __RESET_SCREEN_TITLE=1
-            ;;
-    esac
+    if [[ -n $__EXPLICIT_SCREEN_TITLE ]]; then
+        __set_screen_title $__EXPLICIT_SCREEN_TITLE
+    else
+        case "$1" in
+            *ssh*)
+                set_screen_hostname
+                __RESET_SCREEN_TITLE=1
+                ;;
+            *screen*)
+                set_screen_screen_session "$1"
+                __RESET_SCREEN_TITLE=1
+                ;;
+        esac
+    fi
 }
 
 zsh_precmd_update_screen_title() {
