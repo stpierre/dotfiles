@@ -3,7 +3,7 @@
 setopt prompt_subst
 
 for COLOR in RED GREEN BLUE YELLOW WHITE BLACK CYAN; do
-    eval PR_$COLOR='%{$fg[${(L)COLOR}]%}'        
+    eval PR_$COLOR='%{$fg[${(L)COLOR}]%}'
     eval PR_BRIGHT_$COLOR='%{$fg_bold[${(L)COLOR}]%}'
 done
 PR_RESET="%{$reset_color%}"
@@ -21,10 +21,10 @@ lprompt() {
 
 rprompt() {
     local machine="${PR_BRIGHT_BLUE}["'$__CURRENT_HOSTNAME'"]${PR_RESET}"
-    
+
     # if we're inside screen, then the hostname will be in the status
     # bar and we don't need it in the prompt, too
-    if [[ $TERM == "screen" ]]; then
+    if [[ ${TERM:0:6} == "screen" ]]; then
         RPROMPT=""
     else
         RPROMPT="${machine}"
