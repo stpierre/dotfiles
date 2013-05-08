@@ -63,7 +63,7 @@ _get_aws_envs() {
 }
 
 _get_aws_default_env() {
-    if [[ -L "$AWS_HOME"/credentials.default ]]; then
+    if [[ -e "$AWS_HOME" && -L "$AWS_HOME"/credentials.default ]]; then
         readlink -f "$AWS_HOME"/credentials.default | sed 's/.*credentials\.//'
     fi
 }
