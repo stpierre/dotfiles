@@ -88,6 +88,6 @@ aws_env() {
     fi
 }
 
-if [[ -n _get_aws_default_env ]]; then
+if [[ -e "$AWS_HOME" && -n _get_aws_default_env ]]; then
     aws_env "$(_get_aws_default_env)"
 fi
