@@ -12,7 +12,7 @@
         ci = commit
         co = checkout
         st = status
-        review = "!git pull --rebase && git push origin HEAD:refs/for/$(git rev-parse --abbrev-ref HEAD)"
+        review = "!git push origin HEAD:refs/for/$(git rev-parse --abbrev-ref HEAD)"
         story  = "!git push origin origin:refs/heads/story/fb$1_$2; git fetch origin; git co story/fb$1_$2"
         upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard origin/$(git rev-parse --abbrev-ref HEAD); git pull --rebase; git clean -dffx; git gc )"
         # we frequently have local changes to dotfiles, so this makes it easier to push commits
