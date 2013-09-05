@@ -63,6 +63,8 @@
              (setq show-trailing-whitespace t)
              (setq tab-width 2)
              (setq nxml-child-indent tab-width)
+             (setq nxml-slash-auto-complete-flag t)
+             (setq nxml-auto-insert-xml-declaration-flag t)
              (require 'compile)
              (set (make-local-variable 'compile-command)
                   (concat "xmllint --noout "
