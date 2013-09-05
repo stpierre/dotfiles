@@ -60,7 +60,7 @@ zsh_precmd_update_screen_title() {
     fi
 }
 
-if [[ $TERM == "screen" ]]; then
+if [[ $TERM[0,6] == "screen" ]]; then
     set_screen_hostname
     preexec_functions[$(($#preexec_functions + 1))]='zsh_preexec_update_screen_title'
     precmd_functions[$(($#precmd_functions + 1))]='zsh_precmd_update_screen_title'
