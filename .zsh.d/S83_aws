@@ -7,7 +7,8 @@ _zshrc_log "Loading AWS toolsets"
 # from the README.  Keys are toolset names, values are _HOME variable
 # names
 typeset -A _AWS_TOOLSETS
-_AWS_TOOLSETS=(ec2-api-tools EC2)
+_AWS_TOOLSETS=(ec2-api-tools EC2_HOME)
+_AWS_CREDS=$HOME/.aws
 
 AWS_HOME=$(readlink -f ~/bin/aws)
 
@@ -58,13 +59,45 @@ cfn-watch-stack-events() {
 }
 
 _get_aws_envs() {
-    find "$AWS_HOME" -maxdepth 1 -type f -name credentials.\* -printf '%f\n' |\
-        sed 's/^credentials\.//'
+    find "$_AWS_CREDS" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'
 }
 
 _get_aws_default_env() {
-    if [[ -e "$AWS_HOME" && -L "$AWS_HOME"/credentials.default ]]; then
-        readlink -f "$AWS_HOME"/credentials.default | sed 's/.*credentials\.//'
+    if [[ -e "$_AWS_CREDS" && -L "$_AWS_CREDS"/default ]]; then
+        basename $(readlink -f "$_AWS_CREDS"/default)
+    fi
+}
+
+_get_aws_current_env() {
+    if [[ -e "$_AWS_CREDS" && -L "$_AWS_CREDS"/current ]]; then
+        basename $(readlink -f "$_AWS_CREDS"/current)
+    fi
+}
+
+_set_aws_env() {
+    if [[ -z $1 ]]; then
+        env=$(_get_aws_current_env)
+    else
+        env=$1
+    fi
+    creds="$_AWS_CREDS/$env"
+    export AWS_CREDENTIAL_FILE="$creds/keys"
+    export AWS_ACCESS_KEY=$(awk -F= '/AWSAccessKeyId/ {print $NF}' \
+        $AWS_CREDENTIAL_FILE)
+    export AWS_SECRET_KEY=$(awk -F= '/AWSSecretKey/ {print $NF}' \
+        $AWS_CREDENTIAL_FILE)
+
+    if [[ -e "$creds/key.pem" ]]; then
+        export AWS_PRIVATE_KEY="$creds/key.pem"
+    fi
+    if [[ -e "$creds/key.pk8" ]]; then
+        export AWS_PRIVATE_KEY_PKCS8="$creds/key.pk8"
+    fi
+    if [[ -e "$creds/cert.pem" ]]; then
+        export AWS_CERT="$creds/cert.pem"
+    fi
+    if [[ -e "$creds/user_id" ]]; then
+        export AWS_USER_ID=$(cat "$creds/user_id")
     fi
 }
 
@@ -73,21 +106,29 @@ aws_env() {
         echo "Available AWS environments:"
         _get_aws_envs | \
             sed "s/^\(.*\)$/  \1/;
-                 s/^  \($__AWS_ENV\)$/* \1/;
+                 s/^  \($(_get_aws_current_env)\)$/* \1/;
                  s/^\(..$(_get_aws_default_env)\)\$/\1 (default)/"
-    elif [[ -e "$AWS_HOME/credentials.$1" ]]; then
-        export AWS_CREDENTIAL_FILE="$AWS_HOME/credentials.$1"
-        export AWS_ACCESS_KEY=$(awk -F= '/AWSAccessKeyId/ {print $NF}' \
-            $AWS_CREDENTIAL_FILE)
-        export AWS_SECRET_KEY=$(awk -F= '/AWSSecretKey/ {print $NF}' \
-            $AWS_CREDENTIAL_FILE)
-        export __AWS_ENV="$1"
+    elif [[ -e "$_AWS_CREDS/$1/keys" ]]; then
+        _set_aws_env $1
+        # rewrite ~/.boto
+        cat >| $HOME/.boto <<EOF
+[Credentials]
+aws_access_key_id = $AWS_ACCESS_KEY
+aws_secret_access_key = $AWS_SECRET_KEY
+EOF
+
+        rm -f $_AWS_CREDS/current
+        ln -s $_AWS_CREDS/$1 $_AWS_CREDS/current
     else
         echo "AWS environment $1 not found"
         aws_env
     fi
 }
 
-if [[ -e "$AWS_HOME" && -n _get_aws_default_env ]]; then
-    aws_env "$(_get_aws_default_env)"
+if [[ -e "$_AWS_CREDS" ]]; then
+    if [[ -n _get_aws_current_env ]]; then
+        _set_aws_env
+    elif [[ -n _get_aws_default_env ]]; then
+        aws_env "$(_get_aws_default_env)"
+    fi
 fi
