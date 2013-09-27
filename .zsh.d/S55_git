@@ -2,6 +2,7 @@
 
 export __CURRENT_GIT_REPO=
 export __CURRENT_GIT_BRANCH=
+export __CURRENT_GIT_UNPUSHED=
 
 parse_git_repo() {
     export __CURRENT_GIT_REPO="$(git remote -v 2> /dev/null | \
@@ -10,8 +11,10 @@ parse_git_repo() {
     if [[ $__CURRENT_GIT_REPO != "dotfiles" ]]; then
         export __CURRENT_GIT_BRANCH="$(git branch --no-color 2> /dev/null | \
             sed -e '/^[^*]/d; s/^* //;')"
+        export __CURRENT_GIT_UNPUSHED=$(git log @{u}.. --oneline | wc -l)
     else
         export __CURRENT_GIT_BRANCH=
+        export __CURRENT_GIT_UNPUSHED=
     fi
 }
 
@@ -25,7 +28,11 @@ zsh_update_git_vars() {
 
 get_git_prompt_info() {
     if [[ -n $__CURRENT_GIT_REPO && -n $__CURRENT_GIT_BRANCH ]]; then
-        echo " (${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH})"
+        if [[ $__CURRENT_GIT_UNPUSHED > 0 ]]; then
+            echo " (${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH} ${PR_BRIGHT_CYAN}(${__CURRENT_GIT_UNPUSHED})${PR_RESET}${PR_CYAN})"
+        else
+            echo " (${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH})"
+        fi
     fi
 }
 
