@@ -1,0 +1,45 @@
+#!/bin/zsh
+
+VIRTUALENV_ROOT=~/venv
+VIRTUAL_ENV_DISABLE_PROMPT=1
+
+_activate_virtualenv() {
+    if [[ -n $1 ]]; then
+        name=$1
+    else
+        name=$(basename $(pwd))
+    fi
+    if [[ -n $VIRTUAL_ENV ]]; then
+        echo "virtualenv $VIRTUAL_ENV is currently active, deactivating"
+        deactivate
+    fi
+    if [[ -e $VIRTUALENV_ROOT/$name ]]; then
+        source $VIRTUALENV_ROOT/$name/bin/activate
+    else
+        return 1
+    fi
+}
+
+mkvirtualenv() {
+    if ! _activate_virtualenv $1; then
+        virtualenv --system-site-packages $VIRTUALENV_ROOT/$name
+        pip install -I .
+    fi
+}
+
+chvirtualenv() {
+    if ! _activate_virtualenv $1; then
+        echo "No such virtualenv: $name"
+        return 1
+    fi
+}
+
+venv() {
+    chvirtualenv "$@"
+}
+
+get_venv_prompt_info() {
+    if [[ -n $VIRTUAL_ENV ]]; then
+        echo "$(basename $VIRTUAL_ENV):"
+    fi
+}
