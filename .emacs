@@ -7,7 +7,9 @@
 (setq auto-mode-alist (append '(("pico\\." . text-mode))
                               auto-mode-alist))
 
-;; enable text-fill by default (good for composing email)
+;; enable text-fill by default in text modes, disable in other modes
+(auto-fill-mode nil)
+(setq comment-auto-fill-only-comments t)
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 (add-hook 'tbemail-mode-hook 'turn-on-auto-fill)
 
@@ -74,9 +76,7 @@
                           (delete-trailing-whitespace)
                           (presave-process-check "xmllint" "--noout" "-")))))
 
-(add-hook 'sgml-mode-hook
-          '(lambda ()
-             (turn-on-auto-fill)))
+(add-hook 'sgml-mode-hook 'turn-on-auto-fill)
 
 ;; org mode settings
 (add-hook 'org-mode-hook
