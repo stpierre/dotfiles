@@ -82,10 +82,12 @@ _set_aws_env() {
     fi
     creds="$_AWS_CREDS/$env"
     export AWS_CREDENTIAL_FILE="$creds/keys"
-    export AWS_ACCESS_KEY=$(awk -F= '/AWSAccessKeyId/ {print $NF}' \
+    export AWS_ACCESS_KEY_ID=$(awk -F= '/AWSAccessKeyId/ {print $NF}' \
         $AWS_CREDENTIAL_FILE)
-    export AWS_SECRET_KEY=$(awk -F= '/AWSSecretKey/ {print $NF}' \
+    export AWS_SECRET_ACCESS_KEY=$(awk -F= '/AWSSecretKey/ {print $NF}' \
         $AWS_CREDENTIAL_FILE)
+    export AWS_ACCESS_KEY=$AWS_ACCESS_KEY_ID
+    export AWS_SECRET_KEY=$AWS_SECRET_ACCESS_KEY
 
     if [[ -e "$creds/key.pem" ]]; then
         export AWS_PRIVATE_KEY="$creds/key.pem"
