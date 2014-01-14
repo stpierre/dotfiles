@@ -11,7 +11,12 @@ parse_git_repo() {
     if [[ $__CURRENT_GIT_REPO != "dotfiles" ]]; then
         export __CURRENT_GIT_BRANCH="$(git branch --no-color 2> /dev/null | \
             sed -e '/^[^*]/d; s/^* //;')"
-        export __CURRENT_GIT_UNPUSHED=$(git log @{u}.. --oneline | wc -l)
+        _unpushed=$(git log @{u}.. --oneline 2>&1)
+        if [[ -n $_unpushed ]] && ! echo "$_unpushed" | grep -q fatal; then
+            export __CURRENT_GIT_UNPUSHED=$(echo $_unpushed | wc -l)
+        else
+            export __CURRENT_GIT_UNPUSHED=
+        fi
     else
         export __CURRENT_GIT_BRANCH=
         export __CURRENT_GIT_UNPUSHED=
