@@ -13,8 +13,8 @@ autoreload() {
             source ~/.zshrc
         else
             touch -d @$__AUTORELOAD_LAST_RUN ~/.zsh.d/.autoreload
-            for zshrc_snipplet in $(find ~/.zsh.d -name 'S[0-9][0-9]*' \
-                                    -newer ~/.zsh.d/.autoreload); do
+            for zshrc_snipplet in $(find ~/.zsh.d \( -name 'S[0-9][0-9]*' -o \
+                -name zshrc.\* \) -newer ~/.zsh.d/.autoreload); do
                 echo "autoreload $zshrc_snipplet"
                 source $zshrc_snipplet
             done
