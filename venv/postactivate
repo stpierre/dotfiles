@@ -1,0 +1,18 @@
+#!/bin/zsh
+# This hook is run after every virtualenv is activated.
+
+name=$(basename $VIRTUAL_ENV)
+if [[ -e $PROJECT_HOME/$name ]]; then
+    for dir in bin sbin src/bin src/sbin; do
+        if [[ -e $PROJECT_HOME/$name/$dir ]]; then
+            pathmunge $PROJECT_HOME/$name/$dir
+        fi
+    done
+fi
+
+if [[ $name =~ bcfg2 ]]; then
+    export BCFG2_REPO_ROOT=$HOME/mclass-bcfg2/bcfg2
+    export BCFG2_INFO_BIN=$(which bcfg2-info)
+    export BCFG2_BIN_DIR=$(dirname $(which bcfg2))
+    pathmunge $PROJECT_HOME/bcfg2-tools/scripts
+fi

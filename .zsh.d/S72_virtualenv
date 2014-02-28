@@ -1,63 +1,29 @@
 #!/bin/zsh
 
-VIRTUALENV_ROOT=~/venv
-VIRTUAL_ENV_DISABLE_PROMPT=1
+export WORKON_HOME=~/venv
+export PROJECT_HOME=~/devel
+export VIRTUAL_ENV_DISABLE_PROMPT=1
 
-_activate_virtualenv() {
-    name=$1
-    if [[ -n $VIRTUAL_ENV ]]; then
-        if [[ $VIRTUAL_ENV == $name ]]; then
-            echo "virtualenv $name is already active"
-            return 0
-        fi
-        echo "virtualenv $VIRTUAL_ENV is currently active, deactivating"
-        deactivate
-    fi
-    if [[ -e $VIRTUALENV_ROOT/$name ]]; then
-        source $VIRTUALENV_ROOT/$name/bin/activate
-    else
-        return 1
-    fi
-}
+# ensure that we don't source virtualenvwrapper more than once
+if [[ -z $VIRTUALENVWRAPPER_PROJECT_FILENAME ]]; then
+    source /usr/bin/virtualenvwrapper.sh
+fi
 
-mkvirtualenv() {
+newvirtualenv() {
     if [[ -z $1 ]]; then
         base=$(pwd)
     else
         base=$1
     fi
     name=$(basename $base)
-    if ! _activate_virtualenv $name; then
-        if ! virtualenv --system-site-packages $VIRTUALENV_ROOT/$name; then
-            exit $?
-        fi
-        _activate_virtualenv $name
-        if [[ -e $base/setup.py ]]; then
-            pip install -I $base
-        elif [[ -e $base/requirements.txt ]]; then
-            pip install -r $base/requirements.txt
-        fi
-        if [[ $? -ne 0 ]]; then
-            exit $?
-        fi
+    args="-a $base"
+    if [[ -e $base/requirements.txt ]]; then
+        args="$args -r $base/requirements.txt"
+    elif [[ -e $base/requirements.pip ]]; then
+        args="$args -r $base/requirements.pip"
     fi
-    chvirtualenv $name
-}
 
-chvirtualenv() {
-    if [[ -z $1 ]]; then
-        name=$(basename $(pwd))
-    else
-        name=$1
-    fi
-    if ! _activate_virtualenv $name; then
-        echo "No such virtualenv: $name"
-        return 1
-    fi
-}
-
-venv() {
-    chvirtualenv "$@"
+    mkvirtualenv ${=args} --system-site-packages $name
 }
 
 get_venv_prompt_info() {
