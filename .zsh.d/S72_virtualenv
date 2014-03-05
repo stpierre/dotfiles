@@ -4,10 +4,7 @@ export WORKON_HOME=~/venv
 export PROJECT_HOME=~/devel
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 
-# ensure that we don't source virtualenvwrapper more than once
-if [[ -z $VIRTUALENVWRAPPER_PROJECT_FILENAME ]]; then
-    source /usr/bin/virtualenvwrapper.sh
-fi
+source /usr/bin/virtualenvwrapper.sh
 
 newvirtualenv() {
     if [[ -z $1 ]]; then
