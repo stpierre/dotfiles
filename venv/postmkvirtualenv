@@ -3,6 +3,12 @@
 
 name=$(basename $VIRTUAL_ENV)
 if [[ -e $PROJECT_HOME/$name ]]; then
-    add2virtualenv $PROJECT_HOME/$name
-    cd $PROJECT_HOME/$name
+    if [[ -e $PROJECT_HOME/$name/$name ]]; then
+        add2virtualenv $PROJECT_HOME/$name
+    fi
+    for dir in lib src/lib; do
+        if [[ -e $PROJECT_HOME/$name/$dir ]]; then
+            add2virtualenv $PROJECT_HOME/$name/$dir
+        fi
+    done
 fi
