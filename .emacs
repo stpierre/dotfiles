@@ -125,6 +125,13 @@
                   (concat "php -l "
                           (file-name-nondirectory buffer-file-name)))))
 
+;; go mode settings
+(add-hook 'go-mode-hook
+          '(lambda ()
+             (setq tab-width 2)
+             (setq standard-indent 2)
+             (add-hook 'before-save-hook 'gofmt-before-save)))
+
 ;; Genshi template settings
 (autoload 'genshi-mode
   (concat user-emacs-directory "genshi-mode.el")
