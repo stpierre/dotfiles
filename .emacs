@@ -331,8 +331,7 @@
 (defun flymake-pylint-error-list (err-info-list)
   (if err-info-list
       (let ((err-text (flymake-ler-text (car err-info-list))))
-        (if (string-match "pylint/\\([A-Z][[:digit:]]\\{4\\}\\)"
-                          err-text)
+        (if (string-match "^\\[\\([^,]*\\)," err-text)
             (cons (match-string 1 err-text)
                   (flymake-pylint-error-list (cdr err-info-list)))
           (flymake-pylint-error-list (cdr err-info-list))))
