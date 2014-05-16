@@ -20,6 +20,8 @@
         hist = "log --pretty=format:\"%h %ad | %s%d [%an]\" --date=short"
         # we frequently have local changes to dotfiles, so this makes it easier to push commits
         pushdot = "!git stash && git pull --rebase && git push && git stash apply"
+        clone-fork = "!~/bin/clone-with-fork.sh $1 $2"
+        reviewer = "!~/bin/add-gerrit-reviewer.sh $@"
 
 [push]
         default = current
