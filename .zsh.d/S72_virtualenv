@@ -28,3 +28,14 @@ get_venv_prompt_info() {
         echo "$(basename $VIRTUAL_ENV):"
     fi
 }
+
+# make various python utilities virtualenv-aware.  For some reason
+# fedora ships them with #!/usr/bin/python2 in the shebang instead of
+# #!/usr/bin/env python
+__virtualenv_python_alias() {
+    alias $1='$(which --skip-alias --skip-functions python)'" $(which --skip-alias --skip-functions $1)"
+}
+
+__virtualenv_python_alias bpython
+__virtualenv_python_alias ipython
+__virtualenv_python_alias nosetests
