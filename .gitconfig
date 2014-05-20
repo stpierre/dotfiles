@@ -15,7 +15,7 @@
         review = "!git push origin HEAD:refs/for/$(git rev-parse --abbrev-ref HEAD)"
         story  = "!git push origin origin:refs/heads/story/fb$1_$2; git fetch origin; git co story/fb$1_$2"
         upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git pull --rebase; git clean -dffx; git gc )"
-        amicta = "!( test -e rel-eng && tito tag || true ) && git push && git push --tags"
+        tito = "!( test -e rel-eng && tito tag || true ) && git push && git push --tags"
         fix-merge = "!git checkout $1 && git upstream && git checkout $2 && git upstream && git merge $1"
         hist = "log --pretty=format:\"%h %ad | %s%d [%an]\" --date=short"
         clone-fork = "!~/bin/clone-with-fork.sh $1 $2"
