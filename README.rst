@@ -2,7 +2,7 @@
  dotfiles
 ==========
 
-This is my HOME.  There are many like it, but this one is mine.
+This is my ``HOME``.  There are many like it, but this one is mine.
 
 Technique
 =========
@@ -20,6 +20,13 @@ Similarly, a number of my larger files (``.zshrc``, ``.emacs``) source
 other stuff that is not tracked, which is where I can put
 site-specific or sensitive things that I do not want to be tracked in
 git.
+
+Installation
+============
+
+To set up a home directory, run::
+
+    curl https://raw.githubusercontent.com/stpierre/dotfiles/master/bin/setup-home.sh | bash -ex
 
 zsh loader
 ==========
