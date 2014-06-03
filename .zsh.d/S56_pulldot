@@ -1,7 +1,0 @@
-#!/bin/zsh
-
-# pull dotfiles repo on login, or any time this file is autoreloaded
-# and we happen to be in $HOME
-if [[ $(pwd) == $HOME ]]; then
-    git pulldot
-fi
