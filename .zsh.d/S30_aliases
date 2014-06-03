@@ -9,6 +9,10 @@ if type alpine >& /dev/null; then
     alias pine='alpine -i'
 fi
 
+if type greadlink >& /dev/null; then
+    alias readlink=greadlink
+fi
+
 [ -e $HOME/.zsh.d/aliases.local ] && source $HOME/.zsh.d/aliases.local
 
 function socks() {

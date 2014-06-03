@@ -4,7 +4,13 @@ export WORKON_HOME=~/venv
 export PROJECT_HOME=~/devel
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 
-source /usr/bin/virtualenvwrapper.sh
+# where to look for virtualenvwrapper
+for candidate in /usr/bin /usr/local/bin; do
+    if [[ -e $candidate/virtualenvwrapper.sh ]]; then
+	source $candidate/virtualenvwrapper.sh
+	break
+    fi
+done
 
 newvirtualenv() {
     if [[ -z $1 ]]; then
@@ -29,13 +35,16 @@ get_venv_prompt_info() {
     fi
 }
 
-# make various python utilities virtualenv-aware.  For some reason
-# fedora ships them with #!/usr/bin/python2 in the shebang instead of
-# #!/usr/bin/env python
-__virtualenv_python_alias() {
-    alias $1='$(which --skip-alias --skip-functions python)'" $(which --skip-alias --skip-functions $1)"
-}
+# determine if which supports --skip-alias
+if which --skip-alias which >& /dev/null; then
+    # make various python utilities virtualenv-aware.  For some reason
+    # fedora ships them with #!/usr/bin/python2 in the shebang instead of
+    # #!/usr/bin/env python
+    __virtualenv_python_alias() {
+	alias $1='$(which --skip-alias --skip-functions python)'" $(which --skip-alias --skip-functions $1)"
+    }
 
-__virtualenv_python_alias bpython
-__virtualenv_python_alias ipython
-__virtualenv_python_alias nosetests
+    __virtualenv_python_alias bpython
+    __virtualenv_python_alias ipython
+    __virtualenv_python_alias nosetests
+fi 

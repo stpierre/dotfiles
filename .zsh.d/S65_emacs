@@ -2,17 +2,27 @@
 
 function __start_emacs_server() {
     # start emacs server
-    if ! pgrep -f 'emacs --daemon' >& /dev/null; then
+    if ! pgrep -f '[Ee]macs.* --daemon' >& /dev/null; then
         $__emacs_bin --daemon >& /dev/null
     fi
 }
+
+if [[ -e /Applications/Emacs.app/Contents/MacOS/bin ]]; then
+    pathmunge /Applications/Emacs.app/Contents/MacOS/bin
+fi
 
 if type emacs >& /dev/null; then
     if [[ -z $__emacs_bin ]]; then
         if [[ $(type emacs) == "emacs is a shell function" ]]; then
             unfunction emacs
         fi
-        __emacs_bin=$(which emacs)
+
+        # OS X crap
+        if [[ -e /Applications/Emacs.app/Contents/MacOS/Emacs ]]; then
+            __emacs_bin="/Applications/Emacs.app/Contents/MacOS/Emacs"
+        else
+            __emacs_bin=$(which emacs)
+        fi
     fi
     __emacs_version=$($__emacs_bin --version | head -n 1 | \
         awk '{ split($NF, v, "."); print v[1] "." v[2]; }')
@@ -20,7 +30,7 @@ if type emacs >& /dev/null; then
     if type emacsclient >& /dev/null && [[ $__emacs_version -ge 23.1 ]]; then
         function emacs() {
             __start_emacs_server
-            if [[ -n $DISPLAY ]]; then
+            if [[ $(uname) == "Darwin" || -n $DISPLAY ]]; then
                 args="-c $@"
             else
                 args="-t $@"

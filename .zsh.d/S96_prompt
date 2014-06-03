@@ -6,7 +6,7 @@ lprompt() {
     local time="${PR_BRIGHT_YELLOW}%T${PR_RESET} "
     local user="%(!#${PR_RESET}${PR_BRIGHT_RED}%n${PR_RESET}:#)"
     local venv="${PR_GREEN}"'$(get_venv_prompt_info)'"${PR_RESET}"
-    local cwd="%(5~#.../%4~#%~)"
+    local cwd="%~"
     local retval="%(?##${PR_RED}[%?]${PR_RESET})"
     local git_info="${PR_CYAN}"'$(get_git_prompt_info)'"${PR_RESET}"
     local svn_info="${PR_CYAN}"'$(get_svn_prompt_info)'"${PR_RESET}"

@@ -272,10 +272,6 @@
 ;; Thunderbird External Editor mode
 (require 'tbemail)
 
-;; EasyPG settings
-(require 'epa-file)
-(epa-file-enable)
-
 ;; yaml-mode settings
 (require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
