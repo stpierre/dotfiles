@@ -32,3 +32,4 @@ export HISTFILE=~/.history
 # other misc. options
 setopt noclobber
 setopt extended_glob
+export WORDCHARS=${WORDCHARS//[\/.-_]}

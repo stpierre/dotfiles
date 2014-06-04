@@ -13,6 +13,10 @@ if type greadlink >& /dev/null; then
     alias readlink=greadlink
 fi
 
+if type gstat >& /dev/null; then
+    alias stat=gstat
+fi
+
 [ -e $HOME/.zsh.d/aliases.local ] && source $HOME/.zsh.d/aliases.local
 
 function socks() {

@@ -17,8 +17,10 @@
 ;; C-m to compile
 (global-set-key "\C-x\C-m" 'compile)
 
-;; ensure that M-g, g is set as goto-line
+;; set some navigation keys
 (global-set-key "\M-gg" 'goto-line)
+(global-set-key "\M-[" 'backward-paragraph)
+(global-set-key "\M-]" 'forward-paragraph)
 
 ;; set C-c, c to comment-region and C-c, u to uncomment-region
 (global-set-key "\C-cc" 'comment-region)
