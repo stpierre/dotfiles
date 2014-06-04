@@ -2,12 +2,15 @@
 
 function __start_emacs_server() {
     # start emacs server
-    if ! pgrep -f '[Ee]macs.* --daemon' >& /dev/null; then
+    if ! pgrep -f -U $USER '[Ee]macs.* --daemon' >& /dev/null; then
         $__emacs_bin --daemon >& /dev/null
     fi
 }
 
 if [[ -e /Applications/Emacs.app/Contents/MacOS/bin ]]; then
+    # this needs to be first in PATH, or at least before /usr/bin.
+    # The easiest way to do that is to remove it before adding it.
+    pathremove /Applications/Emacs.app/Contents/MacOS/bin
     pathmunge /Applications/Emacs.app/Contents/MacOS/bin
 fi
 

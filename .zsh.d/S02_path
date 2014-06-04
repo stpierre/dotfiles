@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+_zshrc_log "PATH: $PATH"
+
 pathmunge () {
     if ! echo $PATH | egrep -q "(^|:)$1($|:)" ; then
 	if [ "$2" = "after" ] ; then
@@ -10,6 +12,11 @@ pathmunge () {
 	    PATH=$1:$PATH
 	fi
     fi
+}
+
+pathremove ()  {
+    _zshrc_log "Removing $1 from PATH"
+    export PATH=$(echo -n $PATH | awk -v RS=: -v ORS=: '$0 != "'$1'"' | sed 's/:$//')
 }
 
 if [ -e ~/bin ]; then
