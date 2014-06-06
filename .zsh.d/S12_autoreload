@@ -1,6 +1,8 @@
 #!/bin/zsh
 
 __AUTORELOAD_LAST_RUN=$(date +%s)
+__TOUCH_D=
+__AUTORELOAD_FILE=~/.zsh.d/.autoreload
 
 # automatically reload .zshrc when necessary.
 autoreload() {
@@ -12,13 +14,30 @@ autoreload() {
             echo "autoreload ~/.zshrc"
             source ~/.zshrc
         else
-            touch -d @$__AUTORELOAD_LAST_RUN ~/.zsh.d/.autoreload
+            # determine if touch supports -d
+            if [[ $__TOUCH_D != "0" ]]; then
+                if ! touch -d @$__AUTORELOAD_LAST_RUN \
+                    $__AUTORELOAD_FILE >& /dev/null; then
+                    __TOUCH_D=0
+                else
+                    __TOUCH_D=1
+                fi
+            fi
+            # we do not want this to be an elif, since $__TOUCH_D may
+            # be set by the block above -- e.g., if on the first
+            # autoreload we discover that touch -d is not supported,
+            # then we want to run the code that records the autoreload
+            # without using touch -d
+            if [[ $__TOUCH_D == "0" ]]; then
+                touch -t $(date -r $__AUTORELOAD_LAST_RUN +%Y%m%d%H%M.%S) \
+                    $__AUTORELOAD_FILE
+            fi
             for zshrc_snipplet in $(find ~/.zsh.d \( -name 'S[0-9][0-9]*' -o \
-                -name zshrc.\* \) -newer ~/.zsh.d/.autoreload); do
+                -name zshrc.\* \) -newer $__AUTORELOAD_FILE); do
                 echo "autoreload $zshrc_snipplet"
                 source $zshrc_snipplet
             done
-            rm -f ~/.zsh.d/.autoreload
+            rm -f $__AUTORELOAD_FILE
         fi
 
         __AUTORELOAD_LAST_RUN=$(date +%s)

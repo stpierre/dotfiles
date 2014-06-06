@@ -62,6 +62,8 @@
 ;; xml-mode settings
 (setq auto-mode-alist (append '(("\\.xsd\\'" . xml-mode))
                               auto-mode-alist))
+(setq auto-mode-alist (append '(("\\.rng\\'" . xml-mode))
+                              auto-mode-alist))
 (add-hook 'nxml-mode-hook
           '(lambda ()
              (setq show-trailing-whitespace t)
@@ -211,10 +213,12 @@
 
 ;; set initial window size
 (setq default-frame-alist
-      (append (list '(width  . 162)
-                    '(height . 80))
+      (append (list '(width  . 164)
+                    '(height . 80)
+                    '(font . "Andale Mono"))
               default-frame-alist))
-;;(split-window-horizontally)
+; we can't split the window initially when running as a daemon :(
+;(split-window-horizontally)
 
 ;; better mode line
 (line-number-mode t)
@@ -296,7 +300,7 @@
            (local-file (file-relative-name
                         temp-file
                         (file-name-directory buffer-file-name))))
-      (list "/usr/bin/epylint" (list local-file))))
+      (list "/usr/local/bin/epylint" (list local-file))))
   (add-to-list 'flymake-allowed-file-name-masks
                '("\\.py\\'" flymake-pylint-init)))
 
@@ -368,3 +372,12 @@
   "SELinux TE mode." t)
 (setq auto-mode-alist (append '(("\\.te\\'" . selinux-te-mode))
                               auto-mode-alist))
+
+;; set font
+(defun font-exists (font-name)
+  (if (functionp 'font-family-list)
+      (member font-name (font-family-list))
+    nil))
+
+(if (font-exists "Andale Mono")
+    (set-face-attribute 'default nil :font "Andale Mono"))

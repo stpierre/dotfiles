@@ -57,3 +57,6 @@ fi
 
 alias emcas=$EDITOR
 alias vi=$EDITOR
+
+# don't use python inside a virtualenv to run pymacs
+export PYMACS_PYTHON=$(which python)
