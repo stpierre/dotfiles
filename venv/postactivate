@@ -1,18 +1,21 @@
 #!/bin/zsh
 # This hook is run after every virtualenv is activated.
 
+OPENSTACK_HOME="${OPENSTACK_HOME:-$HOME/stack}"
 name=$(basename $VIRTUAL_ENV)
+repo_path=
 if [[ -e $PROJECT_HOME/$name ]]; then
-    for dir in bin sbin src/bin src/sbin; do
-        if [[ -e $PROJECT_HOME/$name/$dir ]]; then
-            pathmunge $PROJECT_HOME/$name/$dir
-        fi
-    done
+    repo_path=$PROJECT_HOME/$name
+elif [[ -e $OPENSTACK_HOME/$name ]]; then
+    repo_path=$OPENSTACK_HOME/$name
 fi
 
-if [[ $name =~ bcfg2 ]]; then
-    export BCFG2_REPO_ROOT=$HOME/mclass-bcfg2/bcfg2
-    export BCFG2_INFO_BIN=$(which bcfg2-info)
-    export BCFG2_BIN_DIR=$(dirname $(which bcfg2))
-    pathmunge $PROJECT_HOME/bcfg2-tools/scripts
+if [[ -n $repo_path ]]; then
+    for dir in bin sbin src/bin src/sbin; do
+        if [[ -e $repo_path/$dir ]]; then
+            pathmunge $repo_path/$dir
+        fi
+    done
+
+    cd $repo_path
 fi
