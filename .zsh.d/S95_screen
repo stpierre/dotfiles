@@ -16,16 +16,39 @@ __set_screen_title() {
     fi
 }
 
-set_screen_hostname() {
-    # set screen title to hostname
-    __set_screen_title $__CURRENT_HOSTNAME
-}
-
 set_screen_screen_session() {
     # set screen title to the name of the screen sub-session
     set -- $(echo $1 | sed 's/.*\sscreen\s\s*//;')
     zparseopts -E -- S:=session r:=session d=d
     __set_screen_title $(echo $session | sed -e 's/.*\s\s*\(\d+\.\)*//')
+}
+
+default_screen_title() {
+    # set the screen title to an appropriate default
+    title=
+    if [[ $(whoami) == "root" ]]; then
+        prepend_root=1
+    else
+        prepend_root=0
+    fi
+
+    if [[ -n $VIRTUAL_ENV ]]; then
+        # set screen title to the name of the virtualenv being worked
+        # on
+        title="$(basename $VIRTUAL_ENV)"
+    else
+        # set screen title to hostname or username
+        if [[ $prepend_root == 1 ]]; then
+            title=root
+            prepend_root=0
+        else
+            title="$__CURRENT_HOSTNAME"
+        fi
+    fi
+    if [[ $prepend_root == 1 ]]; then
+        title="root:$title"
+    fi
+    __set_screen_title "$title"
 }
 
 screen() {
@@ -41,12 +64,11 @@ zsh_preexec_update_screen_title() {
         __set_screen_title $__EXPLICIT_SCREEN_TITLE
     else
         case "$1" in
-            *ssh*)
-                set_screen_hostname
-                __RESET_SCREEN_TITLE=1
-                ;;
             *screen*)
                 set_screen_screen_session "$1"
+                __RESET_SCREEN_TITLE=1
+                ;;
+            *workon*|*deactivate*|*cd*|*sudo*)
                 __RESET_SCREEN_TITLE=1
                 ;;
         esac
@@ -55,13 +77,13 @@ zsh_preexec_update_screen_title() {
 
 zsh_precmd_update_screen_title() {
     if [[ $__RESET_SCREEN_TITLE == 1 ]]; then
-        set_screen_hostname
+        default_screen_title
         __RESET_SCREEN_TITLE=
     fi
 }
 
 if [[ $TERM[0,6] == "screen" ]]; then
-    set_screen_hostname
+    default_screen_title
     preexec_functions[$(($#preexec_functions + 1))]='zsh_preexec_update_screen_title'
     precmd_functions[$(($#precmd_functions + 1))]='zsh_precmd_update_screen_title'
 

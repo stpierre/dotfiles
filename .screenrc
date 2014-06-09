@@ -15,9 +15,6 @@ bind k kill
 # make Konsole scroll bars work
 termcapinfo xterm* ti@:te@
 
-# protect screen with a password
-password
-
 # messages to display when activity or a bell is detected in another
 # window
 activity              "activity in %n (%t)"
@@ -40,3 +37,26 @@ bind -c selectHighs 8 select 18
 bind -c selectHighs 9 select 19
 
 bind - command -c selectHighs
+
+# startup screens
+screen zsh
+stuff "screen_title py"
+stuff "bpython"
+screen zsh
+stuff "screen_title vm"
+stuff "cd ~/stack && vagrant ssh"
+screen zsh
+stuff "screen_title devstack"
+stuff "cd ~/stack/devstack"
+screen zsh
+stuff "workon nova"
+screen zsh
+screen zsh
+screen zsh
+screen zsh
+screen zsh
+screen zsh
+screen zsh
+stuff "sudo -s"
+screen zsh
+stuff "sudo -s"
