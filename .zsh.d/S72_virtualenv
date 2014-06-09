@@ -4,13 +4,8 @@ export WORKON_HOME=~/venv
 export PROJECT_HOME=~/devel
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 
-# where to look for virtualenvwrapper
-for candidate in /usr/bin /usr/local/bin; do
-    if [[ -e $candidate/virtualenvwrapper.sh ]]; then
-	source $candidate/virtualenvwrapper.sh
-	break
-    fi
-done
+# find virtualenvwrapper in $PATH
+source $(which virtualenvwrapper.sh)
 
 newvirtualenv() {
     if [[ -z $1 ]]; then
