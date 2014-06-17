@@ -1,15 +1,19 @@
 #!/bin/zsh
 
 usage() {
-    echo "Usage: $(basename $0) [-c <commit | change-id>] <user> [<user> ...]"
+    echo "Usage: $(basename $0) [-c <commit | change-id>] [-r <remote>] <user> [<user> ...]"
     exit 1
 }
 
 cid=
-while getopts ":c:h" opt; do
+remote=origin
+while getopts ":c:r:h" opt; do
     case $opt in
         c)
             cid=$OPTARG
+            ;;
+        r)
+            remote=$OPTARG
             ;;
         h)
             usage
@@ -39,7 +43,7 @@ fi
 users="$@"
 
 set -- $(git remote -v | \
-    sed -n 's#origin[[:space:]]*ssh://\([^:/]*\):\([0-9]*\).*push)#\1 \2#p')
+    sed -n 's#^'"$remote"'[[:space:]]*ssh://\([^:/]*\):\([0-9]*\).*push)#\1 \2#p')
 server=$1
 port=$2
 
