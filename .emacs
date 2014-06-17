@@ -49,6 +49,12 @@
                    command nil buffer t args))
       (pop-to-buffer buffer)))
 
+(defun chomp (str)
+  "Chomp leading and tailing whitespace from STR."
+  (while (string-match "\\`\n+\\|^\\s-+\\|\\s-+$\\|\n+\\'" str)
+    (setq str (replace-match "" t t str)))
+  str)
+
 ;; perl mode settings
 (add-hook 'perl-mode-hook
           '(lambda ()
@@ -101,7 +107,6 @@
 
 (add-hook 'python-mode-hook
           '(lambda ()
-             (local-set-key "\C-c\C-k" 'pylint)
              (local-set-key (kbd "<C-tab>") 'rope-lucky-assist)
              (setq tab-width 4)
              (hs-minor-mode)
@@ -291,6 +296,34 @@
              (setq js-indent-level 2)
              (add-hook 'before-save-hook 'delete-trailing-whitespace)))
 
+(setq pylint-names (list "pylintrc" "pylintrc.conf" ".pylintrc"))
+(setq pylintrc-cache nil)
+
+(defun find-pylintrc (file-name)
+  """ find the pylintrc for a project """
+  (setq buffer-directory (file-name-directory file-name))
+  (if (not (assoc buffer-directory pylintrc-cache))
+      (progn
+        (setq gitroot
+              (chomp (shell-command-to-string
+                      (concat "cd " buffer-directory
+                              " && git rev-parse --show-toplevel"))))
+        (print (concat "cd " buffer-directory
+                       " && git rev-parse --show-toplevel"))
+        (print gitroot)
+        (setq pylintrc
+              (chomp (shell-command-to-string
+                      (concat "find " gitroot " -type f \\( -name "
+                              (mapconcat 'identity pylint-names " -o -name ")
+                              " \\) -print -quit"))))
+        (print (concat "find " gitroot " -type f \\( "
+                       (mapconcat 'identity pylint-names " -o ")
+                       " \\) -print -quit"))
+        (print pylintrc)
+        (add-to-list 'pylintrc-cache
+                     (cons buffer-directory
+                           (if (string= "" pylintrc) nil pylintrc)))))
+  (cdr (assoc buffer-directory pylintrc-cache)))
 
 ;; flymake and pyflymake settings
 (when (load "flymake" t)
@@ -299,8 +332,11 @@
                        'flymake-create-temp-inplace))
            (local-file (file-relative-name
                         temp-file
-                        (file-name-directory buffer-file-name))))
-      (list "/usr/local/bin/epylint" (list local-file))))
+                        (file-name-directory buffer-file-name)))
+           (pylintrc (find-pylintrc buffer-file-name)))
+      (if pylintrc
+          (list "~/bin/epylint" (list (concat "--rcfile=" pylintrc)
+                                local-file)))))
   (add-to-list 'flymake-allowed-file-name-masks
                '("\\.py\\'" flymake-pylint-init)))
 
@@ -359,12 +395,6 @@
 (define-key flymake-map "d" 'flymake-disable-pylint-on-line)
 (define-key flymake-map "p" 'flymake-goto-prev-error)
 (define-key flymake-map "n" 'flymake-goto-next-error)
-
-;; which-function-mode settings
-(require 'which-func)
-(add-to-list 'which-func-modes 'org-mode)
-(add-to-list 'which-func-modes 'python-mode)
-(which-func-mode 1)
 
 ;; selinux .te file settings
 (autoload 'selinux-te-mode
