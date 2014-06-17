@@ -12,6 +12,7 @@
         ci = commit
         co = checkout
         st = status
+        root = "rev-parse --show-toplevel"
         upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git pull --rebase; git clean -dffx; git gc )"
         fix-merge = "!git checkout $1 && git upstream && git checkout $2 && git upstream && git merge $1"
         hist = "log --pretty=format:\"%h %ad | %s%d [%an]\" --date=short"
