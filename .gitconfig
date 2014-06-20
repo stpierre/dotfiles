@@ -16,7 +16,7 @@
         upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git pull --rebase; git clean -dffx; git gc )"
         fix-merge = "!git checkout $1 && git upstream && git checkout $2 && git upstream && git merge $1"
         hist = "log --pretty=format:\"%h %ad | %s%d [%an]\" --date=short"
-        clone-fork = "!~/bin/clone-with-fork.sh $1 $2"
+        clone-fork = "!~/bin/clone-with-fork.sh $2 $3"
         reviewer = "!~/bin/add-gerrit-reviewer.sh $@"
         what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
         # we frequently have local changes to dotfiles, so this makes it easier to pull and push commits
