@@ -44,12 +44,12 @@ stuff "screen_title py"
 stuff "bpython"
 screen zsh
 stuff "screen_title vm"
-stuff "cd ~/stack && vagrant ssh"
+stuff "cd ~/stack && vagrant upvagrant ssh"
 screen zsh
 stuff "screen_title devstack"
 stuff "cd ~/stack/devstack"
 screen zsh
-stuff "workon nova"
+stuff "workon nova-grizzly"
 screen zsh
 screen zsh
 screen zsh
