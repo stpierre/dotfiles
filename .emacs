@@ -65,6 +65,9 @@
                   (concat "perl -c "
                           (file-name-nondirectory buffer-file-name)))))
 
+(eval-after-load "perlcritic"
+  '(perlcritic-severity 4))
+
 ;; xml-mode settings
 (setq auto-mode-alist (append '(("\\.xsd\\'" . xml-mode))
                               auto-mode-alist))
@@ -94,8 +97,11 @@
              (org-indent-mode)
              (local-set-key "\C-cl" 'org-store-link)))
 
-(eval-after-load "perlcritic"
-  '(perlcritic-severity 4))
+;; markdown mode
+(autoload 'markdown-mode "markdown-mode"
+   "Major mode for editing Markdown files" t)
+(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
+(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
 ;; python mode settings
 (setq pylookup-db-file (concat user-emacs-directory "pylookup.db"))
@@ -136,6 +142,7 @@
                           (file-name-nondirectory buffer-file-name)))))
 
 ;; go mode settings
+(require 'go-mode-load)
 (add-hook 'go-mode-hook
           '(lambda ()
              (setq tab-width 2)
