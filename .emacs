@@ -315,18 +315,11 @@
               (chomp (shell-command-to-string
                       (concat "cd " buffer-directory
                               " && git rev-parse --show-toplevel"))))
-        (print (concat "cd " buffer-directory
-                       " && git rev-parse --show-toplevel"))
-        (print gitroot)
         (setq pylintrc
               (chomp (shell-command-to-string
                       (concat "find " gitroot " -type f \\( -name "
                               (mapconcat 'identity pylint-names " -o -name ")
                               " \\) -print -quit"))))
-        (print (concat "find " gitroot " -type f \\( "
-                       (mapconcat 'identity pylint-names " -o ")
-                       " \\) -print -quit"))
-        (print pylintrc)
         (add-to-list 'pylintrc-cache
                      (cons buffer-directory
                            (if (string= "" pylintrc) nil pylintrc)))))
