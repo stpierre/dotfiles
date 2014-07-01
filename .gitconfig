@@ -14,17 +14,22 @@
         st = status
         root = "rev-parse --show-toplevel"
         upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git pull --rebase; git clean -dffx; git gc )"
-        fix-merge = "!git checkout $1 && git upstream && git checkout $2 && git upstream && git merge $1"
         hist = "log --pretty=format:\"%h %ad | %s%d [%an]\" --date=short"
-        clone-fork = "!~/bin/clone-with-fork.sh $2 $3"
-        reviewer = "!~/bin/add-gerrit-reviewer.sh $@"
+        clone-fork = "!clone-with-fork.sh"
+        reviewer = "!add-gerrit-reviewer.sh"
+        chain = "!git-chain.sh"
+        fix-merge = "!git chain 'co $1' upstream 'co $2' upstream 'merge $1'"
         what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
+        rename-branch = "!git chain 'co $1' 'branch $2' 'co $2' 'branch -D $1'"
         # we frequently have local changes to dotfiles, so this makes it easier to pull and push commits
-        pulldot = "!git stash && git pull --rebase && git stash apply"
-        pushdot = "!git stash && git pull --rebase && git push && git stash apply"
+        pulldot = "!git chain stash 'pull --rebase' 'stash apply'"
+        pushdot = "!git chain stash 'pull --rebase' push 'stash apply'"
 
 [push]
         default = current
 
 [gitreview]
 	username = stpierre
+
+[github]
+        user = stpierre
