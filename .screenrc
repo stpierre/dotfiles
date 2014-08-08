@@ -40,16 +40,6 @@ bind - command -c selectHighs
 
 # startup screens
 screen zsh
-stuff "screen_title py"
-stuff "bpython"
-screen zsh
-stuff "screen_title vm"
-stuff "cd ~/stack && vagrant upvagrant ssh"
-screen zsh
-stuff "screen_title devstack"
-stuff "cd ~/stack/devstack"
-screen zsh
-stuff "workon nova-grizzly"
 screen zsh
 screen zsh
 screen zsh
@@ -57,6 +47,7 @@ screen zsh
 screen zsh
 screen zsh
 screen zsh
-stuff "sudo -s"
+screen zsh
+screen zsh
 screen zsh
 stuff "sudo -s"
