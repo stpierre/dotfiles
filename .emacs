@@ -15,6 +15,7 @@
                       flymake
                       fuzzy
                       go-mode
+                      google-this
                       graphviz-dot-mode
                       json-mode
                       markdown-mode
@@ -389,7 +390,7 @@
                            (if (string= "" pylintrc) nil pylintrc)))))
   (cdr (assoc buffer-directory pylintrc-cache)))
 
-;; flymake and pyflymake settings
+;; flymake settings
 (when (load "flymake" t)
   (defun flymake-pylint-init ()
     (let* ((temp-file (flymake-init-create-temp-buffer-copy
@@ -398,11 +399,31 @@
                         temp-file
                         (file-name-directory buffer-file-name))))
       (list "~/bin/pychecker.py" (list local-file))))
+  (defun flymake-rst-init ()
+    (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))
+           (local-file (file-relative-name
+                        temp-file
+                        (file-name-directory buffer-file-name))))
+      (list "rstchecker" (list local-file))))
+  (defun flymake-sh-init ()
+    (let* ((temp-file (flymake-init-create-temp-buffer-copy
+                       'flymake-create-temp-inplace))
+           (local-file (file-relative-name
+                        temp-file
+                        (file-name-directory buffer-file-name))))
+      (list "shchecker" (list local-file))))
   (add-to-list 'flymake-allowed-file-name-masks
-               '("\\.py\\'" flymake-pylint-init)))
+               '("\\.py\\'" flymake-pylint-init))
+  (add-to-list 'flymake-allowed-file-name-masks
+               '("\\.rst\\'" flymake-rst-init))
+  (add-to-list 'flymake-allowed-file-name-masks
+               '("\\.sh\\'" flymake-sh-init)))
 
 (add-hook 'find-file-hook 'flymake-find-file-hook)
 
+
+;; better flymake faces
 (custom-set-faces
   '(flymake-errline ((((class color)) (:background "IndianRed1"))))
   '(flymake-warnline ((((class color)) (:background "gold1")))))
