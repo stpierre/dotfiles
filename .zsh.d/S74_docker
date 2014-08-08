@@ -1,0 +1,8 @@
+#!/bin/zsh
+
+if type boot2docker >& /dev/null; then
+    if ! boot2docker status | grep -q running; then
+        boot2docker start
+    fi
+    export DOCKER_HOST=tcp://$(boot2docker ip 2>/dev/null):2375
+fi
