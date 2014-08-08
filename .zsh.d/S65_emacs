@@ -33,11 +33,13 @@ if type emacs >& /dev/null; then
     if type emacsclient >& /dev/null && [[ $__emacs_version -ge 23.1 ]]; then
         function emacs() {
             __start_emacs_server
+            args="-n"
             if [[ $(uname) == "Darwin" || -n $DISPLAY ]]; then
-                args="-c $@"
+                args="$args -c"
             else
-                args="-t $@"
+                args="$args -t"
             fi
+            args="$args $@"
             emacsclient ${=args}
         }
 
