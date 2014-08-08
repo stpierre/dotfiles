@@ -24,7 +24,7 @@ done
 
 # install common tools for every virtualenv
 echo "Installing common tools..."
-pip install bpython flake8 pylint
+pip install bpython flake8 pylint docutils
 
 # install Pymacs
 echo "Installing Pymacs..."
@@ -33,3 +33,5 @@ git pull --rebase
 make check
 make install
 cd -
+
+rehash
