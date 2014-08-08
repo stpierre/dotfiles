@@ -1,5 +1,34 @@
 (princ "Loading ~/.emacs")
 
+(require 'package)
+(add-to-list 'package-archives
+             '("marmalade" . "http://marmalade-repo.org/packages/"))
+(add-to-list 'package-archives
+             '("melpa" . "http://melpa.milkbox.net/packages/"))
+(package-initialize)
+
+(when (not package-archive-contents)
+  (package-refresh-contents))
+
+(defvar my-packages '(auto-complete
+                      autopair
+                      flymake
+                      fuzzy
+                      go-mode
+                      graphviz-dot-mode
+                      json-mode
+                      markdown-mode
+                      popup
+                      pymacs
+                      python-mode
+                      rpm-spec-mode
+                      yaml-mode)
+  "A list of packages to ensure are installed at launch.")
+
+(dolist (p my-packages)
+  (when (not (package-installed-p p))
+    (package-install p)))
+
 ;; don't display the annoying splash screen
 (setq inhibit-splash-screen t)
 
@@ -26,10 +55,17 @@
 (global-set-key "\C-cc" 'comment-region)
 (global-set-key "\C-cu" 'uncomment-region)
 
-;; set C-c, s to point-to-register ([s]ave the current point to the
-;; register) and C-c, j to [j]ump-to-register
-(global-set-key "\C-cs" 'point-to-register)
+;; set C-c, p to point-to-register (current [p]oint to register) and
+;; C-c, j to [j]ump-to-register
+(global-set-key "\C-cp" 'point-to-register)
 (global-set-key "\C-cj" 'jump-to-register)
+
+;; set hideshow mode keys to something easier
+(global-set-key "\C-cs" 'hs-show-block)
+(global-set-key "\C-ch" 'hs-hide-block)
+(global-set-key "\C-ct" 'hs-toggle-hiding)
+(global-set-key "\C-cS" 'hs-show-all)
+(global-set-key "\C-cH" 'hs-hide-all)
 
 ;; set user-emacs-directory on older versions of emacs
 (if (not (boundp 'user-emacs-directory))
@@ -54,6 +90,36 @@
   (while (string-match "\\`\n+\\|^\\s-+\\|\\s-+$\\|\n+\\'" str)
     (setq str (replace-match "" t t str)))
   str)
+
+(defvar hexcolor-keywords
+  '(("#[[:xdigit:]]\\{3,6\\}"
+     (0 (let ((color (match-string-no-properties 0)))
+          (if (or (= (length color) 4)
+                  (= (length color) 7))
+              (put-text-property
+               (match-beginning 0)
+               (match-end 0)
+               'face (list :background
+                           (match-string-no-properties 0)
+                           :foreground
+                           (if (>= (apply '+ (x-color-values
+                                              (match-string-no-properties 0)))
+                                   (* (apply '+ (x-color-values "white")) .6))
+                               "black" ;; light bg, dark text
+                             "white" ;; dark bg, light text
+                             )))))
+        append))))
+
+(defun hexcolor-add-to-font-lock ()
+  (interactive)
+  (font-lock-add-keywords nil hexcolor-keywords t))
+
+;; load autocomplete
+(require 'auto-complete-config)
+(add-to-list 'ac-dictionary-directories "/Users/stpierre/.emacs.d/ac-dict")
+(ac-config-default)
+(define-key ac-completing-map [return] nil)
+(define-key ac-completing-map "\r" nil)
 
 ;; perl mode settings
 (add-hook 'perl-mode-hook
@@ -114,10 +180,11 @@
 (add-hook 'python-mode-hook
           '(lambda ()
              (local-set-key (kbd "<C-tab>") 'rope-lucky-assist)
+             (setq python-fill-docstring-style 'pep-257-nn)
              (setq tab-width 4)
-             (hs-minor-mode)
              (setq python-indent 4)
              (add-hook 'before-save-hook 'delete-trailing-whitespace)
+             (hs-minor-mode)
              (unless (assoc 'python-mode hs-special-modes-alist)
                (setq hs-special-modes-alist
                      (cons (list 'python-mode
@@ -127,9 +194,11 @@
                                    (skip-chars-backward " \t\n"))
                                  nil)
                            hs-special-modes-alist)))))
+(add-hook 'python-mode-hook 'jedi:setup)
 
 (require 'pymacs)
 (pymacs-load "ropemacs" "rope-")
+
 
 ;; PHP mode settings
 (add-hook 'php-mode-hook
@@ -142,7 +211,6 @@
                           (file-name-nondirectory buffer-file-name)))))
 
 ;; go mode settings
-(require 'go-mode-load)
 (add-hook 'go-mode-hook
           '(lambda ()
              (setq tab-width 2)
@@ -164,7 +232,8 @@
              (setq cssm-indent-level 4)
              (setq cssm-newline-before-closing-bracket t)
              (setq cssm-indent-function #'cssm-c-style-indenter)
-             (setq cssm-mirror-mode nil)))
+             (setq cssm-mirror-mode nil)
+             (hexcolor-add-to-font-loc)))
 
 ;; tabs suck, don't use them
 (setq-default indent-tabs-mode nil)
@@ -287,15 +356,10 @@
 
 (put 'scroll-left 'disabled nil)
 
-;; Thunderbird External Editor mode
-(require 'tbemail)
-
 ;; yaml-mode settings
-(require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
 
 ;; json-mode settings
-(require 'json-mode)
 (add-to-list 'auto-mode-alist '("\\.json$" . json-mode))
 (add-hook 'json-mode-hook
           '(lambda ()
@@ -332,15 +396,16 @@
                        'flymake-create-temp-inplace))
            (local-file (file-relative-name
                         temp-file
-                        (file-name-directory buffer-file-name)))
-           (pylintrc (find-pylintrc buffer-file-name)))
-      (if pylintrc
-          (list "~/bin/epylint" (list (concat "--rcfile=" pylintrc)
-                                local-file)))))
+                        (file-name-directory buffer-file-name))))
+      (list "~/bin/pychecker.py" (list local-file))))
   (add-to-list 'flymake-allowed-file-name-masks
                '("\\.py\\'" flymake-pylint-init)))
 
 (add-hook 'find-file-hook 'flymake-find-file-hook)
+
+(custom-set-faces
+  '(flymake-errline ((((class color)) (:background "IndianRed1"))))
+  '(flymake-warnline ((((class color)) (:background "gold1")))))
 
 ;; keep state for flymake-display-err-in-minibuffer so multiple
 ;; invocations cycle through the errors for a given line
