@@ -6,13 +6,13 @@ fi
 
 # get short hostname callback and/or domain
 KNOWN_DOMAINS=.local
-[ -e $HOME/.zsh.d/hostname.local ] && source $HOME/.zsh.d/hostname.local
+[ -e "$HOME"/.zsh.d/hostname.local ] && source "$HOME"/.zsh.d/hostname.local
 
 if ! type short_hostname >& /dev/null; then
     function short_hostname() {
         hostname="$(hostname)"
         for d in ${=KNOWN_DOMAINS}; do
-            if [[ $hostname[-${#d},-1] == $d ]]; then
+            if [[ $hostname[-${#d},-1] == "$d" ]]; then
                 return 0
             fi
         done
@@ -27,7 +27,7 @@ if short_hostname; then
     __CURRENT_HOSTNAME=$(hostname -s)
 else
     __CURRENT_HOSTNAME=$(hostname --fqdn 2>&1)
-    if [[ $? != 0 || $(echo $domain | wc -l) > 1 ]]; then
+    if [[ $? != 0 || $(echo "$domain" | wc -l) -gt 1 ]]; then
         # the second part of this is a very silly check for a "stupid"
         # hostname executable that doesn't understand --fqdn (e.g., on OS
         # X or AIX).  More than one line would seem to indicate an error

@@ -14,21 +14,21 @@ start-ssh-agent() {
     rv=0
     if type ssh-agent >& /dev/null; then
         if [[ -e $SSH_AGENT_FILE ]]; then
-            source $SSH_AGENT_FILE
-            proc=$(ps -p $SSH_AGENT_PID -o comm=)
+            source "$SSH_AGENT_FILE"
+            proc=$(ps -p "$SSH_AGENT_PID" -o comm=)
             if [[ $proc != "ssh-agent" ]]; then
                 export SSH_AUTH_SOCK=
                 export SSH_AGENT_PID=
-                rm -f $SSH_AGENT_FILE
+                rm -f "$SSH_AGENT_FILE"
             else
                 return $rv
             fi
         fi
         cmds=$(ssh-agent | grep -v '^echo')
-        rv=$(($rv + $?))
+        rv=$((rv + $?))
         eval $cmds
-        rv=$(($rv + $?))
-        echo $cmds >| $SSH_AGENT_FILE
+        rv=$((rv + $?))
+        echo "$cmds" >| "$SSH_AGENT_FILE"
     fi
     return $rv
 }
@@ -39,7 +39,7 @@ scp_via() {
     # scp a file or files from one host to another via the current
     # host
     tmpdir=$(mktemp -d)
-    scp $1 $tmpdir/
-    scp $tmpdir/* $2
-    rm -rf $tmpdir
+    scp "$1" "$tmpdir"/
+    scp "$tmpdir"/* "$2"
+    rm -rf "$tmpdir"
 }

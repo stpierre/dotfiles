@@ -3,7 +3,7 @@
 _zshrc_log "PATH: $PATH"
 
 pathmunge () {
-    if ! echo $PATH | egrep -q "(^|:)$1($|:)" ; then
+    if ! echo "$PATH" | egrep -q "(^|:)$1(\$|:)" ; then
 	if [ "$2" = "after" ] ; then
             _zshrc_log "Adding $1 to end of PATH"
 	    PATH=$PATH:$1
@@ -16,20 +16,18 @@ pathmunge () {
 
 pathremove ()  {
     _zshrc_log "Removing $1 from PATH"
-    export PATH=$(echo -n $PATH | awk -v RS=: -v ORS=: '$0 != "'$1'"' | sed 's/:$//')
+    export PATH=$(echo -n "$PATH" | awk -v RS=: -v ORS=: '$0 != "'"$1"'"' | \
+        sed 's/:$//')
 }
 
 if [ -e ~/bin ]; then
     pathmunge ~/bin
-fi
-if [ -e ~/sw/$(uname -s)-$(uname -r | cut -d. -f 1,2)-$(uname -m) ]; then
-    pathmunge ~/sw/$(uname -s)-$(uname -r | cut -d. -f 1,2)-$(uname -m)
 fi
 
 # these need to go after /usr/bin to make mock work properly
 pathmunge /sbin after
 pathmunge /usr/sbin after
 
-[ -e $HOME/.zsh.d/path.local ] && source $HOME/.zsh.d/path.local
+[ -e "$HOME"/.zsh.d/path.local ] && source "$HOME"/.zsh.d/path.local
 
 export PATH

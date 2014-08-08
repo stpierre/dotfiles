@@ -7,8 +7,8 @@ __AUTORELOAD_FILE=~/.zsh.d/.autoreload
 # automatically reload .zshrc when necessary.
 autoreload() {
     # only run this once an hour at most
-    if (( $(($(date +%s) - $__AUTORELOAD_LAST_RUN)) > 3600 )); then
-        if (( $(stat -c %Y ~/.zshrc) > $__AUTORELOAD_LAST_RUN )); then
+    if (( $(($(date +%s) - __AUTORELOAD_LAST_RUN)) > 3600 )); then
+        if (( $(stat -c %Y ~/.zshrc) > __AUTORELOAD_LAST_RUN )); then
             # .zshrc sources all of the .zsh.d files, so we just
             # source it and let it do the heavy lifting
             echo "autoreload ~/.zshrc"
@@ -16,8 +16,8 @@ autoreload() {
         else
             # determine if touch supports -d
             if [[ $__TOUCH_D != "0" ]]; then
-                if ! touch -d @$__AUTORELOAD_LAST_RUN \
-                    $__AUTORELOAD_FILE >& /dev/null; then
+                if ! touch -d @"$__AUTORELOAD_LAST_RUN" "$__AUTORELOAD_FILE" \
+                    >& /dev/null; then
                     __TOUCH_D=0
                 else
                     __TOUCH_D=1
@@ -29,13 +29,13 @@ autoreload() {
             # then we want to run the code that records the autoreload
             # without using touch -d
             if [[ $__TOUCH_D == "0" ]]; then
-                touch -t $(date -r $__AUTORELOAD_LAST_RUN +%Y%m%d%H%M.%S) \
-                    $__AUTORELOAD_FILE
+                touch -t "$(date -r "$__AUTORELOAD_LAST_RUN" +%Y%m%d%H%M.%S)" \
+                    "$__AUTORELOAD_FILE"
             fi
-            for zshrc_snipplet in $(find ~/.zsh.d \( -name 'S[0-9][0-9]*' -o \
-                -name zshrc.\* \) -newer $__AUTORELOAD_FILE); do
+            find ~/.zsh.d \( -name 'S[0-9][0-9]*' -o -name zshrc.\* \) \
+                -newer "$__AUTORELOAD_FILE" | while read zshrc_snipplet; do
                 echo "autoreload $zshrc_snipplet"
-                source $zshrc_snipplet
+                source "$zshrc_snipplet"
             done
             rm -f $__AUTORELOAD_FILE
         fi
@@ -44,4 +44,4 @@ autoreload() {
     fi
 }
 
-preexec_functions[$(($#preexec_functions + 1))]='autoreload'
+preexec_functions[$((${#preexec_functions} + 1))]='autoreload'

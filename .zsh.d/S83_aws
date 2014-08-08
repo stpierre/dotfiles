@@ -14,7 +14,7 @@ AWS_HOME=$(readlink -f ~/bin/aws)
 
 if [[ -e "$AWS_HOME" ]]; then
     for tooldir in $(find "$AWS_HOME" -mindepth 1 -maxdepth 1 -type d); do
-        toolname=$(basename $tooldir | sed 's/-[.[:digit:]]*$//')
+        toolname=$(basename "$tooldir" | sed 's/-[.[:digit:]]*$//')
         readme=$(find "$tooldir" -maxdepth 1 -iname readme\*)
         if [[ -n $_AWS_TOOLSETS[$toolname] ]]; then
             var=$_AWS_TOOLSETS[$toolname]
@@ -28,14 +28,14 @@ if [[ -e "$AWS_HOME" ]]; then
         if [[ -n $var ]]; then
             _zshrc_log "Registering AWS toolset $toolname with $var"
             eval "export $var='$tooldir'"
-            pathmunge $tooldir/bin after
+            pathmunge "$tooldir/bin" after
         else
             echo "Could not determine environment variable for $toolname"
         fi
     done
 
     if [[ -z $JAVA_HOME ]]; then
-        export JAVA_HOME=$(dirname $(which java))/..
+        export JAVA_HOME=$(dirname "$(which java)")/..
     fi
 fi
 
@@ -46,13 +46,13 @@ cfn-watch-stack-events() {
     fi
 
     new=
-    output=$(cfn-describe-stack-events --stack-name=$1 | tac)
-    echo $output
+    output=$(cfn-describe-stack-events --stack-name="$1" | tac)
+    echo "$output"
     sleep 2
 
     while true; do
-        new=$(cfn-describe-stack-events --stack-name=$1 | tac)
-        echo $new | diff - <(echo $output) | sed -n '/^< / { s/^< //; p; }'
+        new=$(cfn-describe-stack-events --stack-name="$1" | tac)
+        echo "$new" | diff - <(echo "$output") | sed -n '/^< / { s/^< //; p; }'
         output="$new"
         sleep 2
     done
@@ -64,13 +64,13 @@ _get_aws_envs() {
 
 _get_aws_default_env() {
     if [[ -e "$_AWS_CREDS" && -L "$_AWS_CREDS"/default ]]; then
-        basename $(readlink -f "$_AWS_CREDS"/default)
+        basename "$(readlink -f "$_AWS_CREDS"/default)"
     fi
 }
 
 _get_aws_current_env() {
     if [[ -e "$_AWS_CREDS" && -L "$_AWS_CREDS"/current ]]; then
-        basename $(readlink -f "$_AWS_CREDS"/current)
+        basename "$(readlink -f "$_AWS_CREDS"/current)"
     fi
 }
 
@@ -83,9 +83,9 @@ _set_aws_env() {
     creds="$_AWS_CREDS/$env"
     export AWS_CREDENTIAL_FILE="$creds/keys"
     export AWS_ACCESS_KEY_ID=$(awk -F= '/AWSAccessKeyId/ {print $NF}' \
-        $AWS_CREDENTIAL_FILE)
+        "$AWS_CREDENTIAL_FILE")
     export AWS_SECRET_ACCESS_KEY=$(awk -F= '/AWSSecretKey/ {print $NF}' \
-        $AWS_CREDENTIAL_FILE)
+        "$AWS_CREDENTIAL_FILE")
     export AWS_ACCESS_KEY=$AWS_ACCESS_KEY_ID
     export AWS_SECRET_KEY=$AWS_SECRET_ACCESS_KEY
 
@@ -107,20 +107,20 @@ aws_env() {
     if [[ -z $1 ]]; then
         echo "Available AWS environments:"
         _get_aws_envs | \
-            sed "s/^\(.*\)$/  \1/;
-                 s/^  \($(_get_aws_current_env)\)$/* \1/;
+            sed "s/^\(.*\)\$/  \1/;
+                 s/^  \($(_get_aws_current_env)\)\$/* \1/;
                  s/^\(..$(_get_aws_default_env)\)\$/\1 (default)/"
     elif [[ -e "$_AWS_CREDS/$1/keys" ]]; then
-        _set_aws_env $1
+        _set_aws_env "$1"
         # rewrite ~/.boto
-        cat >| $HOME/.boto <<EOF
+        cat >| "$HOME/.boto" <<EOF
 [Credentials]
 aws_access_key_id = $AWS_ACCESS_KEY
 aws_secret_access_key = $AWS_SECRET_KEY
 EOF
 
-        rm -f $_AWS_CREDS/current
-        ln -s $_AWS_CREDS/$1 $_AWS_CREDS/current
+        rm -f "$_AWS_CREDS"/current
+        ln -s "$_AWS_CREDS"/"$1" "$_AWS_CREDS"/current
     else
         echo "AWS environment $1 not found"
         aws_env

@@ -8,7 +8,7 @@ parse_svn_repo() {
 }
 
 zsh_preexec_update_svn_vars() {
-    case "$(history -1)" in 
+    case "$(history -1)" in
         *svn*)
             parse_svn_repo
             ;;
@@ -22,8 +22,8 @@ if type svn >& /dev/null; then
     # 2.  When an svn command is run; and
     # 3.  When cd is run
     parse_svn_repo
-    preexec_functions[$(($#preexec_functions + 1))]='zsh_preexec_update_svn_vars'
-    chpwd_functions[$(($#chpwd_functions + 1))]='parse_svn_repo'
+    preexec_functions[$((${#preexec_functions} + 1))]='zsh_preexec_update_svn_vars'
+    chpwd_functions[$((${#chpwd_functions} + 1))]='parse_svn_repo'
 fi
 
 get_svn_prompt_info() {

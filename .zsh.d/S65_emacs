@@ -1,10 +1,28 @@
 #!/bin/zsh
 
+__EMACS_SOCKET_DIR="$TMPDIR"/emacs$(id -u)
+
+function _emacs_server_name() {
+    if [[ -n $VIRTUAL_ENV ]]; then
+        basename "$VIRTUAL_ENV"
+    else
+        echo server
+    fi
+}
+
 function __start_emacs_server() {
     # start emacs server
-    if ! pgrep -f -U $USER '[Ee]macs.* --daemon' >& /dev/null; then
-        $__emacs_bin --daemon >& /dev/null
-    fi
+    name=$(_emacs_server_name)
+    socket="$__EMACS_SOCKET_DIR"/$name
+    if [[ -e $socket ]]; then
+        if ! lsof -F p -a -U -u "$USER" -- "$socket"; then
+            # socket exists, but server is not running
+            rm -f "$socket"
+        else
+            return
+        fi
+    fi  # else, socket does not exist
+    $__emacs_bin --daemon="$name" >& /dev/null
 }
 
 if [[ -e /Applications/Emacs.app/Contents/MacOS/bin ]]; then
@@ -33,7 +51,7 @@ if type emacs >& /dev/null; then
     if type emacsclient >& /dev/null && [[ $__emacs_version -ge 23.1 ]]; then
         function emacs() {
             __start_emacs_server
-            args="-n"
+            args="-n -s $(_emacs_server_name)"
             if [[ $(uname) == "Darwin" || -n $DISPLAY ]]; then
                 args="$args -c"
             else
@@ -44,10 +62,9 @@ if type emacs >& /dev/null; then
         }
 
         function emacs-kill() {
-            emacsclient -e '(kill-emacs)'
+            emacsclient -e -s "$(_emacs_server_name)" '(kill-emacs)'
         }
 
-        __start_emacs_server
         export ALTERNATIVE_EDITOR=""
     fi
     export EDITOR=emacs

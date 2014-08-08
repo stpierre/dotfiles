@@ -50,16 +50,16 @@ __count_output() {
     total=$4
     if [[ $mode == "average" ]]; then
         format="%0.2f"
-        val=$(($total / $count))
+        val=$((total / count))
     else
         format="%s"
         val=$count
     fi
 
     if [[ $spark == 1 ]]; then
-        printf "$format," $val
+        printf "$format," "$val"
     else
-        printf "%s    $format\n" $time $val
+        printf "%s    $format\n" "$time" "$val"
     fi
 }
 
@@ -90,7 +90,7 @@ __count() {
                 __count_usage
                 return 1
                 ;;
-            * ) 
+            * )
                 echo "Option $option not understood"
                 __count_usage
                 return 1
@@ -99,7 +99,7 @@ __count() {
     done
 
     if [[ $mode == "average" ]]; then
-        shift $(($OPTIND - 1))
+        shift $((OPTIND - 1))
         if [[ -z $1 ]]; then
             echo "Error: no awk expression supplied"
             __avg_usage
@@ -127,26 +127,26 @@ __count() {
     count=0
     total=0
     while read line; do
-        current=$(echo $line | awk -F "$csplit" "{ print $cfunc }")
+        current=$(echo "$line" | awk -F "$csplit" "{ print $cfunc }")
         if [[ $mode == "average" ]]; then
-            value=$(echo $line | awk "$awk")
+            value=$(echo "$line" | awk "$awk")
         else
             value=0
         fi
 
         if [[ -z $last ]]; then
             last=$current
-            total=$(($total + $value))
-            count=$(($count + 1))
+            total=$((total + value))
+            count=$((count + 1))
         elif [[ $current != $last ]]; then
-            __count_output $mode "$last" $count $total
+            __count_output "$mode" "$last" $count $total
             last=$current
             count=1
             total=$value
         else
-            count=$(($count + 1))
-            total=$(($total + $value))
+            count=$((count + 1))
+            total=$((total + value))
         fi
     done
-    __count_output $mode "$last" $count $total
+    __count_output "$mode" "$last" $count $total
 }

@@ -6,7 +6,7 @@ export VIRTUAL_ENV_DISABLE_PROMPT=1
 export NODE_VIRTUAL_ENV_DISABLE_PROMPT=1
 
 # find virtualenvwrapper in $PATH
-source $(which virtualenvwrapper.sh)
+source "$(which virtualenvwrapper.sh)"
 
 newvirtualenv() {
     if [[ -z $1 ]]; then
@@ -14,7 +14,7 @@ newvirtualenv() {
     else
         base=$1
     fi
-    name=$(basename $base)
+    name=$(basename "$base")
     args="-a $base"
     if [[ -e $base/requirements.txt ]]; then
         args="$args -r $base/requirements.txt"
@@ -22,12 +22,12 @@ newvirtualenv() {
         args="$args -r $base/requirements.pip"
     fi
 
-    mkvirtualenv ${=args} --system-site-packages $name
+    mkvirtualenv ${=args} --system-site-packages "$name"
 }
 
 get_venv_prompt_info() {
     if [[ -n $VIRTUAL_ENV ]]; then
-        echo "$(basename $VIRTUAL_ENV):"
+        echo "$(basename "$VIRTUAL_ENV"):"
     fi
 }
 

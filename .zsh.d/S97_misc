@@ -13,7 +13,7 @@ function snow() {
     while :; do
         LINES=$(tput lines)
         COLUMNS=$(tput cols)
-        echo $LINES $COLUMNS $(($RANDOM%$COLUMNS))
+        echo "$LINES" "$COLUMNS" $((RANDOM % COLUMNS))
         sleep 0.1
     done | gawk '{
                   a[$3]=0;

@@ -5,7 +5,7 @@ __EXPLICIT_SCREEN_TITLE=
 
 screen_title() {
     __EXPLICIT_SCREEN_TITLE=$1
-    __set_screen_title $1
+    __set_screen_title "$1"
     __RESET_SCREEN_TITLE=
 }
 
@@ -18,9 +18,9 @@ __set_screen_title() {
 
 set_screen_screen_session() {
     # set screen title to the name of the screen sub-session
-    set -- $(echo $1 | sed 's/.*\sscreen\s\s*//;')
+    set -- $(echo "$1" | sed 's/.*\sscreen\s\s*//;')
     zparseopts -E -- S:=session r:=session d=d
-    __set_screen_title $(echo $session | sed -e 's/.*\s\s*\(\d+\.\)*//')
+    __set_screen_title "$(echo "$session" | sed -e 's/.*\s\s*\(\d+\.\)*//')"
 }
 
 default_screen_title() {
@@ -35,7 +35,7 @@ default_screen_title() {
     if [[ -n $VIRTUAL_ENV ]]; then
         # set screen title to the name of the virtualenv being worked
         # on
-        title="$(basename $VIRTUAL_ENV)"
+        title="$(basename "$VIRTUAL_ENV")"
     else
         # set screen title to hostname or username
         if [[ $prepend_root == 1 ]]; then
@@ -55,13 +55,13 @@ screen() {
     # some commands run within screen change the value of $COLUMNS, so
     # we save that variable and then restore it
     oldcols=$COLUMNS
-    /usr/bin/screen $@
+    /usr/bin/screen "$@"
     export COLUMNS=$oldcols
 }
 
 zsh_preexec_update_screen_title() {
     if [[ -n $__EXPLICIT_SCREEN_TITLE ]]; then
-        __set_screen_title $__EXPLICIT_SCREEN_TITLE
+        __set_screen_title "$__EXPLICIT_SCREEN_TITLE"
     else
         case "$1" in
             *screen*)
@@ -84,8 +84,8 @@ zsh_precmd_update_screen_title() {
 
 if [[ $TERM[0,6] == "screen" ]]; then
     default_screen_title
-    preexec_functions[$(($#preexec_functions + 1))]='zsh_preexec_update_screen_title'
-    precmd_functions[$(($#precmd_functions + 1))]='zsh_precmd_update_screen_title'
+    preexec_functions[$((${#preexec_functions} + 1))]='zsh_preexec_update_screen_title'
+    precmd_functions[$((${#precmd_functions} + 1))]='zsh_precmd_update_screen_title'
 
     if [[ $(uname -s) == 'AIX' ]]; then
         # "screen" is not a sane term type on AIX
