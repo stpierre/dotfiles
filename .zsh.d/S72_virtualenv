@@ -3,6 +3,7 @@
 export WORKON_HOME=~/venv
 export PROJECT_HOME=~/devel
 export VIRTUAL_ENV_DISABLE_PROMPT=1
+export NODE_VIRTUAL_ENV_DISABLE_PROMPT=1
 
 # find virtualenvwrapper in $PATH
 source $(which virtualenvwrapper.sh)

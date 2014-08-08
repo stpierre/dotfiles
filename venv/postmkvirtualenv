@@ -12,3 +12,24 @@ if [[ -e $PROJECT_HOME/$name ]]; then
         fi
     done
 fi
+
+echo "Installing requirements..."
+for fname in requirements.txt pip-requirements.txt requirements.pip \
+    test-requirements.txt test-requirements.pip tools/test-requires \
+    tools/pip-requires; do
+    if [[ -e $PROJECT_HOME/$fname ]]; then
+        pip install -r $PROJECT_HOME/$fname
+    fi
+done
+
+# install common tools for every virtualenv
+echo "Installing common tools..."
+pip install bpython flake8 pylint
+
+# install Pymacs
+echo "Installing Pymacs..."
+cd ~/devel/Pymacs
+git pull --rebase
+make check
+make install
+cd -
