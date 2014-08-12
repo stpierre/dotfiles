@@ -1,5 +1,11 @@
 #!/bin/zsh
 
+if [[ -e ~/Library/Caches ]]; then
+    export PIP_DOWNLOAD_CACHE=~/Library/Caches/pip_downloads
+else
+    export PIP_DOWNLOAD_CACHE=~/.pip_downloads
+fi
+
 clean_pyc() {
     if [[ -z $1 ]]; then
         dir=$(pwd)
