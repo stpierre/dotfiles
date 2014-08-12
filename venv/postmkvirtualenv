@@ -1,14 +1,14 @@
 #!/bin/zsh
 # This hook is run after a new virtualenv is activated.
 
-name=$(basename $VIRTUAL_ENV)
+name=$(basename "$VIRTUAL_ENV")
 if [[ -e $PROJECT_HOME/$name ]]; then
     if [[ -e $PROJECT_HOME/$name/$name ]]; then
-        add2virtualenv $PROJECT_HOME/$name
+        add2virtualenv "$PROJECT_HOME"/"$name"
     fi
     for dir in lib src/lib; do
         if [[ -e $PROJECT_HOME/$name/$dir ]]; then
-            add2virtualenv $PROJECT_HOME/$name/$dir
+            add2virtualenv "$PROJECT_HOME"/"$name"/"$dir"
         fi
     done
 fi
@@ -18,13 +18,13 @@ for fname in requirements.txt pip-requirements.txt requirements.pip \
     test-requirements.txt test-requirements.pip tools/test-requires \
     tools/pip-requires; do
     if [[ -e $PROJECT_HOME/$fname ]]; then
-        pip install -r $PROJECT_HOME/$fname
+        pip install -r "$PROJECT_HOME"/"$fname"
     fi
 done
 
 # install common tools for every virtualenv
 echo "Installing common tools..."
-pip install bpython flake8 pylint docutils
+pip install bpython flake8 pylint docutils ropemacs
 
 # install Pymacs
 echo "Installing Pymacs..."
