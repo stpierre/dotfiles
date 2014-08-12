@@ -11,17 +11,18 @@ import os
 import subprocess
 import sys
 import warnings
+from xml.etree import ElementTree
 
 from pylint import lint
 from pylint.reporters.text import TextReporter, ParseableTextReporter
 
 try:
-    from flake8.engine import get_style_guide
+    from flake8.engine import get_style_guide  # pylint: disable=import-error
 except ImportError:
     from pep8 import StyleGuide as get_style_guide
 
 try:
-    import simplejson as json
+    import simplejson as json  # pylint: disable=import-error
 except ImportError:
     import json
 
@@ -56,7 +57,7 @@ class RCFinder(object):
         self._cache[cachekey] = value
         json.dump(self._cache, open(self._cachefile, "w"))
 
-    def _find_gitroot(self, filename):
+    def find_gitroot(self, filename):
         """find top directory of the git project that contains ``filename``."""
         return self._gitroots.get(
             filename,
@@ -67,7 +68,7 @@ class RCFinder(object):
 
     def find(self, filename, names):
         """find a config file whose name is in ``names`` for ``filename``."""
-        gitroot = self._find_gitroot(filename)
+        gitroot = self.find_gitroot(filename)
         if gitroot == os.path.expanduser("~"):
             return None
         retval = self._get_cached(gitroot, names)
@@ -85,10 +86,15 @@ class RCFinder(object):
 
 def run_pylint(filename, rcfile=None):
     """run pylint check."""
+    disable = ["star-args", "maybe-no-member", "logging-not-lazy",
+               "locally-disabled", "duplicate-code", "too-many-ancestors",
+               "too-many-instance-attributes", "too-few-public-methods",
+               "too-many-public-methods", "abstract-class-not-used",
+               "abstract-class-little-used"]
     args = [
         "-r", "n", "--persistent=n",
-        "-d", "W0142,W1201,I0011,R0801,R0901,R0902,R0903,R0904,R0921,R0922",
-        "-e", "W0511"]
+        "-d", ",".join(disable),
+        "-e", "fixme"]
     if rcfile:
         args.append("--rcfile=%s" % rcfile)
 
@@ -101,7 +107,7 @@ def run_pylint(filename, rcfile=None):
         except UserWarning:
             kwargs['reporter'] = TextReporter(sys.stdout)
             args += ["--msg-template",
-                     "{path}:{line}: [{symbol}, {obj}] {msg}"]
+                     "{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"]
 
     lint.Run(args + [filename], **kwargs)
 
@@ -115,9 +121,26 @@ def run_flake8(filename, rcfile=None):
     flake8.input_file(filename)
 
 
+def run_coverage(gitroot, filename):
+    """flag lines without test coverage."""
+    coverage_xml = os.path.join(gitroot, "coverage.xml")
+    with open(os.path.expanduser("~/debug"), "w") as debug:
+        debug.write("filename: %s\n" % filename)
+        debug.write("coverage: %s\n" % coverage_xml)
+    if os.path.exists(coverage_xml):
+        cover_data = ElementTree.parse(coverage_xml)
+        for cls in cover_data.findall(".//class"):
+            if not filename.endswith(cls.get("filename")):
+                continue
+            for line in cls.findall("lines/line[@hits='0']"):
+                print("%s:%s: No test coverage" % (filename,
+                                                   line.get("number")))
+
+
 def main():
     """run checks."""
     parser = argparse.ArgumentParser()
+    parser.add_argument("--original")
     parser.add_argument("filename")
     options = parser.parse_args()
 
@@ -127,6 +150,8 @@ def main():
                rcfinder.find(options.filename,
                              ["pylintrc", "pylintrc.conf", ".pylintrc"]))
     run_flake8(options.filename, rcfinder.find(options.filename, [".flake8"]))
+    run_coverage(rcfinder.find_gitroot(options.filename),
+                 options.original or options.filename)
 
 
 if __name__ == "__main__":

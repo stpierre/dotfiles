@@ -12,7 +12,6 @@
 
 (defvar my-packages '(auto-complete
                       autopair
-                      flymake
                       fuzzy
                       go-mode
                       google-this
@@ -74,17 +73,18 @@
 (if (file-exists-p user-emacs-directory)
     (add-to-list 'load-path user-emacs-directory))
 
-;; function to run pre-save checks
-(defun presave-process-check (command &rest args)
-  "Call an external process on the contents of the buffer"
-  (setq buffer (get-buffer-create (concat "*" command "*")))
-  (save-excursion
-    (set-buffer buffer)
-    (delete-region (point-min) (point-max)))
-  (if (/= 0 (apply 'call-process-region
-                   (point-min) (point-max)
-                   command nil buffer t args))
-      (pop-to-buffer buffer)))
+;; define function to shutdown emacs server instance
+(defun server-shutdown ()
+  "Save buffers, Quit, and Shutdown (kill) server"
+  (interactive)
+  (save-some-buffers)
+  (kill-emacs))
+
+(put 'scroll-left 'disabled nil)
+
+;; always show and trim trailing whitespace
+(setq show-trailing-whitespace t)
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 (defun chomp (str)
   "Chomp leading and tailing whitespace from STR."
@@ -142,7 +142,6 @@
                               auto-mode-alist))
 (add-hook 'nxml-mode-hook
           '(lambda ()
-             (setq show-trailing-whitespace t)
              (setq tab-width 2)
              (setq nxml-child-indent tab-width)
              (setq nxml-slash-auto-complete-flag t)
@@ -150,11 +149,7 @@
              (require 'compile)
              (set (make-local-variable 'compile-command)
                   (concat "xmllint --noout "
-                          (file-name-nondirectory buffer-file-name)))
-             (add-hook 'local-write-file-hooks
-                       '(lambda()
-                          (delete-trailing-whitespace)
-                          (presave-process-check "xmllint" "--noout" "-")))))
+                          (file-name-nondirectory buffer-file-name)))))
 
 (add-hook 'sgml-mode-hook 'turn-on-auto-fill)
 
@@ -163,12 +158,6 @@
           '(lambda ()
              (org-indent-mode)
              (local-set-key "\C-cl" 'org-store-link)))
-
-;; markdown mode
-(autoload 'markdown-mode "markdown-mode"
-   "Major mode for editing Markdown files" t)
-(add-to-list 'auto-mode-alist '("\\.markdown\\'" . markdown-mode))
-(add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 
 ;; python mode settings
 (setq pylookup-db-file (concat user-emacs-directory "pylookup.db"))
@@ -184,8 +173,8 @@
              (setq python-fill-docstring-style 'pep-257-nn)
              (setq tab-width 4)
              (setq python-indent 4)
-             (add-hook 'before-save-hook 'delete-trailing-whitespace)
              (hs-minor-mode)
+             (flycheck-select-checker 'pylint-pychecker)
              (unless (assoc 'python-mode hs-special-modes-alist)
                (setq hs-special-modes-alist
                      (cons (list 'python-mode
@@ -195,7 +184,12 @@
                                    (skip-chars-backward " \t\n"))
                                  nil)
                            hs-special-modes-alist)))))
-(add-hook 'python-mode-hook 'jedi:setup)
+
+;; create a python-scratch buffer that's just like *scratch*, but with
+;; the python major mode
+(with-current-buffer
+    (generate-new-buffer "*python-scratch*")
+  (python-mode))
 
 (require 'pymacs)
 (pymacs-load "ropemacs" "rope-")
@@ -299,8 +293,8 @@
                     '(height . 80)
                     '(font . "Andale Mono"))
               default-frame-alist))
-; we can't split the window initially when running as a daemon :(
-;(split-window-horizontally)
+;; we can't split the window initially when running as a daemon :(
+;;(split-window-horizontally)
 
 ;; better mode line
 (line-number-mode t)
@@ -342,145 +336,104 @@
              (setq graphviz-dot-auto-indent-on-braces nil)
              (setq graphviz-dot-auto-indent-on-semi nil)))
 
-;; define function to shutdown emacs server instance
-(defun server-shutdown ()
-  "Save buffers, Quit, and Shutdown (kill) server"
-  (interactive)
-  (save-some-buffers)
-  (kill-emacs))
-
-;; create a python-scratch buffer that's just like *scratch*, but with
-;; the python major mode
-(with-current-buffer
-    (generate-new-buffer "*python-scratch*")
-  (python-mode))
-
-(put 'scroll-left 'disabled nil)
-
 ;; yaml-mode settings
 (add-to-list 'auto-mode-alist '("\\.yml$" . yaml-mode))
 
 ;; json-mode settings
 (add-to-list 'auto-mode-alist '("\\.json$" . json-mode))
 (add-hook 'json-mode-hook
-          '(lambda ()
-             (setq show-trailing-whitespace t)
-             (setq js-indent-level 2)
-             (add-hook 'before-save-hook 'delete-trailing-whitespace)))
+          '(setq js-indent-level 2))
 
-(setq pylint-names (list "pylintrc" "pylintrc.conf" ".pylintrc"))
-(setq pylintrc-cache nil)
+;; flycheck settings
+(add-hook 'after-init-hook #'global-flycheck-mode)
 
-(defun find-pylintrc (file-name)
-  """ find the pylintrc for a project """
-  (setq buffer-directory (file-name-directory file-name))
-  (if (not (assoc buffer-directory pylintrc-cache))
-      (progn
-        (setq gitroot
-              (chomp (shell-command-to-string
-                      (concat "cd " buffer-directory
-                              " && git rev-parse --show-toplevel"))))
-        (setq pylintrc
-              (chomp (shell-command-to-string
-                      (concat "find " gitroot " -type f \\( -name "
-                              (mapconcat 'identity pylint-names " -o -name ")
-                              " \\) -print -quit"))))
-        (add-to-list 'pylintrc-cache
-                     (cons buffer-directory
-                           (if (string= "" pylintrc) nil pylintrc)))))
-  (cdr (assoc buffer-directory pylintrc-cache)))
+;; better flycheck highlighting and faces
+(eval-after-load "flycheck"
+  '(progn
+     (setq flycheck-highlighting-mode 'lines)
+     (set-face-attribute 'flycheck-error nil :background "IndianRed1")
+     (set-face-attribute 'flycheck-warning nil :background "gold1")
+     (set-face-attribute 'flycheck-info nil :background "SkyBlue1")
+     (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
 
-;; flymake settings
-(when (load "flymake" t)
-  (defun flymake-pylint-init ()
-    (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                       'flymake-create-temp-inplace))
-           (local-file (file-relative-name
-                        temp-file
-                        (file-name-directory buffer-file-name))))
-      (list "~/bin/pychecker.py" (list local-file))))
-  (defun flymake-rst-init ()
-    (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                       'flymake-create-temp-inplace))
-           (local-file (file-relative-name
-                        temp-file
-                        (file-name-directory buffer-file-name))))
-      (list "rstchecker" (list local-file))))
-  (defun flymake-sh-init ()
-    (let* ((temp-file (flymake-init-create-temp-buffer-copy
-                       'flymake-create-temp-inplace))
-           (local-file (file-relative-name
-                        temp-file
-                        (file-name-directory buffer-file-name))))
-      (list "shchecker" (list local-file))))
-  (add-to-list 'flymake-allowed-file-name-masks
-               '("\\.py\\'" flymake-pylint-init))
-  (add-to-list 'flymake-allowed-file-name-masks
-               '("\\.rst\\'" flymake-rst-init))
-  (add-to-list 'flymake-allowed-file-name-masks
-               '("\\.sh\\'" flymake-sh-init)))
+     (define-key flycheck-mode-map flycheck-keymap-prefix nil)
+     (setq flycheck-keymap-prefix (kbd "C-c e"))
+     (define-key flycheck-mode-map flycheck-keymap-prefix
+       flycheck-command-map)
+     (define-key flycheck-mode-map (kbd "C-c e s")
+       'flycheck-display-err-in-minibuffer)
+     (define-key flycheck-mode-map (kbd "C-c e d")
+       'flycheck-disable-pylint-on-line)
+     (define-key flycheck-mode-map (kbd "C-c e q") 'disable-qa-on-line)
+     (define-key flycheck-mode-map (kbd "C-c e v") 'disable-cover-on-line)))
 
-(add-hook 'find-file-hook 'flymake-find-file-hook)
+;; use our own python checker
+(flycheck-define-checker pylint-pychecker
+  "Python checker that uses pylint and flake8 and respects local configs."
+  :command ("~/bin/pychecker.py" "--original" source-original source-inplace)
+  :error-patterns
+  ((warning line-start (1+ not-newline) ":" line ": "
+            (message "[" (or "C" "W") (1+ not-newline)) line-end)
+   (info line-start (1+ not-newline) ":" line ": "
+         (message (or "No test coverage" (group "[" (or "I" "R")))
+                  (0+ not-newline)) line-end)
+   (error line-start (1+ not-newline) ":" line ": "
+          (message (1+ not-newline)) line-end))
+  :modes (python-mode))
 
-
-;; better flymake faces
-(custom-set-faces
-  '(flymake-errline ((((class color)) (:background "IndianRed1"))))
-  '(flymake-warnline ((((class color)) (:background "gold1")))))
-
-;; keep state for flymake-display-err-in-minibuffer so multiple
+;; keep state for flycheck-display-err-in-minibuffer so multiple
 ;; invocations cycle through the errors for a given line
-(setq flymake-error-idx 0)
-(setq flymake-error-line 0)
+(setq flycheck-last-error-idx 0)
+(setq flycheck-last-error-point 0)
 
-(defun flymake-display-err-in-minibuffer ()
+(defun flycheck-errors-at-point ()
+  (let ((old-point (point)))
+    (back-to-indentation)
+    (let ((errors (flycheck-overlay-errors-at (point))))
+      (goto-char old-point)
+      errors)))
+
+(defun flycheck-display-err-in-minibuffer ()
   (interactive)
-  (let* ((line-no (flymake-current-line-no))
-         (line-err-info-list (car (flymake-find-err-info flymake-err-info
-                                                         line-no))))
-    (if line-err-info-list
+  (let ((messages (delq nil (mapcar #'flycheck-error-message
+                                    (flycheck-errors-at-point)))))
+    (progn
+      (if (= (point) flycheck-last-error-point)
+          (setq flycheck-last-error-idx (1+ flycheck-last-error-idx))
+        (setq flycheck-last-error-idx 0))
+      (setq flycheck-last-error-point (point))
+      (setq err (nth flycheck-last-error-idx messages))
+      (if err nil
         (progn
-          (if (= line-no flymake-error-line)
-              (setq flymake-error-idx (1+ flymake-error-idx))
-            (setq flymake-error-idx 0))
-          (setq flymake-error-line line-no)
-          (setq err (nth flymake-error-idx line-err-info-list))
-          (if err nil
-            (progn
-              ;; went past the end of the error list -- start over
-              (setq flymake-error-idx -1)
-              (setq err (car line-err-info-list))))
-          (princ (format "%s (%d)" (flymake-ler-text err) line-no)))
-      (princ (format "No errors on line %d" line-no)))))
+          ;; went past the end of the error list -- start over
+          (setq flycheck-last-error-idx -1)
+          (setq err (car messages))))
+      (princ err))))
 
-(defun flymake-pylint-error-list (err-info-list)
-  (if err-info-list
-      (let ((err-text (flymake-ler-text (car err-info-list))))
-        (if (string-match "^\\[\\([^,]*\\)," err-text)
-            (cons (match-string 1 err-text)
-                  (flymake-pylint-error-list (cdr err-info-list)))
-          (flymake-pylint-error-list (cdr err-info-list))))
-    '()))
+(defun flycheck-error-pylint-name (err)
+  (let ((message (flycheck-error-message err)))
+    (if (string-match "^\\[.*(\\([^)]*\\))" message)
+        (match-string 1 message)
+      nil)))
 
-(defun flymake-disable-pylint-on-line ()
+(defun flycheck-disable-pylint-on-line ()
+  (interactive)
+  (let ((errors (delq nil (mapcar 'flycheck-error-pylint-name
+                                  (flycheck-errors-at-point)))))
+    (end-of-line)
+    (insert
+     (format "  # pylint: disable=%s"
+             (mapconcat 'identity errors ",")))))
+
+(defun disable-qa-on-line ()
   (interactive)
   (end-of-line)
-  (insert
-   (format "  # pylint: disable=%s"
-           (mapconcat
-            'identity
-            (flymake-pylint-error-list
-             (car
-              (flymake-find-err-info flymake-err-info
-                                     (flymake-current-line-no))))
-            ","))))
+  (insert "  # noqa"))
 
-(define-prefix-command 'flymake-map)
-(global-set-key "\C-xe" 'flymake-map)
-(define-key flymake-map "s" 'flymake-display-err-in-minibuffer)
-(define-key flymake-map "d" 'flymake-disable-pylint-on-line)
-(define-key flymake-map "p" 'flymake-goto-prev-error)
-(define-key flymake-map "n" 'flymake-goto-next-error)
+(defun disable-cover-on-line ()
+  (interactive)
+  (end-of-line)
+  (insert "  # pragma: nocover"))
 
 ;; selinux .te file settings
 (autoload 'selinux-te-mode
@@ -497,3 +450,5 @@
 
 (if (font-exists "Andale Mono")
     (set-face-attribute 'default nil :font "Andale Mono"))
+
+;;; .emacs ends here
