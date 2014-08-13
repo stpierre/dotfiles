@@ -86,15 +86,22 @@ class RCFinder(object):
 
 def run_pylint(filename, rcfile=None):
     """run pylint check."""
-    disable = ["star-args", "maybe-no-member", "logging-not-lazy",
-               "locally-disabled", "duplicate-code", "too-many-ancestors",
-               "too-many-instance-attributes", "too-few-public-methods",
-               "too-many-public-methods", "abstract-class-not-used",
-               "abstract-class-little-used"]
+    disable = ["E1103",  # maybe-no-member
+               "W0142",  # star-args
+               "W1201",  # logging-not-lazy
+               "I0011",  # locally-disabled
+               "R0801",  # duplicate-code
+               "R0901",  # too-many-ancestors
+               "R0902",  # too-many-instance-attributes
+               "R0903",  # too-few-public-methods
+               "R0904",  # too-many-public-methods
+               "R0921",  # abstract-class-not-used
+               "R0922"]  # abstract-class-little-used
+    enable = ["W0511"]  # fixme
     args = [
         "-r", "n", "--persistent=n",
         "-d", ",".join(disable),
-        "-e", "fixme"]
+        "-e", ",".join(enable)]
     if rcfile:
         args.append("--rcfile=%s" % rcfile)
 

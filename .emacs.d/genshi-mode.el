@@ -1,6 +1,9 @@
-;; genshi-mode.el -- Genshi template mode for Emacs
+;;; genshi-mode.el -- Genshi template mode for Emacs
 
-;; based on two-mode-mode by David N. Welton <davidw@dedasys.com>
+;;; Commentary:
+;;; based on two-mode-mode by David N. Welton <davidw@dedasys.com>
+
+;;; Code:
 
 (defgroup genshi nil
   "Genshi template editing mode"
@@ -16,7 +19,7 @@
 ;; Genshi-mode hook
 (defvar genshi-mode-hook nil
   "*Hook called by `genshi'.")
-(setq genshi-hook nil)
+(setq genshi-mode-hook nil)
 
 ;;--------------------------------------------------
 ;; Mode-switching magic
@@ -36,7 +39,6 @@
 (setq genshi-switch-hook nil)
 
 (defun genshi-mode-setup ()
-  (make-local-hook 'post-command-hook)
   (add-hook 'post-command-hook 'genshi-mode-need-update nil t)
   (make-local-variable 'minor-mode-alist)
   (make-local-variable 'genshi-bool)
@@ -68,7 +70,7 @@
 	  (run-hooks 'genshi-switch-hook))
       (if (eq font-lock-mode t)
 	  (font-lock-fontify-buffer))
-      (turn-on-font-lock-if-enabled))))
+      (turn-on-font-lock))))
 
 (defun genshi-mode-update-mode ()
   (when (and genshi-bool genshi-update)
@@ -79,7 +81,7 @@
 	(let ((mode (car mode-list))
 	      (lm -1)
 	      (rm -1))
-	  (save-excursion 
+	  (save-excursion
 	    (if (search-backward (cadr mode) nil t)
 		(setq lm (point))
 	      (setq lm -1)))
@@ -97,14 +99,12 @@
 	  (genshi-change-mode (car default-mode) (cadr default-mode))))))
 
 (defun genshi-mode ()
-  "Turn on genshi-mode"
+  "Turn on genshi-mode."
   (interactive)
   (funcall (cadr default-mode))
   (genshi-mode-setup)
-  (if genshi-hook
-      (run-hooks 'genshi-hook)))
-
-(provide 'genshi-mode)
+  (if genshi-mode-hook
+      (run-hooks 'genshi-mode-hook)))
 
 ;;--------------------------------------------------
 ;; Font lock stuff
@@ -150,4 +150,6 @@
    )
   )
 
+(provide 'genshi-mode)
 
+;;; genshi-mode.el ends here

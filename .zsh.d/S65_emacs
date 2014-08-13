@@ -1,9 +1,14 @@
 #!/bin/zsh
 
+# set this to 1 to use one emacs server per virtualenv.  anything else
+# uses a single emacs server for everything, and delegates venv
+# management to emacs itself.
+EMACS_SERVER_PER_VIRTUALENV=0
+
 __EMACS_SOCKET_DIR="$TMPDIR"/emacs$(id -u)
 
 function _emacs_server_name() {
-    if [[ -n $VIRTUAL_ENV ]]; then
+    if [[ $EMACS_SERVER_PER_VIRTUALENV == 1 && -n $VIRTUAL_ENV ]]; then
         basename "$VIRTUAL_ENV"
     else
         echo server
