@@ -151,14 +151,14 @@ Usage: (package-require 'package)"
 
 ;; load autocomplete
 (use-package auto-complete-config
-             :ensure auto-complete
-             :diminish auto-complete-mode
-             :config (progn
-                       (add-to-list 'ac-dictionary-directories
-                                    (concat user-emacs-directory "/ac-dict"))
-                       (ac-config-default)
-                       (define-key ac-completing-map [return] nil)
-                       (define-key ac-completing-map "\r" nil)))
+  :ensure auto-complete
+  :diminish auto-complete-mode
+  :config (progn
+            (add-to-list 'ac-dictionary-directories
+                         (concat user-emacs-directory "/ac-dict"))
+            (ac-config-default)
+            (define-key ac-completing-map [return] nil)
+            (define-key ac-completing-map "\r" nil)))
 (use-package auto-complete-nxml :ensure t)
 (use-package auto-complete-rst :ensure t)
 
@@ -186,10 +186,10 @@ Usage: (package-require 'package)"
 
 ;; make hideshow-able regions more obvious
 (use-package hideshowvis
-             :ensure t
-             :config (if (and (boundp 'hideshowvis-symbols)
-                              (fboundp 'hideshowvis-symbols))
-                         (hideshowvis-symbols)))
+  :ensure t
+  :config (if (and (boundp 'hideshowvis-symbols)
+                   (fboundp 'hideshowvis-symbols))
+              (hideshowvis-symbols)))
 
 (dolist (hook (list 'emacs-lisp-mode-hook
                     'python-mode-hook
@@ -218,8 +218,8 @@ Usage: (package-require 'package)"
                           (file-name-nondirectory buffer-file-name)))))
 
 (use-package perlcritic
-             :ensure t
-             :config (perlcritic-severity 4))
+  :ensure t
+  :config (perlcritic-severity 4))
 
 ;; xml-mode settings
 (setq auto-mode-alist (append '(("\\.xsd\\'" . xml-mode))
@@ -247,36 +247,41 @@ Usage: (package-require 'package)"
 
 ;; python mode settings
 (use-package python
-             :ensure python-mode
-             :mode ("\\.wsgi" . python-mode))
+  :ensure python-mode
+  :mode ("\\.wsgi" . python-mode))
 
 (use-package sphinx-doc
-             :ensure t
-             :diminish sphinx-doc-mode)
+  :ensure t
+  :diminish sphinx-doc-mode)
 
 ;; nose test runner
 (use-package nose
-             :ensure t
-             :config (progn
-                       (setq nose-global-name (executable-find "nosetests"))
-                       (define-key nose-mode-map "\C-cna" 'nosetests-all)
-                       (define-key nose-mode-map "\C-cnm" 'nosetests-module)
-                       (define-key nose-mode-map "\C-cn." 'nosetests-one)
-                       (define-key nose-mode-map "\C-cnc" 'nosetests-again)))
+  :ensure t
+  :config (progn
+            (setq nose-global-name (executable-find "nosetests"))
+            (define-key nose-mode-map "\C-cna" 'nosetests-all)
+            (define-key nose-mode-map "\C-cnm" 'nosetests-module)
+            (define-key nose-mode-map "\C-cn." 'nosetests-one)
+            (define-key nose-mode-map "\C-cnc" 'nosetests-again)))
 
 ;; virtualenv stuff
 (use-package virtualenvwrapper
-             :ensure t
-             :config (setq venv-location "~/venv/"))
+  :ensure t
+  :config (setq venv-location "~/venv/"))
 
 ;; pylookup config
 (use-package pylookup
-             :config (setq pylookup-db-file
-                           (concat user-emacs-directory "pylookup.db"))
-             :bind ("C-c l" . pylookup-lookup-at-point))
+  :config (setq pylookup-db-file
+                (concat user-emacs-directory "pylookup.db"))
+  :bind ("C-c l" . pylookup-lookup-at-point))
+
+;; jedi config
+(use-package jedi
+  :ensure t)
 
 (add-hook 'python-mode-hook
           '(lambda ()
+             (jedi:setup)
              (nose-mode t)
              (sphinx-doc-mode t)
              (setq python-fill-docstring-style 'pep-257-nn)
@@ -301,11 +306,11 @@ Usage: (package-require 'package)"
   (python-mode))
 
 (use-package pymacs
-             :ensure t
-             :diminish ropemacs-mode
-             :config (pymacs-load "ropemacs" "rope-")
-             :bind (("C-<tab>" . rope-lucky-assist)
-                    ("M-." . rope-goto-definition)))
+  :ensure t
+  :diminish ropemacs-mode
+  :config (pymacs-load "ropemacs" "rope-")
+  :bind (("C-<tab>" . rope-lucky-assist)
+         ("M-." . rope-goto-definition)))
 
 (add-hook 'rst-mode-hook '(lambda () (flyspell-mode 1)))
 
@@ -355,8 +360,8 @@ Usage: (package-require 'package)"
 
 ;; load RPM specfile mode
 (use-package rpm-spec-mode
-             :ensure t
-             :mode "\\.spec\\'")
+  :ensure t
+  :mode "\\.spec\\'")
 
 ;; Always end a file with a newline
 (setq require-final-newline t)
@@ -460,8 +465,8 @@ Usage: (package-require 'package)"
 
 ;; goto the last change
 (use-package goto-chg
-             :ensure t
-             :bind ("C-." . goto-last-change))
+  :ensure t
+  :bind ("C-." . goto-last-change))
 
 ;; save my place in files
 (require 'saveplace)
@@ -472,9 +477,9 @@ Usage: (package-require 'package)"
 
 ;; graphviz mode settings
 (use-package graphviz-dot-mode
-             :ensure t
-             :mode (("\\.dot\\'" . graphviz-dot-mode)
-                    ("\\.gv\\'" . graphviz-dot-mode)))
+  :ensure t
+  :mode (("\\.dot\\'" . graphviz-dot-mode)
+         ("\\.gv\\'" . graphviz-dot-mode)))
 
 (add-hook 'graphviz-dot-mode-hook
           '(lambda ()
@@ -486,107 +491,106 @@ Usage: (package-require 'package)"
 
 ;; yaml-mode settings
 (use-package yaml-mode
-             :ensure t
-             :mode "\\.yml\\'")
+  :ensure t
+  :mode "\\.yml\\'")
 
 ;; json-mode settings
 (use-package json-mode
-             :ensure t
-             :mode "\\.json\\'")
+  :ensure t
+  :mode "\\.json\\'")
 (add-hook 'json-mode-hook
           '(setq js-indent-level 2))
 
 ;; flycheck settings
-(use-package
- flycheck
- :demand t
- :init (add-hook 'after-init-hook #'global-flycheck-mode)
- :config (progn
-           ;; better flycheck highlighting and faces
-           (setq flycheck-highlighting-mode 'lines)
-           (set-face-attribute 'flycheck-error nil :background "IndianRed1")
-           (set-face-attribute 'flycheck-warning nil :background "gold1")
-           (set-face-attribute 'flycheck-info nil :background "SkyBlue1")
-           (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
+(use-package flycheck
+  :demand t
+  :init (add-hook 'after-init-hook #'global-flycheck-mode)
+  :config (progn
+            ;; better flycheck highlighting and faces
+            (setq flycheck-highlighting-mode 'lines)
+            (set-face-attribute 'flycheck-error nil :background "IndianRed1")
+            (set-face-attribute 'flycheck-warning nil :background "gold1")
+            (set-face-attribute 'flycheck-info nil :background "SkyBlue1")
+            (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
 
-           ;; map flycheck commands to C-c, e, * instead of C-c, !, *
-           (define-key flycheck-mode-map flycheck-keymap-prefix nil)
-           (setq flycheck-keymap-prefix (kbd "C-c e"))
-           (define-key flycheck-mode-map flycheck-keymap-prefix
-             flycheck-command-map)
-           (define-key flycheck-mode-map (kbd "C-c e s")
-             'flycheck-display-err-in-minibuffer)
-           (define-key flycheck-mode-map (kbd "C-c e d")
-             'flycheck-disable-pylint-on-line)
-           (define-key flycheck-mode-map (kbd "C-c e q")
-             'disable-qa-on-line)
-           (define-key flycheck-mode-map (kbd "C-c e v")
-             'disable-cover-on-line)
+            ;; map flycheck commands to C-c, e, * instead of C-c, !, *
+            (define-key flycheck-mode-map flycheck-keymap-prefix nil)
+            (setq flycheck-keymap-prefix (kbd "C-c e"))
+            (define-key flycheck-mode-map flycheck-keymap-prefix
+              flycheck-command-map)
+            (define-key flycheck-mode-map (kbd "C-c e s")
+              'flycheck-display-err-in-minibuffer)
+            (define-key flycheck-mode-map (kbd "C-c e d")
+              'flycheck-disable-pylint-on-line)
+            (define-key flycheck-mode-map (kbd "C-c e q")
+              'disable-qa-on-line)
+            (define-key flycheck-mode-map (kbd "C-c e v")
+              'disable-cover-on-line)
 
-           ;; use our own python checker
-           (flycheck-define-checker pylint-pychecker
-             "pylint/flake8 checker that respects local configs."
-             :command ("~/bin/pychecker.py"
-                       "--original" source-original
-                       source-inplace)
-             :error-patterns
-             ((warning line-start (1+ not-newline) ":" line ": "
-                       (message "[" (or "C" "W") (1+ not-newline)) line-end)
-              (info line-start (1+ not-newline) ":" line ": "
-                    (message (or "No test coverage" (group "[" (or "I" "R")))
-                             (0+ not-newline)) line-end)
-              (error line-start (1+ not-newline) ":" line ": "
-                     (message (1+ not-newline)) line-end))
-             :modes (python-mode))
+            ;; use our own python checker
+            (flycheck-define-checker pylint-pychecker
+              "pylint/flake8 checker that respects local configs."
+              :command ("~/bin/pychecker.py"
+                        "--original" source-original
+                        source-inplace)
+              :error-patterns
+              ((warning line-start (1+ not-newline) ":" line ": "
+                        (message "[" (or "C" "W") (1+ not-newline)) line-end)
+               (info line-start (1+ not-newline) ":" line ": "
+                     (message (or "No test coverage" (group "[" (or "I" "R")))
+                              (0+ not-newline)) line-end)
+               (error line-start (1+ not-newline) ":" line ": "
+                      (message (1+ not-newline)) line-end))
+              :modes (python-mode))
 
-           ;; functions to display and disable errors on demand
+            ;; functions to display and disable errors on demand
 
-           (defun flycheck-errors-at-point ()
-             "Convenience method to list all flycheck errors at point.
+            (defun flycheck-errors-at-point ()
+              "Convenience method to list all flycheck errors at point.
 
              This actually gets errors from the first non-space
              character, which is more reliable; with whole-line
              highlighting, flycheck actually only highlights
              non-space characters, so if your point is after the
              end of the line, it will report no errors."
-             (let ((old-point (point)))
-               (back-to-indentation)
-               (let ((errors (flycheck-overlay-errors-at (point))))
-                 (goto-char old-point)
-                 errors)))
+              (let ((old-point (point)))
+                (back-to-indentation)
+                (let ((errors (flycheck-overlay-errors-at (point))))
+                  (goto-char old-point)
+                  errors)))
 
-           (defun flycheck-error-pylint-name (err)
-             "Get the symbolic name of the pylint error ERR found by flycheck."
-             (let ((message (flycheck-error-message err)))
-               (if (string-match "^\\[.*(\\([^)]*\\))" message)
-                   (match-string 1 message)
-                 nil)))
+            (defun flycheck-error-pylint-name (err)
+              "Get the symbolic name of the pylint error ERR found by flycheck."
+              (let ((message (flycheck-error-message err)))
+                (if (string-match "^\\[.*(\\([^)]*\\))" message)
+                    (match-string 1 message)
+                  nil)))
 
-           (defun flycheck-disable-pylint-on-line ()
-             "Disable pylint for all flycheck errors in the line at point."
-             (interactive)
-             (let ((errors (delq nil (mapcar 'flycheck-error-pylint-name
-                                             (flycheck-errors-at-point)))))
-               (end-of-line)
-               (insert
-                (format "  # pylint: disable=%s"
-                        (mapconcat 'identity errors ",")))))))
+            (defun flycheck-disable-pylint-on-line ()
+              "Disable pylint for all flycheck errors in the line at point."
+              (interactive)
+              (let ((errors (delq nil (mapcar 'flycheck-error-pylint-name
+                                              (flycheck-errors-at-point)))))
+                (end-of-line)
+                (insert
+                 (format "  # pylint: disable=%s"
+                         (mapconcat 'identity errors ",")))))))
 
 (use-package flycheck-color-mode-line
-             :ensure t
-             :init (progn
-                     (set-face-attribute 'flycheck-color-mode-line-error-face
-                                         nil
-                                         :background "IndianRed1"
-                                         :foreground "gray0")
-                     (set-face-attribute 'flycheck-color-mode-line-warning-face
-                                         nil
-                                         :background "gold1"
-                                         :foreground "gray0")
-                     (set-face-attribute 'flycheck-color-mode-line-info-face
-                                         nil
-                                         :background "SkyBlue1"
-                                         :foreground "gray0")))
+  :ensure t
+  :init (progn
+          (set-face-attribute 'flycheck-color-mode-line-error-face
+                              nil
+                              :background "IndianRed1"
+                              :foreground "gray0")
+          (set-face-attribute 'flycheck-color-mode-line-warning-face
+                              nil
+                              :background "gold1"
+                              :foreground "gray0")
+          (set-face-attribute 'flycheck-color-mode-line-info-face
+                              nil
+                              :background "SkyBlue1"
+                              :foreground "gray0")))
 
 (defun disable-qa-on-line ()
   "Disable python QA on the current line."
