@@ -5,6 +5,7 @@ epylint doesn't accept --rcfile -- WTF?  Ours automagically finds the
 correct pylintrc and .flake8.  This also lets me disable and enable
 some rules on a global basis, and run flake8.
 """
+from __future__ import print_function
 
 import argparse
 import os
@@ -14,12 +15,12 @@ import warnings
 from xml.etree import ElementTree
 
 from pylint import lint
-from pylint.reporters.text import TextReporter, ParseableTextReporter
+from pylint.reporters import text
 
 try:
-    from flake8.engine import get_style_guide  # pylint: disable=import-error
+    from flake8.engine import get_style_guide  # noqa
 except ImportError:
-    from pep8 import StyleGuide as get_style_guide
+    from pep8 import StyleGuide as get_style_guide  # noqa
 
 try:
     import simplejson as json  # pylint: disable=import-error
@@ -56,32 +57,48 @@ class RCFinder(object):
         cachekey = "-".join([gitroot] + names)
         self._cache[cachekey] = value
         json.dump(self._cache, open(self._cachefile, "w"))
+        return value
 
-    def find_gitroot(self, filename):
+    def find_gitroot(self, file_or_dir):
         """find top directory of the git project that contains ``filename``."""
-        return self._gitroots.get(
-            filename,
-            subprocess.check_output(
-                "cd %s && git rev-parse --show-toplevel" %
-                os.path.dirname(os.path.abspath(filename)),
-                shell=True).strip())
+        if os.path.isdir(file_or_dir):
+            dirname = os.path.abspath(file_or_dir)
+        else:
+            dirname = os.path.dirname(os.path.abspath(file_or_dir))
+        cached = self._gitroots.get(dirname)
+        if cached:
+            return cached
+        else:
+            try:
+                retval = subprocess.check_output(
+                    "cd %s && git rev-parse --show-toplevel" % dirname,
+                    shell=True).strip()
+            except subprocess.CalledProcessError:
+                retval = dirname
+        self._gitroots[dirname] = retval
+        return retval
 
-    def find(self, filename, names):
+    def find(self, file_or_dir, names):
         """find a config file whose name is in ``names`` for ``filename``."""
-        gitroot = self.find_gitroot(filename)
-        if gitroot == os.path.expanduser("~"):
-            return None
-        retval = self._get_cached(gitroot, names)
+        retval = self._get_cached(file_or_dir, names)
         if retval is not None:
             return retval
+
+        if os.path.isdir(file_or_dir):
+            for name in names:
+                candidate = os.path.join(file_or_dir, name)
+                if os.path.exists(candidate):
+                    return self._set_cache(file_or_dir, names, candidate)
+
+        # nothing found
+        gitroot = self.find_gitroot(file_or_dir)
+        if file_or_dir == gitroot:
+            return None
         else:
-            for root, _, files in os.walk(gitroot):
-                matches = set(files) & set(names)
-                if matches:
-                    retval = os.path.join(root, matches.pop())
-                    break
-        self._set_cache(gitroot, names, retval)
-        return retval
+            retval = self.find(os.path.dirname(file_or_dir), names)
+            if retval is not None:
+                self._set_cache(file_or_dir, names, retval)
+            return retval
 
 
 def run_pylint(filename, rcfile=None):
@@ -90,6 +107,7 @@ def run_pylint(filename, rcfile=None):
                "W0142",  # star-args
                "W1201",  # logging-not-lazy
                "I0011",  # locally-disabled
+               "I0012",  # locally-enabled
                "R0801",  # duplicate-code
                "R0901",  # too-many-ancestors
                "R0902",  # too-many-instance-attributes
@@ -109,10 +127,10 @@ def run_pylint(filename, rcfile=None):
     with warnings.catch_warnings():
         warnings.simplefilter("error", UserWarning)
         try:
-            kwargs['reporter'] = ParseableTextReporter(sys.stdout)
+            kwargs['reporter'] = text.ParseableTextReporter(sys.stdout)
             args += ["-f", "parseable", "-i", "y"]
         except UserWarning:
-            kwargs['reporter'] = TextReporter(sys.stdout)
+            kwargs['reporter'] = text.TextReporter(sys.stdout)
             args += ["--msg-template",
                      "{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"]
 
@@ -128,20 +146,16 @@ def run_flake8(filename, rcfile=None):
     flake8.input_file(filename)
 
 
-def run_coverage(gitroot, filename):
+def run_coverage(filename, coverage_xml):
     """flag lines without test coverage."""
-    coverage_xml = os.path.join(gitroot, "coverage.xml")
-    with open(os.path.expanduser("~/debug"), "w") as debug:
-        debug.write("filename: %s\n" % filename)
-        debug.write("coverage: %s\n" % coverage_xml)
-    if os.path.exists(coverage_xml):
-        cover_data = ElementTree.parse(coverage_xml)
-        for cls in cover_data.findall(".//class"):
-            if not filename.endswith(cls.get("filename")):
-                continue
-            for line in cls.findall("lines/line[@hits='0']"):
-                print("%s:%s: No test coverage" % (filename,
-                                                   line.get("number")))
+    if coverage_xml is None:
+        return
+    cover_data = ElementTree.parse(coverage_xml)
+    for cls in cover_data.findall(".//class"):
+        if not filename.endswith(cls.get("filename")):
+            continue
+        for line in cls.findall("lines/line[@hits='0']"):
+            print("%s:%s: No test coverage" % (filename, line.get("number")))
 
 
 def main():
@@ -153,12 +167,14 @@ def main():
 
     rcfinder = RCFinder()
 
-    run_pylint(options.filename,
-               rcfinder.find(options.filename,
+    filename = os.path.abspath(options.filename)
+
+    run_pylint(filename,
+               rcfinder.find(filename,
                              ["pylintrc", "pylintrc.conf", ".pylintrc"]))
-    run_flake8(options.filename, rcfinder.find(options.filename, [".flake8"]))
-    run_coverage(rcfinder.find_gitroot(options.filename),
-                 options.original or options.filename)
+    run_flake8(filename, rcfinder.find(filename, [".flake8"]))
+    run_coverage(options.original or filename,
+                 rcfinder.find(filename, ["coverage.xml"]))
 
 
 if __name__ == "__main__":
