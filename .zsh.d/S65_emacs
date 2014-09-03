@@ -5,8 +5,6 @@
 # management to emacs itself.
 EMACS_SERVER_PER_VIRTUALENV=0
 
-__EMACS_SOCKET_DIR="$TMPDIR"/emacs$(id -u)
-
 function _emacs_server_name() {
     if [[ $EMACS_SERVER_PER_VIRTUALENV == 1 && -n $VIRTUAL_ENV ]]; then
         basename "$VIRTUAL_ENV"
@@ -18,16 +16,13 @@ function _emacs_server_name() {
 function __start_emacs_server() {
     # start emacs server
     name=$(_emacs_server_name)
-    socket="$__EMACS_SOCKET_DIR"/$name
-    if [[ -e $socket ]]; then
-        if ! lsof -F p -a -U -u "$USER" -- "$socket"; then
-            # socket exists, but server is not running
-            rm -f "$socket"
-        else
+    for pid in $(pgrep -U "$USER" -f "$__emacs_bin"); do
+        if lsof -F n -a -U -p "$pid" | grep -q "^n.*/$name"; then
+            # already running
             return
         fi
-    fi  # else, socket does not exist
-    $__emacs_bin --daemon="$name" >& /dev/null
+    done
+    $__emacs_bin --daemon="$name"
 }
 
 if [[ -e /Applications/Emacs.app/Contents/MacOS/bin ]]; then
