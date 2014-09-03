@@ -197,6 +197,12 @@ Usage: (package-require 'package)"
                     'perl-mode-hook))
   (add-hook hook 'hideshowvis-enable))
 
+;; create a sh-scratch buffer that's just like *scratch*, but with
+;; the sh major mode
+(with-current-buffer
+    (generate-new-buffer "*sh-scratch*")
+  (sh-mode))
+
 ;; elisp mode settings
 (add-hook 'emacs-lisp-mode-hook
           'hs-minor-mode)
