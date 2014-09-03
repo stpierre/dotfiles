@@ -28,6 +28,6 @@ fi
 
 get_svn_prompt_info() {
     if [[ -n $__CURRENT_SVN_REPO ]]; then
-        echo " ($__CURRENT_SVN_REPO)"
+        echo "${PR_SEP}${PR_CYAN}$__CURRENT_SVN_REPO${PR_RESET}"
     fi
 }

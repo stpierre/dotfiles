@@ -2,16 +2,41 @@
 
 setopt prompt_subst
 
-lprompt() {
+_get_prompt() {
     local time="${PR_BRIGHT_YELLOW}%T${PR_RESET} "
-    local user="%(!#${PR_RESET}${PR_BRIGHT_RED}%n${PR_RESET}:#)"
-    local venv="${PR_GREEN}"'$(get_venv_prompt_info)'"${PR_RESET}"
-    local cwd="%~"
-    local retval="%(?##${PR_RED}[%?]${PR_RESET})"
-    local git_info="${PR_CYAN}"'$(get_git_prompt_info)'"${PR_RESET}"
-    local svn_info="${PR_CYAN}"'$(get_svn_prompt_info)'"${PR_RESET}"
 
-    export PROMPT="${time}${user}${venv}${cwd}${git_info}${svn_info}${retval}%# "
+    local venv="$(get_venv_prompt_info)"
+    local git_info="$(get_git_prompt_info)"
+    local svn_info="$(get_svn_prompt_info)"
+
+    if [[ -n $venv && ( -n $git_info || -n $svn_info ) ]]; then
+        local cwd="%${PR_PWDLEN}<...<%~%<<"
+        local user="%(!#${PR_SEP}${PR_BRIGHT_RED}%n${PR_RESET}#)"
+        echo "${venv}${cwd}${git_info}${svn_info}
+${time}${user}"
+    else
+        local cwd="%~"
+        local user="%(!#${PR_BRIGHT_RED}%n${PR_RESET}${PR_SEP}#)"
+        echo "${time}${user}${cwd}${git_info}${svn_info}"
+    fi
+}
+
+# lprompt() {
+#     local time="${PR_BRIGHT_YELLOW}%T${PR_RESET} "
+#     local user="%(!#${PR_SEP}${PR_BRIGHT_RED}%n${PR_RESET}#)"
+#     local venv='$(get_venv_prompt_info)'
+#     local cwd="%~"
+#     local retval="%(?##${PR_RED}[%?]${PR_RESET})"
+#     local git_info='$(get_git_prompt_info)'
+#     local svn_info='$(get_svn_prompt_info)'
+
+#     export PROMPT="${venv}${cwd}${git_info}${svn_info}
+# ${time}${user}${retval}%# "
+# }
+
+lprompt() {
+    local retval="%(?##${PR_RED}[%?]${PR_RESET})"
+    export PROMPT='$(_get_prompt)'"${retval}%# "
 }
 
 rprompt() {
@@ -27,5 +52,15 @@ rprompt() {
     export RPROMPT
 }
 
+get_pwd_length() {
+    local prompt="$(get_venv_prompt_info)$(get_git_prompt_info)$(get_svn_prompt_info)"
+    local zero='%([BSUbfksu]|([FB]|){*})'
+    promptlength=${#${(S%%)prompt//$~zero/}}
+    PR_PWDLEN=$((COLUMNS - promptlength))
+}
+
 lprompt
 rprompt
+get_pwd_length
+
+preexec_functions[$(($#preexec_functions + 1))]='get_pwd_length'

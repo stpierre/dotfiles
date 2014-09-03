@@ -1,7 +1,9 @@
 #!/bin/zsh
 
-for COLOR in RED GREEN BLUE YELLOW WHITE BLACK CYAN; do
+for COLOR in RED GREEN BLUE CYAN YELLOW MAGENTA WHITE BLACK; do
     eval PR_$COLOR='%{$fg[${(L)COLOR}]%}'
     eval PR_BRIGHT_$COLOR='%{$fg_bold[${(L)COLOR}]%}'
 done
 PR_RESET="%{$reset_color%}"
+
+PR_SEP="${PR_BLUE} | ${PR_RESET}"
