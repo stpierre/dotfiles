@@ -15,7 +15,7 @@ parse_git_repo() {
         export __CURRENT_GIT_BRANCH="$(git what-branch)"
         local _unpushed="$(git log @{u}.. --oneline 2>&1)"
         if [[ -n $_unpushed ]] && ! echo "$_unpushed" | grep -q fatal; then
-            export __CURRENT_GIT_UNPUSHED="$(echo $_unpushed | wc -l)"
+            export __CURRENT_GIT_UNPUSHED="$(echo $_unpushed | wc -l | tr -d ' ')"
         else
             export __CURRENT_GIT_UNPUSHED=
         fi
