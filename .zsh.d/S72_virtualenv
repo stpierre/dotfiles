@@ -27,7 +27,7 @@ newvirtualenv() {
 
 get_venv_prompt_info() {
     if [[ -n $VIRTUAL_ENV ]]; then
-        echo "$(basename "$VIRTUAL_ENV")${PR_SEP}"
+        echo "${PR_GREEN}$(basename "$VIRTUAL_ENV")${PR_RESET}${PR_SEP}"
     fi
 }
 
