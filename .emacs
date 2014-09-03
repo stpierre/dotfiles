@@ -273,7 +273,8 @@ Usage: (package-require 'package)"
 ;; virtualenv stuff
 (use-package virtualenvwrapper
   :ensure t
-  :config (setq venv-location "~/venv/"))
+  :config (setq venv-location "~/venv/")
+  :bind ("C-c v" . venv-workon))
 
 ;; pylookup config
 (use-package pylookup
