@@ -173,39 +173,11 @@ Usage: (package-require 'package)"
 (use-package know-your-http-well :ensure t)
 (use-package httprepl :ensure t)
 
-;; hideshow minor mode settings
-(load-library "hideshow")
-(diminish 'hs-minor-mode)
-
-;; set hideshow mode keys to something easier
-(global-set-key "\C-cs" 'hs-show-block)
-(global-set-key "\C-ch" 'hs-hide-block)
-(global-set-key "\C-ct" 'hs-toggle-hiding)
-(global-set-key "\C-cS" 'hs-show-all)
-(global-set-key "\C-cH" 'hs-hide-all)
-
-;; make hideshow-able regions more obvious
-(use-package hideshowvis
-  :ensure t
-  :config (if (and (boundp 'hideshowvis-symbols)
-                   (fboundp 'hideshowvis-symbols))
-              (hideshowvis-symbols)))
-
-(dolist (hook (list 'emacs-lisp-mode-hook
-                    'python-mode-hook
-                    'php-mode-hook
-                    'perl-mode-hook))
-  (add-hook hook 'hideshowvis-enable))
-
 ;; create a sh-scratch buffer that's just like *scratch*, but with
 ;; the sh major mode
 (with-current-buffer
     (generate-new-buffer "*sh-scratch*")
   (sh-mode))
-
-;; elisp mode settings
-(add-hook 'emacs-lisp-mode-hook
-          'hs-minor-mode)
 
 ;; text-mode settings
 (add-hook 'text-mode-hook
@@ -216,7 +188,6 @@ Usage: (package-require 'package)"
 ;; perl mode settings
 (add-hook 'perl-mode-hook
           '(lambda ()
-             (hs-minor-mode)
              (local-set-key "\C-c\C-k" 'perlcritic)
              (require 'compile)
              (set (make-local-variable 'compile-command)
@@ -294,17 +265,7 @@ Usage: (package-require 'package)"
              (setq python-fill-docstring-style 'pep-257-nn)
              (setq tab-width 4)
              (setq python-indent 4)
-             (hs-minor-mode)
-             (flycheck-select-checker 'pylint-pychecker)
-             (unless (assoc 'python-mode hs-special-modes-alist)
-               (setq hs-special-modes-alist
-                     (cons (list 'python-mode
-                                 "^\\s-*def\\>" nil "#"
-                                 (lambda (arg)
-                                   (py-end-of-def-or-class)
-                                   (skip-chars-backward " \t\n"))
-                                 nil)
-                           hs-special-modes-alist)))))
+             (flycheck-select-checker 'pylint-pychecker)))
 
 ;; create a python-scratch buffer that's just like *scratch*, but with
 ;; the python major mode
@@ -326,7 +287,6 @@ Usage: (package-require 'package)"
           '(lambda ()
              (setq tab-width 4)
              (require 'compile)
-             (hs-minor-mode)
              (set (make-local-variable 'compile-command)
                   (concat "php -l "
                           (file-name-nondirectory buffer-file-name)))))
@@ -335,7 +295,6 @@ Usage: (package-require 'package)"
 (use-package go-mode :ensure t)
 (add-hook 'go-mode-hook
           '(lambda ()
-             (hs-minor-mode)
              (setq tab-width 2)
              (setq standard-indent 2)
              (add-hook 'before-save-hook 'gofmt-before-save)))
@@ -429,7 +388,6 @@ Usage: (package-require 'package)"
 
 ;; better mode line. much of this stolen from
 ;; https://github.com/lunaryorn/blog/blob/master/posts/make-your-emacs-mode-line-more-useful.md
-(which-function-mode 1)
 (setq size-indication-mode t)
 (setq line-number-mode t)
 (setq column-number-mode t)
