@@ -33,3 +33,10 @@
 
 [github]
         user = stpierre
+
+[sendemail]
+        from = chris.a.st.pierre@gmail.com
+        smtpencryption = tls
+        smtpserver = smtp.gmail.com
+        smtpuser = chris.a.st.pierre@gmail.com
+        smtpserverport = 587
