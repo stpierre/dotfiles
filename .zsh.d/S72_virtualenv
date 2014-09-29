@@ -31,6 +31,18 @@ get_venv_prompt_info() {
     fi
 }
 
+venv_install_node_js() {
+    if [[ -z $VIRTUAL_ENV ]]; then
+        echo "This command must be run inside an active virtual environment"
+        exit 1
+    fi
+    pip install nodeenv
+    nodeenv -p
+    proj=$VIRTUAL_ENV
+    deactivate
+    workon "$proj"
+}
+
 # The code below here works great when using system libraries in
 # virtualenvs and you want to share a single bpython between them all.
 # When not using system libraries, it doesn't work at all.
