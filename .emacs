@@ -546,16 +546,16 @@ Usage: (package-require 'package)"
   :init (progn
           (set-face-attribute 'flycheck-color-mode-line-error-face
                               nil
-                              :background "IndianRed1"
-                              :foreground "gray0")
+                              :background "#ff6e64"
+                              :foreground "#002b36")
           (set-face-attribute 'flycheck-color-mode-line-warning-face
                               nil
-                              :background "gold1"
-                              :foreground "gray0")
+                              :background "#deb542"
+                              :foreground "#002b36")
           (set-face-attribute 'flycheck-color-mode-line-info-face
                               nil
-                              :background "SkyBlue1"
-                              :foreground "gray0")))
+                              :background "#69b7f0"
+                              :foreground "#002b36")))
 
 (defun disable-qa-on-line ()
   "Disable python QA on the current line."
