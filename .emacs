@@ -135,8 +135,11 @@ Usage: (package-require 'package)"
       (member font-name (font-family-list))
     nil))
 
-(if (font-exists "Andale Mono")
-    (set-face-attribute 'default nil :font "Andale Mono"))
+;; TODO: really need to make this autodiscover the best font to use,
+;; but I ran into strange issues with that. on OS X this (and the
+;; other reference below) should be Andale Mono
+(if (font-exists "liberation mono")
+    (set-face-attribute 'default nil :font "liberation mono" :height 90))
 
 ;; don't display the annoying splash screen
 (setq inhibit-startup-message t)
@@ -475,7 +478,7 @@ Usage: (package-require 'package)"
 (setq default-frame-alist
       (append (list '(width  . 164)
                     '(height . 80)
-                    '(font . "Andale Mono"))
+                    '(font . "liberation mono-9"))
               default-frame-alist))
 ;; we can't split the window initially when running as a daemon :(
 ;;(split-window-horizontally)
