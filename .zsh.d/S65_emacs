@@ -67,14 +67,16 @@ if type emacs >& /dev/null; then
 
         export ALTERNATIVE_EDITOR=""
     fi
-    export EDITOR=emacs
+    export EDITOR="emacs -nw"
+    alias emcas=emacs
 elif type vim >& /dev/null; then
     export EDITOR=vim
+    alias emcas=$EDITOR
 else
     export EDITOR=vi
+    alias emcas=$EDITOR
 fi
 
-alias emcas=$EDITOR
 alias vi=$EDITOR
 
 # don't use python inside a virtualenv to run pymacs
