@@ -257,6 +257,97 @@ Usage: (package-require 'package)"
 (use-package jedi
   :ensure t)
 
+;; flycheck settings
+(use-package flycheck
+  :demand t
+  :init (add-hook 'after-init-hook #'global-flycheck-mode)
+  :config (progn
+            ;; better flycheck highlighting and faces
+            (setq flycheck-highlighting-mode 'lines)
+            (set-face-attribute 'flycheck-error nil :background "IndianRed1")
+            (set-face-attribute 'flycheck-warning nil :background "gold1")
+            (set-face-attribute 'flycheck-info nil :background "SkyBlue1")
+            (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
+
+            ;; map flycheck commands to C-c, e, * instead of C-c, !, *
+            (define-key flycheck-mode-map flycheck-keymap-prefix nil)
+            (setq flycheck-keymap-prefix (kbd "C-c e"))
+            (define-key flycheck-mode-map flycheck-keymap-prefix
+              flycheck-command-map)
+            (define-key flycheck-mode-map (kbd "C-c e s")
+              'flycheck-display-err-in-minibuffer)
+            (define-key flycheck-mode-map (kbd "C-c e d")
+              'flycheck-disable-pylint-on-line)
+            (define-key flycheck-mode-map (kbd "C-c e q")
+              'disable-qa-on-line)
+            (define-key flycheck-mode-map (kbd "C-c e v")
+              'disable-cover-on-line)
+
+            ;; use our own python checker
+            (flycheck-define-checker pylint-pychecker
+              "pylint/flake8 checker that respects local configs."
+              :command ("~/bin/pychecker.py"
+                        "--original" source-original
+                        source-inplace)
+              :error-patterns
+              ((warning line-start (1+ not-newline) ":" line ": "
+                        (message "[" (or "C" "W") (1+ not-newline)) line-end)
+               (info line-start (1+ not-newline) ":" line ": "
+                     (message (or "No test coverage" (group "[" (or "I" "R")))
+                              (0+ not-newline)) line-end)
+               (error line-start (1+ not-newline) ":" line ": "
+                      (message (1+ not-newline)) line-end))
+              :modes (python-mode))
+
+            ;; functions to display and disable errors on demand
+
+            (defun flycheck-errors-at-point ()
+              "Convenience method to list all flycheck errors at point.
+
+             This actually gets errors from the first non-space
+             character, which is more reliable; with whole-line
+             highlighting, flycheck actually only highlights
+             non-space characters, so if your point is after the
+             end of the line, it will report no errors."
+              (let ((old-point (point)))
+                (back-to-indentation)
+                (let ((errors (flycheck-overlay-errors-at (point))))
+                  (goto-char old-point)
+                  errors)))
+
+            (defun flycheck-error-pylint-name (err)
+              "Get the symbolic name of the pylint error ERR found by flycheck."
+              (let ((message (flycheck-error-message err)))
+                (if (string-match "^\\[.*(\\([^)]*\\))" message)
+                    (match-string 1 message)
+                  nil)))
+
+            (defun flycheck-disable-pylint-on-line ()
+              "Disable pylint for all flycheck errors in the line at point."
+              (interactive)
+              (let ((errors (delq nil (mapcar 'flycheck-error-pylint-name
+                                              (flycheck-errors-at-point)))))
+                (end-of-line)
+                (insert
+                 (format "  # pylint: disable=%s"
+                         (mapconcat 'identity errors ",")))))))
+
+(use-package flycheck-color-mode-line
+  :ensure t
+  :init (progn
+          (set-face-attribute 'flycheck-color-mode-line-error-face
+                              nil
+                              :background "#ff6e64"
+                              :foreground "#002b36")
+          (set-face-attribute 'flycheck-color-mode-line-warning-face
+                              nil
+                              :background "#deb542"
+                              :foreground "#002b36")
+          (set-face-attribute 'flycheck-color-mode-line-info-face
+                              nil
+                              :background "#69b7f0"
+                              :foreground "#002b36")))
+
 (add-hook 'python-mode-hook
           '(lambda ()
              (jedi:setup)
@@ -465,97 +556,6 @@ Usage: (package-require 'package)"
   :mode "\\.json\\'")
 (add-hook 'json-mode-hook
           '(setq js-indent-level 2))
-
-;; flycheck settings
-(use-package flycheck
-  :demand t
-  :init (add-hook 'after-init-hook #'global-flycheck-mode)
-  :config (progn
-            ;; better flycheck highlighting and faces
-            (setq flycheck-highlighting-mode 'lines)
-            (set-face-attribute 'flycheck-error nil :background "IndianRed1")
-            (set-face-attribute 'flycheck-warning nil :background "gold1")
-            (set-face-attribute 'flycheck-info nil :background "SkyBlue1")
-            (add-hook 'flycheck-mode-hook 'flycheck-color-mode-line-mode)
-
-            ;; map flycheck commands to C-c, e, * instead of C-c, !, *
-            (define-key flycheck-mode-map flycheck-keymap-prefix nil)
-            (setq flycheck-keymap-prefix (kbd "C-c e"))
-            (define-key flycheck-mode-map flycheck-keymap-prefix
-              flycheck-command-map)
-            (define-key flycheck-mode-map (kbd "C-c e s")
-              'flycheck-display-err-in-minibuffer)
-            (define-key flycheck-mode-map (kbd "C-c e d")
-              'flycheck-disable-pylint-on-line)
-            (define-key flycheck-mode-map (kbd "C-c e q")
-              'disable-qa-on-line)
-            (define-key flycheck-mode-map (kbd "C-c e v")
-              'disable-cover-on-line)
-
-            ;; use our own python checker
-            (flycheck-define-checker pylint-pychecker
-              "pylint/flake8 checker that respects local configs."
-              :command ("~/bin/pychecker.py"
-                        "--original" source-original
-                        source-inplace)
-              :error-patterns
-              ((warning line-start (1+ not-newline) ":" line ": "
-                        (message "[" (or "C" "W") (1+ not-newline)) line-end)
-               (info line-start (1+ not-newline) ":" line ": "
-                     (message (or "No test coverage" (group "[" (or "I" "R")))
-                              (0+ not-newline)) line-end)
-               (error line-start (1+ not-newline) ":" line ": "
-                      (message (1+ not-newline)) line-end))
-              :modes (python-mode))
-
-            ;; functions to display and disable errors on demand
-
-            (defun flycheck-errors-at-point ()
-              "Convenience method to list all flycheck errors at point.
-
-             This actually gets errors from the first non-space
-             character, which is more reliable; with whole-line
-             highlighting, flycheck actually only highlights
-             non-space characters, so if your point is after the
-             end of the line, it will report no errors."
-              (let ((old-point (point)))
-                (back-to-indentation)
-                (let ((errors (flycheck-overlay-errors-at (point))))
-                  (goto-char old-point)
-                  errors)))
-
-            (defun flycheck-error-pylint-name (err)
-              "Get the symbolic name of the pylint error ERR found by flycheck."
-              (let ((message (flycheck-error-message err)))
-                (if (string-match "^\\[.*(\\([^)]*\\))" message)
-                    (match-string 1 message)
-                  nil)))
-
-            (defun flycheck-disable-pylint-on-line ()
-              "Disable pylint for all flycheck errors in the line at point."
-              (interactive)
-              (let ((errors (delq nil (mapcar 'flycheck-error-pylint-name
-                                              (flycheck-errors-at-point)))))
-                (end-of-line)
-                (insert
-                 (format "  # pylint: disable=%s"
-                         (mapconcat 'identity errors ",")))))))
-
-(use-package flycheck-color-mode-line
-  :ensure t
-  :init (progn
-          (set-face-attribute 'flycheck-color-mode-line-error-face
-                              nil
-                              :background "#ff6e64"
-                              :foreground "#002b36")
-          (set-face-attribute 'flycheck-color-mode-line-warning-face
-                              nil
-                              :background "#deb542"
-                              :foreground "#002b36")
-          (set-face-attribute 'flycheck-color-mode-line-info-face
-                              nil
-                              :background "#69b7f0"
-                              :foreground "#002b36")))
 
 (defun disable-qa-on-line ()
   "Disable python QA on the current line."

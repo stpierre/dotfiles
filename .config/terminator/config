@@ -1,0 +1,72 @@
+[global_config]
+  enabled_plugins = LaunchpadCodeURLHandler, APTURLHandler, LaunchpadBugURLHandler
+  title_transmit_bg_color = "#d30102"
+  handle_size = 0
+  focus = system
+[keybindings]
+[profiles]
+  [[default]]
+    palette = "#073642:#dc322f:#859900:#b58900:#268bd2:#d33682:#2aa198:#eee8d5:#002b36:#cb4b16:#586e75:#657b83:#839496:#6c71c4:#93a1a1:#fdf6e3"
+    exit_action = restart
+    visible_bell = True
+    background_image = None
+    scrollback_lines = 5000
+    use_system_font = False
+    foreground_color = "#839496"
+    show_titlebar = False
+    color_scheme = solarized_dark
+    font = Liberation Mono 10
+    background_color = "#002b36"
+    audible_bell = True
+[layouts]
+  [[default]]
+    [[[child1]]]
+      type = Terminal
+      parent = window0
+      profile = solarized-dark
+    [[[window0]]]
+      type = Window
+      parent = ""
+  [[grid]]
+    [[[child0]]]
+      position = 1:2
+      type = Window
+      order = 0
+      parent = ""
+      size = 1434, 828
+    [[[child1]]]
+      position = 414
+      type = VPaned
+      order = 0
+      parent = child0
+    [[[child2]]]
+      position = 717
+      type = HPaned
+      order = 0
+      parent = child1
+    [[[child5]]]
+      position = 717
+      type = HPaned
+      order = 1
+      parent = child1
+    [[[terminal3]]]
+      profile = default
+      type = Terminal
+      order = 0
+      parent = child2
+    [[[terminal4]]]
+      profile = default
+      type = Terminal
+      order = 1
+      parent = child2
+    [[[terminal7]]]
+      profile = default
+      type = Terminal
+      order = 1
+      parent = child5
+    [[[terminal6]]]
+      profile = default
+      type = Terminal
+      order = 0
+      parent = child5
+[plugins]
