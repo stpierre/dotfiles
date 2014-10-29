@@ -41,6 +41,9 @@ Usage: (package-require 'package)"
 ;; install use-package, which is *wonderful*
 (package-require 'use-package)
 
+;; solarized == teh business
+(package-require 'solarized-theme)
+
 ;; set M-x compile to something handier.  this lets you run C-x C-m
 ;; C-m to compile
 (global-set-key "\C-x\C-m" 'compile)
