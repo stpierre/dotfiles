@@ -1,21 +1,45 @@
 #!/bin/zsh
 # This hook is run after every virtualenv is activated.
 
-OPENSTACK_HOME="${OPENSTACK_HOME:-$HOME/stack}"
-name=$(basename $VIRTUAL_ENV)
-repo_path=
-if [[ -e $PROJECT_HOME/$name ]]; then
-    repo_path=$PROJECT_HOME/$name
-elif [[ -e $OPENSTACK_HOME/$name ]]; then
-    repo_path=$OPENSTACK_HOME/$name
+name=$(basename "$VIRTUAL_ENV")
+
+# generate a list of all possible project names for this
+# virtualenv. start with the base name and the base name with python-
+# prepended, e.g., for OpenStack client libraries
+names=($name python-$name)
+
+# if the virtualenv name contains a dash, strip off the stuff after
+# the dash in case it's an openstack version (e.g., "nova-kilo")
+dash=$(expr index "$name" -)
+if [[ $dash -ne 0 ]]; then
+    names+=("${name:0:$((dash - 1))}")
 fi
 
-if [[ -n $repo_path ]]; then
-    for dir in bin sbin src/bin src/sbin; do
-        if [[ -e $repo_path/$dir ]]; then
-            pathmunge $repo_path/$dir
+cdproject
+
+for dir in bin sbin src/bin src/sbin; do
+    if [[ -e $repo_path/$dir ]]; then
+        pathmunge "$(pwd)"/"$dir"
+    fi
+done
+
+echo "Installing requirements..."
+for fname in requirements.txt pip-requirements.txt requirements.pip \
+    test-requirements.txt test-requirements.pip test-requires \
+    pip-requires; do
+    for dir in . tools test tests testsuite; do
+        if [[ -e $dir/$fname ]]; then
+            pip install -r "$dir"/"$fname"
         fi
     done
+done
 
-    cd $repo_path
+# install common tools for every virtualenv
+echo "Installing common tools..."
+pip install bpython flake8 pylint docutils
+
+if [[ -e tox.ini ]]; then
+    pip install tox
 fi
+
+rehash
