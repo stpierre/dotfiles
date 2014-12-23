@@ -14,7 +14,7 @@
         st = status
         root = "rev-parse --show-toplevel"
         upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git pull --rebase; git clean -dffx; git gc )"
-        hist = "log --pretty=format:\"%h %ad | %s%d [%an]\" --date=short"
+        hist = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
         clone-fork = "!clone-with-fork.sh"
         reviewer = "!add-gerrit-reviewer.sh"
         chain = "!git-chain.sh"
