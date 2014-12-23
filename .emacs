@@ -581,3 +581,4 @@ Usage: (package-require 'package)"
   :mode "\\.te\\'")
 
 ;;; .emacs ends here
+(put 'narrow-to-region 'disabled nil)
