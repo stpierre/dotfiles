@@ -1,14 +1,5 @@
 #!/bin/zsh
 
-if type ssh >& /dev/null; then
-    if [[ -z $__ssh_bin ]]; then
-        if [[ $(type ssh) == "ssh is a shell function" ]]; then
-            unfunction ssh
-        fi
-        __ssh_bin=$(which ssh)
-    fi
-fi
-
 start-ssh-agent() {
     SSH_AGENT_FILE=$(readlink -f ~/.ssh-agent-info)
     rv=0

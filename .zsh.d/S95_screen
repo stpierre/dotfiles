@@ -18,9 +18,20 @@ __set_screen_title() {
 
 set_screen_screen_session() {
     # set screen title to the name of the screen sub-session
-    set -- $(echo "$1" | sed 's/.*\sscreen\s\s*//;')
+    set -- $(echo "$1" | sed 's/.*[\s\/]\?screen\s\s*//')
     zparseopts -E -- S:=session r:=session d=d
     __set_screen_title "$(echo "$session" | sed -e 's/.*\s\s*\(\d+\.\)*//')"
+}
+
+set_screen_ssh_host() {
+    # set screen title to the ssh destination host
+    set -- $(echo "$1" | sed 's/.*[\s\/]\?ssh\s\s*//')
+    host=
+    while [[ -n $1 ]]; do
+        host=$1
+        shift
+    done
+    __set_screen_title "$host"
 }
 
 default_screen_title() {
@@ -71,6 +82,10 @@ zsh_preexec_update_screen_title() {
                 __RESET_SCREEN_TITLE=1
                 ;;
             *workon*|*deactivate*|*cd*|*sudo*)
+                __RESET_SCREEN_TITLE=1
+                ;;
+            *ssh*)
+                set_screen_ssh_host "$1"
                 __RESET_SCREEN_TITLE=1
                 ;;
         esac
