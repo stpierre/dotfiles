@@ -191,6 +191,10 @@ Usage: (package-require 'package)"
              (turn-on-auto-fill)
              (flyspell-mode 1)))
 
+;; open Alpine temp files (pico.NNNNN) in text-mode
+(setq auto-mode-alist (append '(("pico\\." . text-mode))
+			      auto-mode-alist))
+
 ;; perl mode settings
 (add-hook 'perl-mode-hook
           '(lambda ()
