@@ -18,11 +18,10 @@
         clone-fork = "!clone-with-fork.sh"
         reviewer = "!add-gerrit-reviewer.sh"
         chain = "!git-chain.sh"
-        fix-merge = !git chain "co\\ $1" upstream "co\\ $2" upstream "merge\\ $1"
         what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
-        rename-branch = !git chain "co\\ $1" "branch\\ $2" "co\\ $2" "branch\\ -D\\ $1"
-        full-rebase = !git chain "co\\ $1" upstream 'co -' "rebase\\ $1"
-        os-bug = !git chain 'co openstack-master' upstream "branch\\ $1" "co\\ $1"
+        rename-branch = !sh -c 'git chain "co\\ $1" "branch\\ $2" "co\\ $2" "branch\\ -D\\ $1"' -
+        full-rebase = !sh -c 'git chain "co\\ $1" upstream "co\\ $(git what-branch)" "rebase\\ $1"' -
+        os-bug = !sh -c 'git chain 'co openstack-master' upstream "branch\\ $1" "co\\ $1"' -
         # we frequently have local changes to dotfiles, so this makes it easier to pull and push commits
         pulldot = "!git chain stash 'pull --rebase' 'stash apply'"
         pushdot = "!git chain stash 'pull --rebase' push 'stash apply'"
