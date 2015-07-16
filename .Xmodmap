@@ -1,5 +1,7 @@
 ! compose key: Compose on Sun Type 7, Menu button on Windows keyboards
 keycode 135 = Multi_key
+! compose key: Right alt for laptop keyboards
+keycode 108 = Multi_key
 
 ! settings for the Sun Type 7, the greatest keyboard ever built.  many
 ! of these keys work in X, but I don't like to depend on them in case
