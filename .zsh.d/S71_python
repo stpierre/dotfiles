@@ -12,5 +12,5 @@ clean_pyc() {
     else
         dir=$1
     fi
-    find "$dir" -name \*.pyc -delete
+    find "$dir" -regex '.+\.py[co]$' -delete
 }
