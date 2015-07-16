@@ -47,8 +47,11 @@ default_screen_title() {
         # set screen title to the name of the virtualenv being worked
         # on
         title="$(basename "$VIRTUAL_ENV")"
-    elif [[ -n $__CURRENT_GIT_REPO && $__CURRENT_GIT_REPO != "dotfiles" ]]; then
+    elif [[ -n $__CURRENT_GIT_REPO && $__CURRENT_GIT_REPO != "dotfiles" ]]
+    then
         title=$__CURRENT_GIT_REPO
+    elif [[ -n $__CURRENT_SVN_REPO ]]; then
+        title=$__CURRENT_SVN_REPO
     else
         # set screen title to hostname or username
         if [[ $prepend_root == 1 ]]; then
