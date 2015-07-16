@@ -14,10 +14,11 @@
         st = status
         root = "rev-parse --show-toplevel"
         upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git pull --rebase; git clean -dffx; git gc )"
-        hist = "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+        hist = "log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
         clone-fork = "!clone-with-fork.sh"
         reviewer = "!add-gerrit-reviewer.sh"
         chain = "!git-chain.sh"
+        new-branch = !sh -c 'git chain "co\\ ${2:-master}" "upstream" "branch\\ $1" "co\\ $1"' -
         what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
         rename-branch = !sh -c 'git chain "co\\ $1" "branch\\ $2" "co\\ $2" "branch\\ -D\\ $1"' -
         full-rebase = !sh -c 'git chain "co\\ $1" upstream "co\\ $(git what-branch)" "rebase\\ $1"' -
