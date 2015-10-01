@@ -191,6 +191,12 @@ Usage: (package-require 'package)"
              (turn-on-auto-fill)
              (flyspell-mode 1)))
 
+;; create a text-scratch buffer that's just like *scratch*, but with
+;; the text major mode
+(with-current-buffer
+    (generate-new-buffer "*text-scratch*")
+  (text-mode))
+
 ;; open Alpine temp files (pico.NNNNN) in text-mode
 (setq auto-mode-alist (append '(("pico\\." . text-mode))
 			      auto-mode-alist))
