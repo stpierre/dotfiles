@@ -12,12 +12,19 @@ _get_prompt() {
     if [[ -n $venv && ( -n $git_info || -n $svn_info ) ]]; then
         local cwd="%${PR_PWDLEN}<...<%~%<<"
         local user="%(!#${PR_SEP}${PR_BRIGHT_RED}%n${PR_RESET}#)"
-        echo "${venv}${cwd}${git_info}${svn_info}
+        echo "${venv}${PR_SEP}${cwd}${PR_SEP}${git_info}${svn_info}
 ${time}${user}"
     else
         local cwd="%~"
         local user="%(!#${PR_BRIGHT_RED}%n${PR_RESET}${PR_SEP}#)"
-        echo "${time}${user}${cwd}${git_info}${svn_info}"
+        prompt=${time}${user}${cwd}
+        if [[ -n $venv ]]; then
+            prompt=$prompt$PR_SEP$venv
+        fi
+        if [[ -n $git_info || -n $svn_info ]]; then
+            prompt=$prompt$PR_SEP$git_info$svn_info
+        fi
+        echo "$prompt"
     fi
 }
 

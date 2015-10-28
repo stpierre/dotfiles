@@ -36,9 +36,9 @@ zsh_update_git_vars() {
 get_git_prompt_info() {
     if [[ -n $__CURRENT_GIT_REPO && -n $__CURRENT_GIT_BRANCH ]]; then
         if [[ $__CURRENT_GIT_UNPUSHED > 0 ]]; then
-            echo "${PR_SEP}${PR_CYAN}${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH} ${PR_BRIGHT_CYAN}(${__CURRENT_GIT_UNPUSHED})${PR_RESET}"
+            echo "${PR_CYAN}${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH} ${PR_BRIGHT_CYAN}(${__CURRENT_GIT_UNPUSHED})${PR_RESET}"
         else
-            echo "${PR_SEP}${PR_CYAN}${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH}${PR_RESET}"
+            echo "${PR_CYAN}${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH}${PR_RESET}"
         fi
     fi
 }
