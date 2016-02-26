@@ -32,7 +32,7 @@ export HISTFILE=~/.history
 # other misc. options
 setopt noclobber
 setopt extended_glob
-export WORDCHARS=${WORDCHARS//[\/.-_]}
+export WORDCHARS=${WORDCHARS//[\/._-]}
 
 # non-zsh-specific options
 export CLICOLOR=1
