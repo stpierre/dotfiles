@@ -18,7 +18,7 @@
         clone-fork = "!clone-with-fork.sh"
         reviewer = "!add-gerrit-reviewer.sh"
         chain = "!git-chain.sh"
-        new-branch = !sh -c 'git chain "co\\ ${2:-master}" "upstream" "branch\\ $1" "co\\ $1"' -
+        new-branch = !sh -c 'git chain "co\\ ${2:-master}" "upstream" "co\\ -b $1"' -
         what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
         rename-branch = !sh -c 'git chain "co\\ $1" "branch\\ $2" "co\\ $2" "branch\\ -D\\ $1"' -
         full-rebase = !sh -c 'git chain "co\\ $1" upstream "co\\ $(git what-branch)" "rebase\\ $1"' -
@@ -26,6 +26,7 @@
         # we frequently have local changes to dotfiles, so this makes it easier to pull and push commits
         pulldot = "!git chain stash 'pull --rebase' 'stash apply'"
         pushdot = "!git chain stash 'pull --rebase' push 'stash apply'"
+        pull-push = "!git chain 'pull --rebase' push"
 
 [push]
         default = current
