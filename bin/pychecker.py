@@ -124,15 +124,14 @@ def run_pylint(filename, rcfile=None):
         args.append("--rcfile=%s" % rcfile)
 
     kwargs = dict(exit=False)
-    with warnings.catch_warnings():
-        warnings.simplefilter("error", UserWarning)
-        try:
-            kwargs['reporter'] = text.ParseableTextReporter(sys.stdout)
-            args += ["-f", "parseable", "-i", "y"]
-        except UserWarning:
-            kwargs['reporter'] = text.TextReporter(sys.stdout)
-            args += ["--msg-template",
-                     "{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"]
+    try:
+        kwargs['reporter'] = text.TextReporter(sys.stdout)
+        kwargs['reporter'].line_format  # pylint: disable=pointless-statement
+        args += ["--msg-template",
+                 "{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"]
+    except AttributeError:
+        kwargs['reporter'] = text.ParseableTextReporter(sys.stdout)
+        args += ["-f", "parseable", "-i", "y"]
 
     lint.Run(args + [filename], **kwargs)
 
