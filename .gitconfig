@@ -12,21 +12,25 @@
         ci = commit
         co = checkout
         st = status
+        br = branch
+        p = "pull --rebase --ff-only"
         root = "rev-parse --show-toplevel"
-        upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git pull --rebase; git clean -dffx; git gc )"
+        upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git p )"
+        up = !git upstream
+        nuke = !git chain upstream "clean\\ -dffx" gc
         hist = "log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
         clone-fork = "!clone-with-fork.sh"
         reviewer = "!add-gerrit-reviewer.sh"
         chain = "!git-chain.sh"
-        new-branch = !sh -c 'git chain "co\\ ${2:-master}" "upstream" "co\\ -b $1"' -
+        new-branch = !sh -c 'git chain "co\\ ${2:-master}" "upstream" "co\\ -b\\ $1"' -
         what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
-        rename-branch = !sh -c 'git chain "co\\ $1" "branch\\ $2" "co\\ $2" "branch\\ -D\\ $1"' -
+        rename-branch = !sh -c 'git chain "co\\ $1" "co\\ -b\\ $2" "branch\\ -D\\ $1"' -
         full-rebase = !sh -c 'git chain "co\\ $1" upstream "co\\ $(git what-branch)" "rebase\\ $1"' -
-        os-bug = !sh -c 'git chain 'co openstack-master' upstream "branch\\ $1" "co\\ $1"' -
+        os-bug = !sh -c 'git chain 'co openstack-master' upstream "co\\ -b\\ $1"' -
+        pull-push = "!git chain p push"
         # we frequently have local changes to dotfiles, so this makes it easier to pull and push commits
-        pulldot = "!git chain stash 'pull --rebase' 'stash apply'"
-        pushdot = "!git chain stash 'pull --rebase' push 'stash apply'"
-        pull-push = "!git chain 'pull --rebase' push"
+        pulldot = "!git chain stash p 'stash apply'"
+        pushdot = "!git chain stash p push 'stash apply'"
 
 [push]
         default = current
