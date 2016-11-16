@@ -1,0 +1,32 @@
+#!/bin/bash
+# ansible-vault-git-diff -- show what changed in a vaulted file at a
+# specific commit
+
+set -euo pipefail
+
+if [[ -n ${3:-} ]]; then
+    password_file="${1:-}"
+    commit="${2:-}"
+    file="${3:-}"
+else
+    password_file=
+    commit="${1:-}"
+    file="${2:-}"
+fi
+
+if [[ -z $commit || -z $file ]]; then
+  echo "Usage: $0 [<password file>] <commit> <file>"
+  exit 1
+fi
+
+vault_args=
+if [[ -n $password_file ]]; then
+    vault_args="--vault-password-file $password_file"
+fi
+
+contents_of() {
+  ansible-vault $vault_args view <(git show "${1:-}":"${2:-}")
+}
+
+diff -u <(contents_of "${commit}^" "${file}") \
+     <(contents_of "${commit}" "${file}")
