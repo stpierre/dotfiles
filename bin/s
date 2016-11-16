@@ -1,0 +1,44 @@
+#!/bin/zsh
+#
+# Just Screen It.
+
+set -euo pipefail
+
+if [[ $# == 2 ]]; then
+    # must be axion
+    axion-screen $@
+elif [[ $# == 1 ]]; then
+    name="${1:-}"
+    # some versions of screen -ls are broken; in non-interactive shells,
+    # it appears to always return 1. so we have to do this stupidity.
+    set +eo pipefail
+    if screen -ls "$name" | grep -qi 'No Sockets'; then
+        found_screen=
+    else
+        found_screen=1
+    fi
+    set -eo pipefail
+    if [[ $found_screen == 1 ]]; then
+        screen -dr "$name"
+    elif [[ $name == "default" ]]; then
+        screen -S default -c ~/.screenrc.default
+    elif [[ $name == "staging" ]]; then
+        staging-screen
+    elif [[ $name == "dev" ]]; then
+        devel-screen
+    else
+        if [[ -e ~/venv/"$name" ]]; then
+            venv-screen "$name"
+        elif [[ -e ~/stack/"$name"-hosts.txt ]]; then
+            dev-screen "$name"
+        else
+            # just start a new dumb screen
+            screen -S "$name"
+        fi
+    fi
+elif [[ $# == 0 ]]; then
+    screen
+else
+    echo "Unrecognized arguments: $@" 1>&2
+    exit 1
+fi

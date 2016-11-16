@@ -1,0 +1,67 @@
+#!/bin/zsh
+#
+# generic script to ssh to all hosts in a given ssh_config file. if
+# the screen session must be created, it is left in the background so
+# that the caller can add more windows to it if desired. the number of
+# the final screen created is echoed to stdout.
+
+set -euo pipefail
+
+SCRIPT=$(basename "$0")
+
+usage() {
+    echo "Usage: $SCRIPT [-s suffix] <name> </path/to/ssh/config>" 1>&2
+    exit 1
+}
+
+suffix=
+while getopts ":hs:" opt; do
+    case $opt in
+        s)
+            suffix=:$OPTARG
+            ;;
+        h)
+            usage
+            ;;
+        \?)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+name=${1:-}
+ssh_config=${2:-}
+if [[ -z $name || -z $ssh_config ]]; then
+    usage
+fi
+
+set +eo pipefail
+# some versions of screen -ls are broken; in non-interactive shells,
+# it appears to always return 1. so we have to do this stupidity.
+screens=$(screen -ls "$name")
+set -eo pipefail
+
+if echo "$screens" | grep -qi "No Sockets"; then
+    # create new screen
+    screen -dm -S "$name"
+    screen_num=0
+    for hostname in $(awk '/^Host/ && !/\*/ { print $2 }' "$ssh_config"); do
+        # default .screenrc creates five windows, we may need more
+        if ((screen_num > 4)); then
+            screen -S "$name" -X screen
+        fi
+
+        window_name=${hostname%%.*}$suffix
+        screen -S "$name" -p "$screen_num" -X stuff \
+            "screen_title '$window_name'; ssh -F '$ssh_config' '$hostname'"$'\n'
+        screen -S "$name" -p "$screen_num" -X stuff "watch -n 120 echo ."$'\n'
+        screen_num=$((screen_num + 1))
+    done
+
+    for i in $(seq "$screen_num" 4); do
+        screen -S "$name" -p "$i" -X stuff "exit"$'\n'
+    done
+fi
+
+echo $((screen_num - 1))
