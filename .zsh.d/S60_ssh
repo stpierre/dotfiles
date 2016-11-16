@@ -29,8 +29,11 @@ start-ssh-agent
 scp_via() {
     # scp a file or files from one host to another via the current
     # host
+    dest=$argv[-1]
+    src=$argv[-2]
+    argv[-2,-1]=()
     tmpdir=$(mktemp -d)
-    scp "$1" "$tmpdir"/
-    scp "$tmpdir"/* "$2"
+    scp ${=argv} "$src" "$tmpdir"/
+    scp ${=argv} "$tmpdir"/* "$dest"
     rm -rf "$tmpdir"
 }
