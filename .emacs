@@ -495,6 +495,16 @@ Usage: (package-require 'package)"
 ;; we can't split the window initially when running as a daemon :(
 ;;(split-window-horizontally)
 
+(defun hidpi-font-on ()
+  "Convenience method for setting font size on HiDPI monitors."
+  (interactive)
+  (set-frame-font "liberation mono-14"))
+
+(defun hidpi-font-off ()
+  "Convenience method for setting font size on HiDPI monitors."
+  (interactive)
+  (set-frame-font "liberation mono-9"))
+
 ;; better mode line. much of this stolen from
 ;; https://github.com/lunaryorn/blog/blob/master/posts/make-your-emacs-mode-line-more-useful.md
 (setq size-indication-mode t)
