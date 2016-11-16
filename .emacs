@@ -74,8 +74,10 @@ Usage: (package-require 'package)"
 ;; set user-emacs-directory on older versions of emacs
 (if (not (boundp 'user-emacs-directory))
     (setq user-emacs-directory "~/.emacs.d"))
+
+;; add a place to put custom packages that aren't in MELPA/Marmalade
 (if (file-exists-p user-emacs-directory)
-    (add-to-list 'load-path user-emacs-directory))
+    (add-to-list 'load-path (concat user-emacs-directory "/packages")))
 
 ;; define function to shutdown emacs server instance
 (defun server-shutdown ()
@@ -545,7 +547,7 @@ Usage: (package-require 'package)"
 (setq-default save-place t)
 
 ;; load fpaste magic
-(package-require 'fpaste)
+(use-package fpaste)
 
 ;; graphviz mode settings
 (use-package graphviz-dot-mode
@@ -590,6 +592,24 @@ Usage: (package-require 'package)"
   :commands selinux-te-mode
   :mode "\\.te\\'")
 
-;;; .emacs ends here
 (put 'narrow-to-region 'disabled nil)
 (put 'downcase-region 'disabled nil)
+
+(use-package find-file-in-repository
+  :bind (("C-x f" . find-file-in-repository)))
+
+;;; .emacs ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (groovy-mode find-file-in-repository find-file-in-project yaml-mode window-jump virtualenvwrapper use-package sql-indent sphinx-doc solarized-theme scss-mode rpm-spec-mode python-mode pymacs plsql perlcritic nose markdown-mode legalese know-your-http-well json-mode jedi httprepl grep-o-matic grep+ graphviz-dot-mode goto-chg google-this go-mode fuzzy fpaste flycheck-color-mode-line dockerfile-mode backup-each-save autopair auto-complete-rst auto-complete-nxml))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
