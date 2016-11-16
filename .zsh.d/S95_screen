@@ -102,13 +102,8 @@ zsh_precmd_update_screen_title() {
     fi
 }
 
-if [[ $TERM[0,6] == "screen" ]]; then
+if [[ -n $STY || $TERM[0,6] == "screen" ]]; then
     default_screen_title
     preexec_functions[$((${#preexec_functions} + 1))]='zsh_preexec_update_screen_title'
     precmd_functions[$((${#precmd_functions} + 1))]='zsh_precmd_update_screen_title'
-
-    if [[ $(uname -s) == 'AIX' ]]; then
-        # "screen" is not a sane term type on AIX
-        export TERM=xterm
-    fi
 fi

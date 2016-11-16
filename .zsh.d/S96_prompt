@@ -51,7 +51,7 @@ rprompt() {
 
     # if we're inside screen, then the hostname will be in the status
     # bar and we don't need it in the prompt, too
-    if [[ $TERM[0,6] == "screen" || $TERM[0,5] == "eterm" ]]; then
+    if [[ -n $STY || $TERM[0,6] == "screen" || $TERM[0,5] == "eterm" ]]; then
         RPROMPT=""
     else
         RPROMPT="${machine}"
