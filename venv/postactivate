@@ -36,10 +36,26 @@ done
 
 # install common tools for every virtualenv
 echo "Installing common tools..."
-pip install bpython flake8 pylint docutils ndg-httpsclient
+pip install bpython pep8 flake8 pylint docutils ndg-httpsclient
 
 if [[ -e tox.ini ]]; then
     pip install tox
+fi
+
+if [[ -d /usr/lib64/python2.7/site-packages/selinux ]]; then
+    if [[ -e "$VIRTUAL_ENV"/lib/python2.7/site-packages ]]; then
+        # we install selinux unconditionally because a) it's super
+        # quick; and b) after an update we want to get the latest
+        # libraries.
+        echo "Hackishly installing selinux"
+        \cp -fR /usr/lib64/python2.7/site-packages/selinux \
+            /usr/lib64/python2.7/site-packages/_selinux.so \
+            "$VIRTUAL_ENV"/lib/python2.7/site-packages
+    else
+        echo "virtualenv is not using Python 2.7, cannot install SELinux" 1>&2
+    fi
+else
+    echo "Could not find SELinux libraries to install" 1>&2
 fi
 
 rehash
