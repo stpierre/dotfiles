@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# This script removes an SSH host key from a file. It's named
+# "Offending" so that you can just copy and paste a line like this:
+#
+# Offending RSA key in /home/cstpierr/.ssh/known_hosts:282
+#
+# ...and it'll Do The Right Thing. Magic!
+
+set -euo pipefail
+
+fileline=${4:-}
+
+if [[ -z $fileline ]]; then
+    echo "Usage: Offending RSA key in <file>:<line>" 1>&2
+    echo "" 1>&2
+    echo "Just copy and paste the line from 'ssh'!" 1>&2
+    exit 1
+fi
+
+file=${fileline%:*}
+line=${fileline##*:}
+
+sed -i "$line"d "$file"
