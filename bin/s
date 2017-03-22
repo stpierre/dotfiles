@@ -22,8 +22,8 @@ elif [[ $# == 1 ]]; then
         screen -dr "$name"
     elif [[ $name == "default" ]]; then
         screen -S default -c ~/.screenrc.default
-    elif [[ $name == "staging" ]]; then
-        staging-screen
+    elif [[ -e ~/stack/ansible-engineering/playbooks/infra-ng/ssh_config_$name ]]; then
+        ans-eng-screen "$name"
     elif [[ $name == "dev" ]]; then
         devel-screen
     else

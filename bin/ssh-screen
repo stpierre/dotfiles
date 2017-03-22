@@ -55,7 +55,8 @@ if echo "$screens" | grep -qi "No Sockets"; then
         window_name=${hostname%%.*}$suffix
         screen -S "$name" -p "$screen_num" -X stuff \
             "screen_title '$window_name'; ssh -F '$ssh_config' '$hostname'"$'\n'
-        screen -S "$name" -p "$screen_num" -X stuff "watch -n 120 echo ."$'\n'
+        # dumb keepalive
+        screen -S "$name" -p "$screen_num" -X stuff "watch -n 120 :"$'\n'
         screen_num=$((screen_num + 1))
     done
 
