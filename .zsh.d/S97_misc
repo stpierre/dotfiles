@@ -8,7 +8,7 @@ if [[ -e $HOME/.ssh/known_hosts ]]; then
 fi
 
 # fun snowflake effect.  'tis the season and all that
-function snow() {
+snow() {
     clear
     while :; do
         LINES=$(tput lines)
@@ -24,4 +24,9 @@ function snow() {
                       printf "\033[%s;%sH*\033[0;0H",a[x],x;
                   }
                  }'
+}
+
+# useful ansible alias
+clean_retry() {
+    find "$(git rev-parse --show-toplevel)" -name \*.retry | xargs rm
 }

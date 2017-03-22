@@ -1,7 +1,8 @@
 #!/bin/zsh
 
+SSH_AGENT_FILE=$(readlink -f ~/.ssh-agent-info)
+
 start-ssh-agent() {
-    SSH_AGENT_FILE=$(readlink -f ~/.ssh-agent-info)
     rv=0
     if type ssh-agent >& /dev/null; then
         if [[ -e $SSH_AGENT_FILE ]]; then
@@ -26,14 +27,5 @@ start-ssh-agent() {
 
 start-ssh-agent
 
-scp_via() {
-    # scp a file or files from one host to another via the current
-    # host
-    dest=$argv[-1]
-    src=$argv[-2]
-    argv[-2,-1]=()
-    tmpdir=$(mktemp -d)
-    scp ${=argv} "$src" "$tmpdir"/
-    scp ${=argv} "$tmpdir"/* "$dest"
-    rm -rf "$tmpdir"
-}
+# I used to have a command called scp_via, but it was obsoleted by 'scp -3'
+alias scp_via 'scp -3'

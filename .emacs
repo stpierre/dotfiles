@@ -616,7 +616,7 @@ Usage: (package-require 'package)"
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (groovy-mode find-file-in-repository find-file-in-project yaml-mode window-jump virtualenvwrapper use-package sql-indent sphinx-doc solarized-theme scss-mode rpm-spec-mode python-mode pymacs plsql perlcritic nose markdown-mode legalese know-your-http-well json-mode jedi httprepl grep-o-matic grep+ graphviz-dot-mode goto-chg google-this go-mode fuzzy fpaste flycheck-color-mode-line dockerfile-mode backup-each-save autopair auto-complete-rst auto-complete-nxml))))
+    (ess ansible groovy-mode find-file-in-repository find-file-in-project yaml-mode window-jump virtualenvwrapper use-package sql-indent sphinx-doc solarized-theme scss-mode rpm-spec-mode python-mode pymacs plsql perlcritic nose markdown-mode legalese know-your-http-well json-mode jedi httprepl grep-o-matic grep+ graphviz-dot-mode goto-chg google-this go-mode fuzzy fpaste flycheck-color-mode-line dockerfile-mode backup-each-save autopair auto-complete-rst auto-complete-nxml))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

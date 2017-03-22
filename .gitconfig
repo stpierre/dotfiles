@@ -1,6 +1,8 @@
 [user]
 	name = Chris St. Pierre
-	email = chris.a.st.pierre@gmail.com
+	#email = chris.a.st.pierre@gmail.com
+        email = cstpierr@cisco.com
+        signingkey = BA70C55C63A66668852E270610DF5E32832981E6
 
 [color]
 	diff = auto
@@ -36,7 +38,8 @@
         default = current
 
 [gitreview]
-	username = stpierre
+	#username = stpierre
+        username = cstpierr
 
 [github]
         user = stpierre
@@ -47,3 +50,6 @@
         smtpserver = smtp.gmail.com
         smtpuser = chris.a.st.pierre@gmail.com
         smtpserverport = 587
+
+[gpg]
+        program = gpg2
