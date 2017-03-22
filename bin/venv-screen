@@ -11,6 +11,6 @@ else
     for i in $(seq 0 4); do
         screen -S "$name" -p $i -X stuff "workon $name"$'\n'
     done
-    screen -S "$name" -p 0 -X stuff "screen_title py; bpython"$'\n'
+    screen -S "$name" -p 0 -X stuff "screen_title py; ptpython"$'\n'
     screen -dr "$name"
 fi

@@ -36,7 +36,7 @@ done
 
 # install common tools for every virtualenv
 echo "Installing common tools..."
-pip install bpython pep8 flake8 pylint docutils ndg-httpsclient
+pip install ptpython pep8 flake8 pylint docutils ndg-httpsclient
 
 if [[ -e tox.ini ]]; then
     pip install tox
