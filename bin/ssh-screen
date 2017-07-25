@@ -10,15 +10,19 @@ set -euo pipefail
 SCRIPT=$(basename "$0")
 
 usage() {
-    echo "Usage: $SCRIPT [-s suffix] <name> </path/to/ssh/config>" 1>&2
+    echo "Usage: $SCRIPT [-s suffix] [-f] <name> </path/to/ssh/config>" 1>&2
     exit 1
 }
 
 suffix=
-while getopts ":hs:" opt; do
+firsthost=
+while getopts ":hfs:" opt; do
     case $opt in
         s)
             suffix=:$OPTARG
+            ;;
+        f)
+            firsthost=1
             ;;
         h)
             usage
@@ -36,6 +40,20 @@ if [[ -z $name || -z $ssh_config ]]; then
     usage
 fi
 
+list_hosts() {
+    ssh_config=$1
+    if [[ $firsthost == 1 ]]; then
+        for class in $(awk '/^Host/ && !/\*/ { print $2 }' "$ssh_config" | \
+                           sed 's/[[:digit:]]*$//' | uniq); do
+            awk '/^Host '"$class"'[[:digit:]]/ { print $2 }' "$ssh_config" | \
+                head -n 1
+        done
+    else
+        awk '/^Host/ && !/\*/ { print $2 }' "$ssh_config"
+    fi
+}
+
+
 set +eo pipefail
 # some versions of screen -ls are broken; in non-interactive shells,
 # it appears to always return 1. so we have to do this stupidity.
@@ -46,7 +64,7 @@ if echo "$screens" | grep -qi "No Sockets"; then
     # create new screen
     screen -dm -S "$name"
     screen_num=0
-    for hostname in $(awk '/^Host/ && !/\*/ { print $2 }' "$ssh_config"); do
+    for hostname in $(list_hosts "$ssh_config"); do
         # default .screenrc creates five windows, we may need more
         if ((screen_num > 4)); then
             screen -S "$name" -X screen
