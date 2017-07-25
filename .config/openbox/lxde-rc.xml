@@ -303,7 +303,7 @@
 
   <!-- Launch gnome-screenshot when PrintScreen is pressed -->
   <keybind key="Print">
-      <action name="Execute"><command>gnome-screenshot -i</command></action>
+      <action name="Execute"><command>ksnapshot --fullscreen</command></action>
   </keybind>
 
   <!-- Launch LXRandR when Fn+Screen is pressed -->
@@ -330,12 +330,12 @@
 
   <keybind key="XF86KbdBrightnessDown">
     <action name="Execute">
-      <command>~/bin/lxde-kbd-backlight-ctl.sh down</command>
+      <command>xbacklight -dec 10</command>
     </action>
   </keybind>
   <keybind key="XF86KbdBrightnessUp">
     <action name="Execute">
-      <command>~/bin/lxde-kbd-backlight-ctl.sh up</command>
+      <command>xbacklight -inc 10</command>
     </action>
   </keybind>
 
