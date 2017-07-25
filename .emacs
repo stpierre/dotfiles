@@ -243,7 +243,8 @@ Usage: (package-require 'package)"
 ;; python mode settings
 (use-package python
   :ensure python-mode
-  :mode ("\\.wsgi" . python-mode))
+  :mode ("\\.wsgi" . python-mode))\
+(use-package py-yapf :ensure t)
 
 (use-package sphinx-doc
   :ensure t
@@ -371,6 +372,7 @@ Usage: (package-require 'package)"
              (jedi:setup)
              (nose-mode t)
              (sphinx-doc-mode t)
+             (py-yapf-enable-on-save)
              (setq python-fill-docstring-style 'pep-257-nn)
              (setq tab-width 4)
              (setq python-indent 4)
@@ -616,7 +618,7 @@ Usage: (package-require 'package)"
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (ess ansible groovy-mode find-file-in-repository find-file-in-project yaml-mode window-jump virtualenvwrapper use-package sql-indent sphinx-doc solarized-theme scss-mode rpm-spec-mode python-mode pymacs plsql perlcritic nose markdown-mode legalese know-your-http-well json-mode jedi httprepl grep-o-matic grep+ graphviz-dot-mode goto-chg google-this go-mode fuzzy fpaste flycheck-color-mode-line dockerfile-mode backup-each-save autopair auto-complete-rst auto-complete-nxml))))
+    (py-yapf ess ansible groovy-mode find-file-in-repository find-file-in-project yaml-mode window-jump virtualenvwrapper use-package sql-indent sphinx-doc solarized-theme scss-mode rpm-spec-mode python-mode pymacs plsql perlcritic nose markdown-mode legalese know-your-http-well json-mode jedi httprepl grep-o-matic grep+ graphviz-dot-mode goto-chg google-this go-mode fuzzy fpaste flycheck-color-mode-line dockerfile-mode backup-each-save autopair auto-complete-rst auto-complete-nxml))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
