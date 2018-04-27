@@ -1,3 +1,4 @@
+
 ;;; package --- .emacs customizations
 
 ;;; Commentary:
@@ -17,9 +18,13 @@
 
 (require 'package)
 (add-to-list 'package-archives
-             '("marmalade" . "http://marmalade-repo.org/packages/"))
-(add-to-list 'package-archives
-             '("melpa" . "http://melpa.milkbox.net/packages/"))
+            '("marmalade" . "http://marmalade-repo.org/packages/"))
+(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                    (not (gnutls-available-p))))
+       (url (concat (if no-ssl "http" "https") "://melpa.org/packages/")))
+  (add-to-list 'package-archives (cons "melpa" url) t))
+(when (< emacs-major-version 24)
+  (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
 (package-initialize)
 
 (when (not package-archive-contents)
@@ -42,7 +47,9 @@ Usage: (package-require 'package)"
 (package-require 'use-package)
 
 ;; solarized == teh business
-(package-require 'solarized-theme)
+(use-package solarized-theme
+  :ensure t
+  :init (load-theme 'solarized-light t))
 
 ;; set M-x compile to something handier.  this lets you run C-x C-m
 ;; C-m to compile
@@ -156,6 +163,8 @@ Usage: (package-require 'package)"
 (use-package google-this :ensure t)
 (use-package markdown-mode :ensure t)
 (use-package popup :ensure t)
+(use-package groovy-mode :ensure t)
+(use-package terraform-mode :ensure t)
 
 ;; load autocomplete
 (use-package auto-complete-config
@@ -243,7 +252,7 @@ Usage: (package-require 'package)"
 ;; python mode settings
 (use-package python
   :ensure python-mode
-  :mode ("\\.wsgi" . python-mode))\
+  :mode ("\\.wsgi" . python-mode))
 (use-package py-yapf :ensure t)
 
 (use-package sphinx-doc
@@ -353,30 +362,35 @@ Usage: (package-require 'package)"
 
 (use-package flycheck-color-mode-line
   :ensure t
-  :init (progn
-          (set-face-attribute 'flycheck-color-mode-line-error-face
-                              nil
-                              :background "#ff6e64"
-                              :foreground "#002b36")
-          (set-face-attribute 'flycheck-color-mode-line-warning-face
-                              nil
-                              :background "#deb542"
-                              :foreground "#002b36")
-          (set-face-attribute 'flycheck-color-mode-line-info-face
-                              nil
-                              :background "#69b7f0"
-                              :foreground "#002b36")))
+  :config (progn
+            (set-face-attribute 'flycheck-color-mode-line-error-face
+                                nil
+                                :background "#ff6e64"
+                                :foreground "#002b36")
+            (set-face-attribute 'flycheck-color-mode-line-warning-face
+                                nil
+                                :background "#deb542"
+                                :foreground "#002b36")
+            (set-face-attribute 'flycheck-color-mode-line-info-face
+                                nil
+                                :background "#69b7f0"
+                                :foreground "#002b36")))
 
 (add-hook 'python-mode-hook
           '(lambda ()
              (jedi:setup)
              (nose-mode t)
              (sphinx-doc-mode t)
-             (py-yapf-enable-on-save)
+             (add-hook 'before-save-hook 'py-yapf-buffer t t)
              (setq python-fill-docstring-style 'pep-257-nn)
              (setq tab-width 4)
              (setq python-indent 4)
              (flycheck-select-checker 'pylint-pychecker)))
+
+(defun py-yapf-disable-on-save ()
+  "Disable auto-YAPF for the current buffer."
+  (interactive)
+  (remove-hook 'before-save-hook 'py-yapf-buffer t))
 
 ;; create a python-scratch buffer that's just like *scratch*, but with
 ;; the python major mode
@@ -500,7 +514,7 @@ Usage: (package-require 'package)"
 (defun hidpi-font-on ()
   "Convenience method for setting font size on HiDPI monitors."
   (interactive)
-  (set-frame-font "liberation mono-14"))
+  (set-frame-font "liberation mono-11"))
 
 (defun hidpi-font-off ()
   "Convenience method for setting font size on HiDPI monitors."
@@ -559,7 +573,7 @@ Usage: (package-require 'package)"
 (setq-default save-place t)
 
 ;; load fpaste magic
-(use-package fpaste)
+(use-package fpaste :ensure t)
 
 ;; graphviz mode settings
 (use-package graphviz-dot-mode
@@ -616,9 +630,12 @@ Usage: (package-require 'package)"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" default)))
  '(package-selected-packages
    (quote
-    (py-yapf ess ansible groovy-mode find-file-in-repository find-file-in-project yaml-mode window-jump virtualenvwrapper use-package sql-indent sphinx-doc solarized-theme scss-mode rpm-spec-mode python-mode pymacs plsql perlcritic nose markdown-mode legalese know-your-http-well json-mode jedi httprepl grep-o-matic grep+ graphviz-dot-mode goto-chg google-this go-mode fuzzy fpaste flycheck-color-mode-line dockerfile-mode backup-each-save autopair auto-complete-rst auto-complete-nxml))))
+    (hcl-mode terraform-mode py-yapf ess ansible groovy-mode find-file-in-repository find-file-in-project yaml-mode window-jump virtualenvwrapper use-package sql-indent sphinx-doc solarized-theme scss-mode rpm-spec-mode python-mode pymacs plsql perlcritic nose markdown-mode legalese know-your-http-well json-mode jedi httprepl grep-o-matic grep+ graphviz-dot-mode goto-chg google-this go-mode fuzzy fpaste flycheck-color-mode-line dockerfile-mode backup-each-save autopair auto-complete-rst auto-complete-nxml))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
