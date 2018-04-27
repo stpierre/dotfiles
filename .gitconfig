@@ -1,7 +1,6 @@
 [user]
 	name = Chris St. Pierre
-	#email = chris.a.st.pierre@gmail.com
-        email = cstpierr@cisco.com
+        email = chris.a.st.pierre@gmail.com
         signingkey = BA70C55C63A66668852E270610DF5E32832981E6
 
 [color]
@@ -27,19 +26,16 @@
         new-branch = !sh -c 'git chain "co\\ ${2:-master}" "upstream" "co\\ -b\\ $1"' -
         what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
         rename-branch = !sh -c 'git chain "co\\ $1" "co\\ -b\\ $2" "branch\\ -D\\ $1"' -
-        full-rebase = !sh -c 'git chain "co\\ $1" upstream "co\\ $(git what-branch)" "rebase\\ $1"' -
+        full-rebase = !sh -c 'git chain "co\\ ${1:-master}" upstream "co\\ $(git what-branch)" "rebase\\ ${1:-master}"' -
         os-bug = !sh -c 'git chain 'co openstack-master' upstream "co\\ -b\\ $1"' -
         pull-push = "!git chain p push"
+        onward = !git chain 'ci -a --amend' 'rebase --continue'
         # we frequently have local changes to dotfiles, so this makes it easier to pull and push commits
         pulldot = "!git chain stash p 'stash apply'"
         pushdot = "!git chain stash p push 'stash apply'"
 
 [push]
         default = current
-
-[gitreview]
-	#username = stpierre
-        username = cstpierr
 
 [github]
         user = stpierre
@@ -53,3 +49,6 @@
 
 [gpg]
         program = gpg2
+
+[interactive]
+        singleKey = true
