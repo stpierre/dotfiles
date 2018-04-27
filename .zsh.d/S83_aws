@@ -81,10 +81,10 @@ _set_aws_env() {
         env=$1
     fi
     creds="$_AWS_CREDS/$env"
-    export AWS_CREDENTIAL_FILE="$creds/keys"
-    export AWS_ACCESS_KEY_ID=$(awk -F= '/AWSAccessKeyId/ {print $NF}' \
+    export AWS_CREDENTIAL_FILE="$creds/credentials"
+    export AWS_ACCESS_KEY_ID=$(awk -F= '/aws_access_key_id/ {print $NF}' \
         "$AWS_CREDENTIAL_FILE")
-    export AWS_SECRET_ACCESS_KEY=$(awk -F= '/AWSSecretKey/ {print $NF}' \
+    export AWS_SECRET_ACCESS_KEY=$(awk -F= '/aws_secret_access_key/ {print $NF}' \
         "$AWS_CREDENTIAL_FILE")
     export AWS_ACCESS_KEY=$AWS_ACCESS_KEY_ID
     export AWS_SECRET_KEY=$AWS_SECRET_ACCESS_KEY
@@ -110,7 +110,7 @@ aws_env() {
             sed "s/^\(.*\)\$/  \1/;
                  s/^  \($(_get_aws_current_env)\)\$/* \1/;
                  s/^\(..$(_get_aws_default_env)\)\$/\1 (default)/"
-    elif [[ -e "$_AWS_CREDS/$1/keys" ]]; then
+    elif [[ -e "$_AWS_CREDS/$1/credentials" ]]; then
         _set_aws_env "$1"
         # rewrite ~/.boto
         cat >| "$HOME/.boto" <<EOF
