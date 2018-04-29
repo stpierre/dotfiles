@@ -1,5 +1,0 @@
-[general]
-flush_output=False
-
-[keyboard]
-undo=C-_
