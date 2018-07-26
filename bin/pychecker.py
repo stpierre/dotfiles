@@ -8,11 +8,12 @@ some rules on a global basis, and run flake8.
 from __future__ import print_function
 
 import argparse
+import json
+import logging
 import os
 import subprocess
 import sys
-import warnings
-from xml.etree import ElementTree
+from xml import etree
 
 from pylint import lint
 from pylint.reporters import text
@@ -22,10 +23,9 @@ try:
 except ImportError:
     from pep8 import StyleGuide as get_style_guide  # noqa
 
-try:
-    import simplejson as json  # pylint: disable=import-error
-except ImportError:
-    import json
+SCRIPT_NAME = os.path.basename(__file__)
+LOG = logging.getLogger(SCRIPT_NAME if __name__ == "__main__" else __name__)
+DEBUG = True
 
 
 class RCFinder(object):
@@ -35,6 +35,7 @@ class RCFinder(object):
     git project that contains a filename.  caches results in
     ~/.pychecker.
     """
+
     def __init__(self, cachefile="~/.pychecker"):
         self._cachefile = os.path.expanduser(cachefile)
         if os.path.exists(self._cachefile):
@@ -103,23 +104,16 @@ class RCFinder(object):
 
 def run_pylint(filename, rcfile=None):
     """run pylint check."""
-    disable = ["E1103",  # maybe-no-member
-               "W0142",  # star-args
-               "W1201",  # logging-not-lazy
-               "I0011",  # locally-disabled
-               "I0012",  # locally-enabled
-               "R0801",  # duplicate-code
-               "R0901",  # too-many-ancestors
-               "R0902",  # too-many-instance-attributes
-               "R0903",  # too-few-public-methods
-               "R0904",  # too-many-public-methods
-               "R0921",  # abstract-class-not-used
-               "R0922"]  # abstract-class-little-used
+    disable = [
+        "I0011",  # locally-disabled
+        "I0012",  # locally-enabled
+        "R0801",  # duplicate-code
+    ]
     enable = ["W0511"]  # fixme
     args = [
-        "-r", "n", "--persistent=n",
-        "-d", ",".join(disable),
-        "-e", ",".join(enable)]
+        "-r", "n", "--persistent=n", "-d", ",".join(disable), "-e",
+        ",".join(enable)
+    ]
     if rcfile:
         args.append("--rcfile=%s" % rcfile)
 
@@ -127,11 +121,15 @@ def run_pylint(filename, rcfile=None):
     try:
         kwargs['reporter'] = text.TextReporter(sys.stdout)
         kwargs['reporter'].line_format  # pylint: disable=pointless-statement
-        args += ["--msg-template",
-                 "{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"]
+        args += [
+            "--msg-template",
+            "{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}"
+        ]
     except AttributeError:
         kwargs['reporter'] = text.ParseableTextReporter(sys.stdout)
         args += ["-f", "parseable", "-i", "y"]
+
+    LOG.info("Running pylint: %s %s", args, filename)
 
     lint.Run(args + [filename], **kwargs)
 
@@ -142,6 +140,7 @@ def run_flake8(filename, rcfile=None):
     if rcfile:
         kwargs['config'] = rcfile
     flake8 = get_style_guide(**kwargs)
+    LOG.info("Running flake8 with style guide: %s", kwargs)
     flake8.input_file(filename)
 
 
@@ -149,7 +148,7 @@ def run_coverage(filename, coverage_xml):
     """flag lines without test coverage."""
     if coverage_xml is None:
         return
-    cover_data = ElementTree.parse(coverage_xml)
+    cover_data = etree.ElementTree.parse(coverage_xml)
     for cls in cover_data.findall(".//class"):
         if not filename.endswith(cls.get("filename")):
             continue
@@ -164,13 +163,24 @@ def main():
     parser.add_argument("filename")
     options = parser.parse_args()
 
+    if DEBUG:
+        handler = logging.FileHandler(
+            os.path.join("/tmp", "%s.%s" % (SCRIPT_NAME, os.getpid())))
+        handler.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+        LOG.addHandler(handler)
+        LOG.setLevel(logging.DEBUG)
+
+    LOG.debug("Invocation: %s", sys.argv)
+    LOG.debug("Working directory: %s", os.getcwd())
+    LOG.debug("Environment: %s", os.environ)
+
     rcfinder = RCFinder()
 
     filename = os.path.abspath(options.filename)
 
-    run_pylint(filename,
-               rcfinder.find(filename,
-                             ["pylintrc", "pylintrc.conf", ".pylintrc"]))
+    run_pylint(
+        filename,
+        rcfinder.find(filename, ["pylintrc", "pylintrc.conf", ".pylintrc"]))
     run_flake8(filename, rcfinder.find(filename, [".flake8"]))
     run_coverage(options.original or filename,
                  rcfinder.find(filename, ["coverage.xml"]))
