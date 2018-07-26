@@ -21,14 +21,11 @@
         up = !git upstream
         nuke = !git chain upstream "clean\\ -dffx" gc
         hist = "log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
-        clone-fork = "!clone-with-fork.sh"
-        reviewer = "!add-gerrit-reviewer.sh"
         chain = "!git-chain.sh"
         new-branch = !sh -c 'git chain "co\\ ${2:-master}" "upstream" "co\\ -b\\ $1"' -
         what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
         rename-branch = !sh -c 'git chain "co\\ $1" "co\\ -b\\ $2" "branch\\ -D\\ $1"' -
         full-rebase = !sh -c 'git chain "co\\ ${1:-master}" upstream "co\\ $(git what-branch)" "rebase\\ ${1:-master}"' -
-        os-bug = !sh -c 'git chain 'co openstack-master' upstream "co\\ -b\\ $1"' -
         pull-push = "!git chain p push"
         rebase-push = !sh -c 'git chain "full-rebase\\ ${1:-master}" "push\\ -f"'
         onward = !git chain 'ci -a --amend' 'rebase --continue'
