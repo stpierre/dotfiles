@@ -42,17 +42,20 @@ if [[ -e tox.ini ]]; then
     pip install tox
 fi
 
-if [[ -d /usr/lib64/python2.7/site-packages/selinux ]]; then
-    if [[ -e "$VIRTUAL_ENV"/lib/python2.7/site-packages ]]; then
+python_version=$(python -c 'import sys;print("%s.%s" % (sys.version_info.major, sys.version_info.minor))')
+
+if [[ -d /usr/lib64/python"$python_version"/site-packages/selinux ]]; then
+    venv_site_packages="$VIRTUAL_ENV"/lib/python"$python_version"/site-packages
+    if [[ -e $venv_site_packages ]]; then
         # we install selinux unconditionally because a) it's super
         # quick; and b) after an update we want to get the latest
         # libraries.
         echo "Hackishly installing selinux"
-        \cp -fR /usr/lib64/python2.7/site-packages/selinux \
-            /usr/lib64/python2.7/site-packages/_selinux.so \
-            "$VIRTUAL_ENV"/lib/python2.7/site-packages
+        \cp -fR /usr/lib64/python"$python_version"/site-packages/selinux \
+            /usr/lib64/python"$python_version"/site-packages/_selinux.*so \
+            "$VIRTUAL_ENV"/lib/python"$python_version"/site-packages
     else
-        echo "virtualenv is not using Python 2.7, cannot install SELinux" 1>&2
+        echo "$venv_site_packages does not exist, cannot install SELinux" 1>&2
     fi
 else
     echo "Could not find SELinux libraries to install" 1>&2
