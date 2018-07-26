@@ -1,62 +1,6 @@
 #!/bin/zsh
 
-_zshrc_log "Loading AWS toolsets"
-
-# Explicitly list AWS CLI toolsets that don't have README files, or
-# for which the necessary environment variable cannot be determined
-# from the README.  Keys are toolset names, values are _HOME variable
-# names
-typeset -A _AWS_TOOLSETS
-_AWS_TOOLSETS=(ec2-api-tools EC2_HOME)
 _AWS_CREDS=$HOME/.aws
-
-AWS_HOME=$(readlink -f ~/bin/aws)
-
-if [[ -e "$AWS_HOME" ]]; then
-    for tooldir in $(find "$AWS_HOME" -mindepth 1 -maxdepth 1 -type d); do
-        toolname=$(basename "$tooldir" | sed 's/-[.[:digit:]]*$//')
-        readme=$(find "$tooldir" -maxdepth 1 -iname readme\*)
-        if [[ -n $_AWS_TOOLSETS[$toolname] ]]; then
-            var=$_AWS_TOOLSETS[$toolname]
-            _zshrc_log "$toolname: Using variable name from _AWS_TOOLSETS"
-        elif [[ -n $readme ]]; then
-            var=$(grep -o 'AWS_[A-Z_]*_HOME' "$readme" | head -n 1)
-            _zshrc_log "$toolname: Determined variable name from $readme"
-        else
-            echo "No README found in $tooldir"
-        fi
-        if [[ -n $var ]]; then
-            _zshrc_log "Registering AWS toolset $toolname with $var"
-            eval "export $var='$tooldir'"
-            pathmunge "$tooldir/bin" after
-        else
-            echo "Could not determine environment variable for $toolname"
-        fi
-    done
-
-    if [[ -z $JAVA_HOME ]]; then
-        export JAVA_HOME=$(dirname "$(which java)")/..
-    fi
-fi
-
-cfn-watch-stack-events() {
-    if [[ -z $1 ]]; then
-        echo "Usage: $0 <stack name>"
-        return 1
-    fi
-
-    new=
-    output=$(cfn-describe-stack-events --stack-name="$1" | tac)
-    echo "$output"
-    sleep 2
-
-    while true; do
-        new=$(cfn-describe-stack-events --stack-name="$1" | tac)
-        echo "$new" | diff - <(echo "$output") | sed -n '/^< / { s/^< //; p; }'
-        output="$new"
-        sleep 2
-    done
-}
 
 _get_aws_envs() {
     find "$_AWS_CREDS" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'
@@ -74,35 +18,6 @@ _get_aws_current_env() {
     fi
 }
 
-_set_aws_env() {
-    if [[ -z $1 ]]; then
-        env=$(_get_aws_current_env)
-    else
-        env=$1
-    fi
-    creds="$_AWS_CREDS/$env"
-    export AWS_CREDENTIAL_FILE="$creds/credentials"
-    export AWS_ACCESS_KEY_ID=$(awk -F= '/aws_access_key_id/ {print $NF}' \
-        "$AWS_CREDENTIAL_FILE")
-    export AWS_SECRET_ACCESS_KEY=$(awk -F= '/aws_secret_access_key/ {print $NF}' \
-        "$AWS_CREDENTIAL_FILE")
-    export AWS_ACCESS_KEY=$AWS_ACCESS_KEY_ID
-    export AWS_SECRET_KEY=$AWS_SECRET_ACCESS_KEY
-
-    if [[ -e "$creds/key.pem" ]]; then
-        export AWS_PRIVATE_KEY="$creds/key.pem"
-    fi
-    if [[ -e "$creds/key.pk8" ]]; then
-        export AWS_PRIVATE_KEY_PKCS8="$creds/key.pk8"
-    fi
-    if [[ -e "$creds/cert.pem" ]]; then
-        export AWS_CERT="$creds/cert.pem"
-    fi
-    if [[ -e "$creds/user_id" ]]; then
-        export AWS_USER_ID=$(cat "$creds/user_id")
-    fi
-}
-
 aws_env() {
     if [[ -z $1 ]]; then
         echo "Available AWS environments:"
@@ -111,16 +26,13 @@ aws_env() {
                  s/^  \($(_get_aws_current_env)\)\$/* \1/;
                  s/^\(..$(_get_aws_default_env)\)\$/\1 (default)/"
     elif [[ -e "$_AWS_CREDS/$1/credentials" ]]; then
-        _set_aws_env "$1"
-        # rewrite ~/.boto
-        cat >| "$HOME/.boto" <<EOF
-[Credentials]
-aws_access_key_id = $AWS_ACCESS_KEY
-aws_secret_access_key = $AWS_SECRET_KEY
-EOF
-
         rm -f "$_AWS_CREDS"/current
-        ln -s "$_AWS_CREDS"/"$1" "$_AWS_CREDS"/current
+        ln -s "$_AWS_CREDS/$1" "$_AWS_CREDS"/current
+        for filename in config credentials; do
+            if [[ ! -e "$_AWS_CREDS/$filename" ]]; then
+                ln -s "$_AWS_CREDS/current/$filename" "$_AWS_CREDS/$filename"
+            fi
+        done
     else
         echo "AWS environment $1 not found"
         aws_env
@@ -128,9 +40,7 @@ EOF
 }
 
 if [[ -e "$_AWS_CREDS" ]]; then
-    if [[ -n _get_aws_current_env ]]; then
-        _set_aws_env
-    elif [[ -n _get_aws_default_env ]]; then
+    if [[ -z _get_aws_current_env && -n _get_aws_default_env ]]; then
         aws_env "$(_get_aws_default_env)"
     fi
 fi
