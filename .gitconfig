@@ -12,7 +12,8 @@
 [alias]
         ci = commit
         co = checkout
-        st = status
+        st = "status --show-stash"
+        status = "status --show-stash"
         br = branch
         p = "pull --rebase --ff-only"
         root = "rev-parse --show-toplevel"
@@ -29,6 +30,7 @@
         full-rebase = !sh -c 'git chain "co\\ ${1:-master}" upstream "co\\ $(git what-branch)" "rebase\\ ${1:-master}"' -
         os-bug = !sh -c 'git chain 'co openstack-master' upstream "co\\ -b\\ $1"' -
         pull-push = "!git chain p push"
+        rebase-push = !sh -c 'git chain "full-rebase\\ ${1:-master}" "push\\ -f"'
         onward = !git chain 'ci -a --amend' 'rebase --continue'
         # we frequently have local changes to dotfiles, so this makes it easier to pull and push commits
         pulldot = "!git chain stash p 'stash apply'"

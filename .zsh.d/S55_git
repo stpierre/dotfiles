@@ -43,23 +43,9 @@ get_git_prompt_info() {
     fi
 }
 
-git_submodule_update() {
-    topdir=$(git rev-parse --show-cdup)
-    if [[ -n $topdir ]]; then
-        pushd $topdir
-    fi
-    git submodule update
-    if [[ -n $topdir ]]; then
-        popd
-    fi
-}
-
 if type git >& /dev/null; then
-    if [[ -z $__git_bin ]]; then
-        if [[ $(type git) == "git is a shell function" ]]; then
-            unfunction git
-        fi
-        __git_bin=$(which git)
+    if [[ $(type git) == "git is a shell function" ]]; then
+        unfunction git
     fi
 
     # we run parse_git_repo and parse_git_branch on three occasions:
@@ -71,15 +57,7 @@ if type git >& /dev/null; then
     preexec_functions[$(($#preexec_functions + 1))]='zsh_update_git_vars'
     chpwd_functions[$(($#chpwd_functions + 1))]='parse_git_repo'
 
-    git() {
-        cmd=$1
-        if [[ -n $cmd && ($cmd == "co" || $cmd == "checkout") ]]; then
-            $__git_bin $*
-            rv=$?
-            git_submodule_update
-            return $rv
-        else
-            $__git_bin $*
-        fi
-    }
+    if type hub >& /dev/null; then
+        eval "$(hub alias -s)"
+    fi
 fi
