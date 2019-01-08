@@ -117,7 +117,7 @@ def run_pylint(filename, rcfile=None):
     if rcfile:
         args.append("--rcfile=%s" % rcfile)
 
-    kwargs = dict(exit=False)
+    kwargs = {}
     try:
         kwargs['reporter'] = text.TextReporter(sys.stdout)
         kwargs['reporter'].line_format  # pylint: disable=pointless-statement

@@ -4,3 +4,7 @@
 if [ -f /etc/bashrc ]; then
         . /etc/bashrc
 fi
+
+complete -C /home/stpierre/bin/vault vault
+
+complete -C /home/stpierre/bin/packer packer

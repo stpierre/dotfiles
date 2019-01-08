@@ -18,11 +18,8 @@
 
 (require 'package)
 (add-to-list 'package-archives
-            '("marmalade" . "http://marmalade-repo.org/packages/"))
-(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
-                    (not (gnutls-available-p))))
-       (url (concat (if no-ssl "http" "https") "://melpa.org/packages/")))
-  (add-to-list 'package-archives (cons "melpa" url) t))
+            '("marmalade" . "http://marmalade-repo.org/packages/")
+            '("melpa" . "http://melpa.org/packages/"))
 (when (< emacs-major-version 24)
   (add-to-list 'package-archives '("gnu" . "http://elpa.gnu.org/packages/")))
 (package-initialize)
@@ -240,6 +237,12 @@ Usage: (package-require 'package)"
                   (concat "xmllint --noout "
                           (file-name-nondirectory buffer-file-name)))))
 
+;; javascript-mode settings
+(add-hook 'javascript-mode-hook
+          '(lambda ()
+             (setq tab-width 2)
+             (setq js-indent-level 2)))
+
 (add-hook 'sgml-mode-hook 'turn-on-auto-fill)
 
 ;; org mode settings
@@ -384,7 +387,8 @@ Usage: (package-require 'package)"
              (setq python-fill-docstring-style 'pep-257-nn)
              (setq tab-width 4)
              (setq python-indent 4)
-             (flycheck-select-checker 'pylint-pychecker)))
+             (flycheck-select-checker 'pylint-pychecker)
+             (highlight-indentation-mode)))
 
 (defun py-yapf-disable-on-save ()
   "Disable auto-YAPF for the current buffer."
@@ -433,7 +437,7 @@ Usage: (package-require 'package)"
 (use-package scss-mode :ensure t)
 (add-hook 'css-mode-hook
           '(lambda ()
-             (setq cssm-indent-level 4)
+             (setq css-indent-offset 2)
              (setq cssm-newline-before-closing-bracket t)
              (setq cssm-indent-function #'cssm-c-style-indenter)
              (setq cssm-mirror-mode nil)
@@ -574,6 +578,10 @@ Usage: (package-require 'package)"
 ;; load fpaste magic
 (use-package fpaste :ensure t)
 
+;; highlight indentation
+(use-package highlight-indentation
+  :ensure t)
+
 ;; graphviz mode settings
 (use-package graphviz-dot-mode
   :ensure t
@@ -592,6 +600,8 @@ Usage: (package-require 'package)"
 (use-package yaml-mode
   :ensure t
   :mode "\\.yml\\'")
+(add-hook 'yaml-mode-hook
+          'highlight-indentation-mode)
 
 ;; json-mode settings
 (use-package json-mode
@@ -634,7 +644,7 @@ Usage: (package-require 'package)"
     ("d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" default)))
  '(package-selected-packages
    (quote
-    (hcl-mode terraform-mode py-yapf ess ansible groovy-mode find-file-in-repository find-file-in-project yaml-mode window-jump virtualenvwrapper use-package sql-indent sphinx-doc solarized-theme scss-mode rpm-spec-mode python-mode pymacs plsql perlcritic nose markdown-mode legalese know-your-http-well json-mode jedi httprepl grep-o-matic graphviz-dot-mode goto-chg google-this go-mode fuzzy fpaste flycheck-color-mode-line dockerfile-mode backup-each-save autopair auto-complete-rst auto-complete-nxml))))
+    (highlight-indentation hcl-mode terraform-mode py-yapf ess ansible groovy-mode find-file-in-repository find-file-in-project yaml-mode window-jump virtualenvwrapper use-package sql-indent sphinx-doc solarized-theme scss-mode rpm-spec-mode python-mode pymacs plsql perlcritic nose markdown-mode legalese know-your-http-well json-mode jedi httprepl grep-o-matic graphviz-dot-mode goto-chg google-this go-mode fuzzy fpaste flycheck-color-mode-line dockerfile-mode backup-each-save autopair auto-complete-rst auto-complete-nxml))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
