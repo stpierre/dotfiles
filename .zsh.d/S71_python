@@ -12,5 +12,6 @@ clean_pyc() {
     else
         dir=$1
     fi
-    find "$dir" -regex '.+\.py[co]$' -delete
+    find "$dir" -name __pycache__ -o -name .mypy_cache -o -regex '.+\.py[co]$' \
+         -delete
 }

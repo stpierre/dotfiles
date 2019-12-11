@@ -107,3 +107,5 @@ if [[ -n $STY || $TERM[0,6] == "screen" ]]; then
     preexec_functions[$((${#preexec_functions} + 1))]='zsh_preexec_update_screen_title'
     precmd_functions[$((${#precmd_functions} + 1))]='zsh_precmd_update_screen_title'
 fi
+
+alias sx='screen -x'

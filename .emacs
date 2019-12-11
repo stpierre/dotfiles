@@ -204,9 +204,11 @@ Usage: (package-require 'package)"
     (generate-new-buffer "*text-scratch*")
   (text-mode))
 
-;; open Alpine temp files (pico.NNNNN) in text-mode
-(setq auto-mode-alist (append '(("pico\\." . text-mode))
-			      auto-mode-alist))
+(defun sort-lines-nocase ()
+  "Sort lines case-insensitively."
+  (interactive)
+  (let ((sort-fold-case t))
+    (call-interactively 'sort-lines)))
 
 ;; perl mode settings
 (add-hook 'perl-mode-hook

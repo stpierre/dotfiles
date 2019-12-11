@@ -10,28 +10,53 @@
 	ui = auto
 
 [alias]
-        ci = commit
-        co = checkout
-        st = "status --show-stash"
-        status = "status --show-stash"
+        a = add
+        am = amend
+        ama = "amend -a"
         br = branch
-        p = "pull --rebase --ff-only"
-        root = "rev-parse --show-toplevel"
-        upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git p )"
-        up = !git upstream
-        nuke = !git chain upstream "clean\\ -dffx" gc
-        hist = "log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
         chain = "!git-chain.sh"
-        new-branch = !sh -c 'git chain "co\\ ${2:-master}" "upstream" "co\\ -b\\ $1"' -
-        what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
-        rename-branch = !sh -c 'git chain "co\\ $1" "co\\ -b\\ $2" "branch\\ -D\\ $1"' -
+        ci = commit
+        cia = "ci -a"
+        co = checkout
+        d = diff
+        fixup = cia --amend
+        fr = full-rebase
+        fu = fixup
         full-rebase = !sh -c 'git chain "co\\ ${1:-master}" upstream "co\\ $(git what-branch)" "rebase\\ ${1:-master}"' -
+        g = grep
+        h = hist
+        hist = "log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+        low = !echo '___________________ ____ __________   ____  __.\n\\_   ___ \\______   \\    |   \\      \\ |    |/ _|\n/    \\  \\/|       _/    |   /   |   \\|      <\n\\     \\___|    |   \\    |  /    |    \\    |  \\\n \\______  /____|_  /______/\\____|__  /____|__ \\\n        \\/       \\/                \\/        \\/\n     ____.____ ___.____________ ___________\n    |    |    |   \\   \\_   ___ \\\\_   _____/\n    |    |    |   /   /    \\  \\/ |    __)_\n/\\__|    |    |  /|   \\     \\____|        \\\n\\________|______/ |___|\\______  /_______  /\n                              \\/        \\/'
+        nb = new-branch
+        new-branch = !sh -c 'git chain "co\\ ${2:-master}" "upstream" "co\\ -b\\ $1"' -
+        nuke = !git chain upstream "clean\\ -dffx" gc
+        onward = !git chain fixup 'rebase --continue'
+        p = push
+        pf = "push -f"
+        pu = "pull --rebase --ff-only"
         pull-push = "!git chain p push"
-        rebase-push = !sh -c 'git chain "full-rebase\\ ${1:-master}" "push\\ -f"'
-        onward = !git chain 'ci -a --amend' 'rebase --continue'
         # we frequently have local changes to dotfiles, so this makes it easier to pull and push commits
         pulldot = "!git chain stash p 'stash apply'"
         pushdot = "!git chain stash p push 'stash apply'"
+        r = rebase
+        rc = "rebase --continue"
+        rebase-branch = !sh -c 'git chain "co\\ $1" rebase-push'
+        rebase-push = !sh -c 'git chain "full-rebase\\ ${1:-master}" "push\\ -f"'
+        rename-branch = !sh -c 'git chain "co\\ $1" "co\\ -b\\ $2" "branch\\ -D\\ $1"' -
+        ri = "rebase -i"
+        rim = "rebase -i master"
+        root = "rev-parse --show-toplevel"
+        rp = rebase-push
+        rH = "reset HEAD"
+        s = st
+        sh = show
+        sH = show HEAD
+        st = status
+        status = "status --show-stash"
+        u = up
+        up = upstream
+        upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git fetch --all; git fetch --tags --force; git pu )"
+        what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
 
 [push]
         default = current

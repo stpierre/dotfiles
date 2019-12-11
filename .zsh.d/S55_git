@@ -30,6 +30,9 @@ zsh_update_git_vars() {
         *git*)
             parse_git_repo
             ;;
+        g\ *)
+            parse_git_repo
+            ;;
     esac
 }
 
@@ -61,3 +64,10 @@ if type git >& /dev/null; then
         eval "$(hub alias -s)"
     fi
 fi
+
+alias g=git
+alias gg='git grep'
+alias grim='git rebase -i master'
+alias grp='git rebase-push'
+alias gs='git status'
+alias gu='git up'
