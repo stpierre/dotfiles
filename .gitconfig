@@ -14,39 +14,98 @@
         am = amend
         ama = "amend -a"
         br = branch
-        chain = "!git-chain.sh"
+        branch-exists = "!f() { \
+          git show-ref --verify --quiet refs/heads/$1; \
+        }; f"
         ci = commit
         cia = "ci -a"
         co = checkout
         d = diff
+        f = "!git fetch --all; git fetch --tags --force"
         fixup = cia --amend
         fr = full-rebase
         fu = fixup
-        full-rebase = !sh -c 'git chain "co\\ ${1:-master}" upstream "co\\ $(git what-branch)" "rebase\\ ${1:-master}"' -
+        full-rebase = "!f() { \
+          set -euxo pipefail; \
+          branch=$(git what-branch); \
+          parent=${1:-$(git primary-branch)}; \
+          git co \"$parent\"; \
+          git upstream; \
+          git co \"$branch\"; \
+          git rebase \"$parent\"; \
+        }; f"
         g = grep
         h = hist
         hist = "log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
         low = !echo '___________________ ____ __________   ____  __.\n\\_   ___ \\______   \\    |   \\      \\ |    |/ _|\n/    \\  \\/|       _/    |   /   |   \\|      <\n\\     \\___|    |   \\    |  /    |    \\    |  \\\n \\______  /____|_  /______/\\____|__  /____|__ \\\n        \\/       \\/                \\/        \\/\n     ____.____ ___.____________ ___________\n    |    |    |   \\   \\_   ___ \\\\_   _____/\n    |    |    |   /   /    \\  \\/ |    __)_\n/\\__|    |    |  /|   \\     \\____|        \\\n\\________|______/ |___|\\______  /_______  /\n                              \\/        \\/'
         nb = new-branch
-        new-branch = !sh -c 'git chain "co\\ ${2:-master}" "upstream" "co\\ -b\\ $1"' -
-        nuke = !git chain upstream "clean\\ -dffx" gc
-        onward = !git chain fixup 'rebase --continue'
+        new-branch = "!f() { \
+          set -euxo pipefail; \
+          git co \"${2:-$(git primary-branch)}\"; \
+          git up; \
+          git co -b \"$1\"; \
+        }; f"
+        nuke = "!f() { \
+          set -euo pipefail; \
+          git up; \
+          git clean -dffx; \
+          git gc; \
+        }; f"
+        onward = "!f() { \
+          git fixup; \
+          git rc; \
+        }; f"
         p = push
         pf = "push -f"
+        primary-branch = "!f() { \
+          set -euo pipefail; \
+          for candidate in master main devel; do \
+            if git branch-exists \"$candidate\"; then \
+              echo \"$candidate\"; \
+              exit 0; \
+            fi; \
+          done; \
+          echo \"No primary branch found\" 1>&2; \
+          exit 1; \
+        }; f"
         pu = "pull --rebase --ff-only"
-        pull-push = "!git chain p push"
-        # we frequently have local changes to dotfiles, so this makes it easier to pull and push commits
-        pulldot = "!git chain stash p 'stash apply'"
-        pushdot = "!git chain stash p push 'stash apply'"
+        pull-push = "!git pu; git p"
+        # we frequently have local changes to dotfiles, so this makes
+        # it easier to pull and push commits
+        pulldot = "!f() { \
+          set -euo pipefail; \
+          git stash; \
+          git p; \
+          git stash apply; \
+        }; f"
+        pushdot = "!f() { \
+          set -euo pipefail; \
+          git stash; \
+          git pull-push; \
+          git stash apply; \
+        }; f"
         r = rebase
         rc = "rebase --continue"
-        rebase-branch = !sh -c 'git chain "co\\ $1" rebase-push'
-        rebase-push = !sh -c 'git chain "full-rebase\\ ${1:-master}" "push\\ -f"'
-        rename-branch = !sh -c 'git chain "co\\ $1" "co\\ -b\\ $2" "branch\\ -D\\ $1"' -
-        ri = "rebase -i"
-        rim = "rebase -i master"
-        root = "rev-parse --show-toplevel"
+        rebase-branch = "!f() { \
+          set -euo pipefail; \
+          git co \"$1\"; \
+          rebase-push; \
+        }; f"
+        rebase-push = "!f() { \
+          set -euxo pipefail; \
+          git full-rebase \"${1:-}\"; \
+          git push -f; \
+        }; f"
         rp = rebase-push
+        rename-branch = "!f() { \
+          set -exuo pipefail; \
+          git co \"$1\"; \
+          git co -b \"$2\"; \
+          git branch -D \"$1\"; \
+        }; f"
+        ri = "rebase -i"
+        rim = "rebase -i \"$(git primary-branch)\""
+        root = "rev-parse --show-toplevel"
         rH = "reset HEAD"
         s = st
         sh = show
@@ -55,7 +114,7 @@
         status = "status --show-stash"
         u = up
         up = upstream
-        upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git fetch --all; git fetch --tags --force; git pu )"
+        upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git f; git pu )"
         what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
 
 [push]
