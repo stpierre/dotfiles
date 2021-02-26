@@ -32,3 +32,5 @@ clean_retry() {
 }
 
 alias yarn=nodejs-yarn
+
+alias tf=terraform
