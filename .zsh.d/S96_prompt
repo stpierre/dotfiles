@@ -5,7 +5,6 @@ setopt prompt_subst
 nbsp=$'\u00A0'
 
 _get_prompt() {
-    local hist="${PR_BRIGHT_GREEN}%h${PR_RESET} "
     local time="${PR_BRIGHT_YELLOW}%T${PR_RESET} "
 
     local venv="$(get_venv_prompt_info)"
@@ -17,11 +16,11 @@ _get_prompt() {
         local cwd="%${PR_PWDLEN}<...<%~%<<"
         local user="%(!#${PR_SEP}${PR_BRIGHT_RED}%n${PR_RESET}#)"
         echo "${venv}${PR_SEP}${cwd}${PR_SEP}${git_info}${svn_info}
-${hist}${time}${user}"
+${time}${user}"
     else
         local cwd="%~"
         local user="%(!#${PR_BRIGHT_RED}%n${PR_RESET}${PR_SEP}#)"
-        prompt=${hist}${time}${user}${cwd}
+        prompt=${time}${user}${cwd}
         if [[ -n $venv ]]; then
             prompt=$prompt$PR_SEP$venv
         fi
