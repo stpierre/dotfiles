@@ -13,19 +13,40 @@ import logging
 import os
 import subprocess
 import sys
-from xml import etree
 
-from pylint import lint
-from pylint.reporters import text
+try:
+    from xml import etree
+    etree.ElementTree
+    HAS_COVERAGE = True
+except (AttributeError, ImportError):
+    HAS_COVERAGE = False
+
+try:
+    from pylint import lint
+    from pylint.reporters import text
+    HAS_PYLINT = True
+except ImportError:
+    HAS_PYLINT = False
 
 try:
     from flake8.engine import get_style_guide  # noqa
+    HAS_FLAKE8 = True
 except ImportError:
-    from pep8 import StyleGuide as get_style_guide  # noqa
+    try:
+        from pep8 import StyleGuide as get_style_guide  # noqa
+        HAS_FLAKE8 = True
+    except ImportError:
+        HAS_FLAKE8 = False
+
+try:
+    import mypy.api
+    HAS_MYPY = True
+except ImportError:
+    HAS_MYPY = False
 
 SCRIPT_NAME = os.path.basename(__file__)
 LOG = logging.getLogger(SCRIPT_NAME if __name__ == "__main__" else __name__)
-DEBUG = True
+DEBUG = False
 
 
 class RCFinder(object):
@@ -69,13 +90,14 @@ class RCFinder(object):
         cached = self._gitroots.get(dirname)
         if cached:
             return cached
-        else:
-            try:
-                retval = subprocess.check_output(
-                    "cd %s && git rev-parse --show-toplevel" % dirname,
-                    shell=True).strip()
-            except subprocess.CalledProcessError:
-                retval = dirname
+
+        try:
+            retval = subprocess.check_output(
+                "cd %s && git rev-parse --show-toplevel" % dirname,
+                shell=True).strip()
+        except subprocess.CalledProcessError:
+            retval = dirname
+
         self._gitroots[dirname] = retval
         return retval
 
@@ -95,27 +117,35 @@ class RCFinder(object):
         gitroot = self.find_gitroot(file_or_dir)
         if file_or_dir == gitroot:
             return None
-        else:
-            retval = self.find(os.path.dirname(file_or_dir), names)
-            if retval is not None:
-                self._set_cache(file_or_dir, names, retval)
-            return retval
+
+        retval = self.find(os.path.dirname(file_or_dir), names)
+        if retval is not None:
+            self._set_cache(file_or_dir, names, retval)
+        return retval
 
 
 def run_pylint(filename, rcfile=None):
     """run pylint check."""
-    disable = [
-        "I0011",  # locally-disabled
-        "I0012",  # locally-enabled
-        "R0801",  # duplicate-code
-    ]
-    enable = ["W0511"]  # fixme
     args = [
-        "-r", "n", "--persistent=n", "-d", ",".join(disable), "-e",
-        ",".join(enable)
+        "-r",
+        "n",
+        "--persistent=n",
     ]
     if rcfile:
         args.append("--rcfile=%s" % rcfile)
+    else:
+        disable = [
+            "I0011",  # locally-disabled
+            "I0012",  # locally-enabled
+            "R0801",  # duplicate-code
+        ]
+        enable = ["W0511"]  # fixme
+        args.extend([
+            '-d',
+            ",".join(disable),
+            "-e",
+            ",".join(enable),
+        ])
 
     kwargs = {}
     try:
@@ -136,12 +166,27 @@ def run_pylint(filename, rcfile=None):
 
 def run_flake8(filename, rcfile=None):
     """run flake8 check."""
-    kwargs = dict(format="pylint", ignore=["E501"])
+    kwargs = {'format': "pylint"}
     if rcfile:
         kwargs['config'] = rcfile
     flake8 = get_style_guide(**kwargs)
     LOG.info("Running flake8 with style guide: %s", kwargs)
     flake8.input_file(filename)
+
+
+def run_mypy(filename, rcfile=None):
+    """run mypy check."""
+    args = []
+    if rcfile:
+        args.extend(['--config-file', rcfile])
+    LOG.info("Running mypy: %s %s", args, filename)
+
+    normal_report, error_report, status = mypy.api.run(args)
+    if status != 0:
+        LOG.error('Mypy encountered errors (exit code: {status})')
+    if error_report:
+        LOG.warning(error_report)
+    print(normal_report)
 
 
 def run_coverage(filename, coverage_xml):
@@ -178,12 +223,21 @@ def main():
 
     filename = os.path.abspath(options.filename)
 
-    run_pylint(
-        filename,
-        rcfinder.find(filename, ["pylintrc", "pylintrc.conf", ".pylintrc"]))
-    run_flake8(filename, rcfinder.find(filename, [".flake8"]))
-    run_coverage(options.original or filename,
-                 rcfinder.find(filename, ["coverage.xml"]))
+    if HAS_PYLINT:
+        run_pylint(
+            filename,
+            rcfinder.find(filename,
+                          ["pylintrc", "pylintrc.conf", ".pylintrc"]))
+
+    if HAS_FLAKE8:
+        run_flake8(filename, rcfinder.find(filename, [".flake8"]))
+
+    if HAS_COVERAGE:
+        run_coverage(options.original or filename,
+                     rcfinder.find(filename, ["coverage.xml"]))
+
+    if HAS_MYPY:
+        run_mypy(filename, rcfinder.find(filename, ["mypy.ini"]))
 
 
 if __name__ == "__main__":
