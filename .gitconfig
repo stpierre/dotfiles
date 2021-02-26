@@ -36,7 +36,7 @@
         }; f"
         g = grep
         h = hist
-        hist = "log --color --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+        hist = "log --color --pretty=format:'%Cred%h%Creset %C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
         low = !echo '___________________ ____ __________   ____  __.\n\\_   ___ \\______   \\    |   \\      \\ |    |/ _|\n/    \\  \\/|       _/    |   /   |   \\|      <\n\\     \\___|    |   \\    |  /    |    \\    |  \\\n \\______  /____|_  /______/\\____|__  /____|__ \\\n        \\/       \\/                \\/        \\/\n     ____.____ ___.____________ ___________\n    |    |    |   \\   \\_   ___ \\\\_   _____/\n    |    |    |   /   /    \\  \\/ |    __)_\n/\\__|    |    |  /|   \\     \\____|        \\\n\\________|______/ |___|\\______  /_______  /\n                              \\/        \\/'
         nb = new-branch
         new-branch = "!f() { \
@@ -104,7 +104,7 @@
           git branch -D \"$1\"; \
         }; f"
         ri = "rebase -i"
-        rim = "rebase -i \"$(git primary-branch)\""
+        rim = "!git rebase -i \"$(git primary-branch)\""
         root = "rev-parse --show-toplevel"
         rH = "reset HEAD"
         s = st
