@@ -7,24 +7,7 @@ export VIRTUAL_ENV_DISABLE_PROMPT=1
 export NODE_VIRTUAL_ENV_DISABLE_PROMPT=1
 
 # find virtualenvwrapper in $PATH
-source "$(which virtualenvwrapper.sh)"
-
-newvirtualenv() {
-    if [[ -z $1 ]]; then
-        base=$(pwd)
-    else
-        base=$1
-    fi
-    name=$(basename "$base")
-    args="-a $base"
-    if [[ -e $base/requirements.txt ]]; then
-        args="$args -r $base/requirements.txt"
-    elif [[ -e $base/requirements.pip ]]; then
-        args="$args -r $base/requirements.pip"
-    fi
-
-    mkvirtualenv ${=args} --system-site-packages "$name"
-}
+#source "$(which virtualenvwrapper.sh)"
 
 get_venv_prompt_info() {
     if [[ -n $VIRTUAL_ENV ]]; then
@@ -43,25 +26,3 @@ venv_install_node_js() {
     deactivate
     workon "$proj"
 }
-
-# The code below here works great when using system libraries in
-# virtualenvs and you want to share a single bpython between them all.
-# When not using system libraries, it doesn't work at all.
-
-# # determine if which supports --skip-alias
-# if which --skip-alias which >& /dev/null; then
-#     alias _find_executable='which --skip-alias --skip-functions'
-# else
-#     _find_executable() {
-#         which -a $1 | sed -n '/^\//p' | head -n 1
-#     }
-# fi
-
-# # make various python utilities virtualenv-aware so we don't have to
-# # install them in every virtualenv
-# __virtualenv_python_alias() {
-#     alias $1='$(_find_executable python)'" $(_find_executable $1)"
-# }
-
-# __virtualenv_python_alias bpython
-# __virtualenv_python_alias ipython
