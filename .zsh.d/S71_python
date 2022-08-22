@@ -20,4 +20,6 @@ clean_pyc() {
          -delete
 }
 
-source $HOME/.poetry/env
+if [[ -e $HOME/.poetry/env ]]; then
+    source $HOME/.poetry/env
+fi
