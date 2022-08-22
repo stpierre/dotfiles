@@ -267,11 +267,15 @@ Usage: (package-require 'package)"
   :mode ("\\.wsgi" . python-mode))
 (use-package py-yapf :ensure t)
 
+(use-package python-black
+  :demand t
+  :after python
+  :config (setq python-black-extra-args '("--line-length=79")))
+
 (use-package sphinx-doc
   :ensure t
   :diminish sphinx-doc-mode)
 
-;; nose test runner
 (use-package nose
   :ensure t
   :config (progn
@@ -281,20 +285,20 @@ Usage: (package-require 'package)"
             (define-key nose-mode-map "\C-cn." 'nosetests-one)
             (define-key nose-mode-map "\C-cnc" 'nosetests-again)))
 
-;; virtualenv stuff
 (use-package virtualenvwrapper
   :ensure t
   :config (setq venv-location "~/venv/")
   :bind ("C-c v" . venv-workon))
 
-;; pylookup config
 (use-package pylookup
   :config (setq pylookup-db-file
                 (concat user-emacs-directory "pylookup.db"))
   :bind ("C-c l" . pylookup-lookup-at-point))
 
-;; jedi config
 (use-package jedi
+  :ensure t)
+
+(use-package py-isort
   :ensure t)
 
 ;; flycheck settings
@@ -394,7 +398,9 @@ Usage: (package-require 'package)"
              (jedi:setup)
              (nose-mode t)
              (sphinx-doc-mode t)
-             (add-hook 'before-save-hook 'py-yapf-buffer t t)
+             (python-black-on-save-mode)
+             ;(add-hook 'before-save-hook 'py-yapf-buffer t t)
+             (add-hook 'before-save-hook 'py-isort-before-save)
              (setq python-fill-docstring-style 'pep-257-nn)
              (setq tab-width 4)
              (setq python-indent 4)
@@ -405,6 +411,11 @@ Usage: (package-require 'package)"
   "Disable auto-YAPF for the current buffer."
   (interactive)
   (remove-hook 'before-save-hook 'py-yapf-buffer t))
+
+(defun py-isort-disable-on-save ()
+  "Disable auto-isort for the current buffer."
+  (interactive)
+  (remove-hook 'before-save-hook 'py-isort-before-save))
 
 ;; create a python-scratch buffer that's just like *scratch*, but with
 ;; the python major mode
@@ -653,7 +664,7 @@ Usage: (package-require 'package)"
  '(custom-safe-themes
    '("d677ef584c6dfc0697901a44b885cc18e206f05114c8a3b7fde674fce6180879" "a8245b7cc985a0610d71f9852e9f2767ad1b852c2bdea6f4aadc12cce9c4d6d0" default))
  '(package-selected-packages
-   '(pyenv-mode protobuf-mode groovy-mode highlight-indentation hcl-mode terraform-mode py-yapf ess ansible find-file-in-repository find-file-in-project yaml-mode window-jump virtualenvwrapper use-package sql-indent sphinx-doc solarized-theme scss-mode rpm-spec-mode python-mode pymacs plsql perlcritic nose markdown-mode legalese know-your-http-well json-mode jedi httprepl grep-o-matic graphviz-dot-mode goto-chg google-this go-mode fuzzy fpaste flycheck-color-mode-line dockerfile-mode backup-each-save autopair auto-complete-rst auto-complete-nxml)))
+   '(lua-mode python-black py-isort pyenv-mode protobuf-mode groovy-mode highlight-indentation hcl-mode terraform-mode py-yapf ess ansible find-file-in-repository find-file-in-project yaml-mode window-jump virtualenvwrapper use-package sql-indent sphinx-doc solarized-theme scss-mode rpm-spec-mode python-mode pymacs plsql perlcritic nose markdown-mode legalese know-your-http-well json-mode jedi httprepl grep-o-matic graphviz-dot-mode goto-chg google-this go-mode fuzzy fpaste flycheck-color-mode-line dockerfile-mode backup-each-save autopair auto-complete-rst auto-complete-nxml)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
