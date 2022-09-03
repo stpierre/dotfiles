@@ -1,14 +1,21 @@
 #!/bin/zsh
 
-if [[ -e ~/Library/Caches ]]; then
-    export PIP_DOWNLOAD_CACHE=~/Library/Caches/pip_downloads
-else
-    export PIP_DOWNLOAD_CACHE=~/.pip_downloads
+export PIP_DOWNLOAD_CACHE=~/.pip_downloads
+
+if [[ ! -e "$HOME"/.pyenv ]]; then
+    echo "Installing pyenv"
+    curl https://pyenv.run | bash
 fi
 
 export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
+
+if [[ ! -e "$(pyenv root)"/plugins/pyenv-virtualenvwrapper ]]; then
+    echo "Installing pyenv-virtualenvwrapper"
+    git clone https://github.com/pyenv/pyenv-virtualenvwrapper.git $(pyenv root)/plugins/pyenv-virtualenvwrapper
+fi
+pyenv virtualenvwrapper
 
 clean_pyc() {
     if [[ -z $1 ]]; then
