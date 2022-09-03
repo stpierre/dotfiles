@@ -25,25 +25,13 @@ function __start_emacs_server() {
     $__emacs_bin --daemon="$name"
 }
 
-if [[ -e /Applications/Emacs.app/Contents/MacOS/bin ]]; then
-    # this needs to be first in PATH, or at least before /usr/bin.
-    # The easiest way to do that is to remove it before adding it.
-    pathremove /Applications/Emacs.app/Contents/MacOS/bin
-    pathmunge /Applications/Emacs.app/Contents/MacOS/bin
-fi
-
 if type emacs >& /dev/null; then
     if [[ -z $__emacs_bin ]]; then
         if [[ $(type emacs) == "emacs is a shell function" ]]; then
             unfunction emacs
         fi
 
-        # OS X crap
-        if [[ -e /Applications/Emacs.app/Contents/MacOS/Emacs ]]; then
-            __emacs_bin="/Applications/Emacs.app/Contents/MacOS/Emacs"
-        else
-            __emacs_bin=$(which emacs)
-        fi
+        __emacs_bin=$(which emacs)
     fi
     __emacs_version=$($__emacs_bin --version | head -n 1 | \
         awk '{ split($NF, v, "."); print v[1] "." v[2]; }')
