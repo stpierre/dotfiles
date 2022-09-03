@@ -9,7 +9,7 @@ complete -C /home/stpierre/bin/vault vault
 
 complete -C /home/stpierre/bin/packer packer
 
-if type zsh >& /dev/null; then
-    exec zsh $*
-fi
+#if type zsh >& /dev/null; then
+#    exec zsh $*
+#fi
 
