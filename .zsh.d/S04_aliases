@@ -23,3 +23,5 @@ function socks() {
     # todo: make port configurable
     ssh -D 8000 -fCqN "$@" && echo "proxy started on port 8000"
 }
+
+alias path='echo -e ${PATH//:/\\n}'
