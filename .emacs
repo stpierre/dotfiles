@@ -621,6 +621,15 @@ Usage: (package-require 'package)"
 (use-package find-file-in-repository
   :bind (("C-x f" . find-file-in-repository)))
 
+(use-package nix-mode
+  :mode "\\.nix\\'")
+
+(use-package direnv
+ :config
+ (direnv-mode))
+
+(use-package just-mode)
+
 ;;; .emacs ends here
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
