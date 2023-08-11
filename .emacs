@@ -547,8 +547,7 @@ Usage: (package-require 'package)"
 (fset 'yes-or-no-p 'y-or-n-p)
 
 ;; the toolbar and menu bar are wastes of valuable screen estate
-(if (and (boundp 'tool-bar-mode) (fboundp 'tool-bar-mode))
-    (tool-bar-mode -1))
+(tool-bar-mode -1)
 (menu-bar-mode -1)
 
 ;; the blinking cursor is nothing but an annoyance
