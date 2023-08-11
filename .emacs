@@ -269,10 +269,9 @@ Usage: (package-require 'package)"
   :ensure t
   :diminish sphinx-doc-mode)
 
-(use-package virtualenvwrapper
+(use-package pyvenv
   :ensure t
-  :config (setq venv-location "~/venv/")
-  :bind ("C-c v" . venv-workon))
+  :bind ("C-c v" . pyvenv-activate))
 
 (use-package pylookup
   :config (setq pylookup-db-file

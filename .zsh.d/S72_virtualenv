@@ -1,13 +1,8 @@
 #!/bin/zsh
 
-export WORKON_HOME=~/venv
 export PROJECT_HOME=~/devel
-export VIRTUALENVWRAPPER_HOOK_DIR="$WORKON_HOME"
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 export NODE_VIRTUAL_ENV_DISABLE_PROMPT=1
-
-# find virtualenvwrapper in $PATH
-#source "$(which virtualenvwrapper.sh)"
 
 get_venv_prompt_info() {
     if [[ -n $VIRTUAL_ENV ]]; then
