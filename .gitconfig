@@ -25,7 +25,7 @@
         fr = full-rebase
         fu = fixup
         full-rebase = "!f() { \
-          set -euxo pipefail; \
+          set -euo pipefail; \
           branch=$(git what-branch); \
           parent=${1:-$(git primary-branch)}; \
           git co \"$parent\"; \
@@ -39,7 +39,7 @@
         low = !echo '___________________ ____ __________   ____  __.\n\\_   ___ \\______   \\    |   \\      \\ |    |/ _|\n/    \\  \\/|       _/    |   /   |   \\|      <\n\\     \\___|    |   \\    |  /    |    \\    |  \\\n \\______  /____|_  /______/\\____|__  /____|__ \\\n        \\/       \\/                \\/        \\/\n     ____.____ ___.____________ ___________\n    |    |    |   \\   \\_   ___ \\\\_   _____/\n    |    |    |   /   /    \\  \\/ |    __)_\n/\\__|    |    |  /|   \\     \\____|        \\\n\\________|______/ |___|\\______  /_______  /\n                              \\/        \\/'
         nb = new-branch
         new-branch = "!f() { \
-          set -euxo pipefail; \
+          set -euo pipefail; \
           git co \"${2:-$(git primary-branch)}\"; \
           git up; \
           git co -b \"$1\"; \
@@ -92,13 +92,13 @@
           rebase-push; \
         }; f"
         rebase-push = "!f() { \
-          set -euxo pipefail; \
+          set -euo pipefail; \
           git full-rebase \"${1:-}\"; \
           git push -f; \
         }; f"
         rp = rebase-push
         rename-branch = "!f() { \
-          set -exuo pipefail; \
+          set -euo pipefail; \
           git co \"$1\"; \
           git co -b \"$2\"; \
           git branch -D \"$1\"; \
