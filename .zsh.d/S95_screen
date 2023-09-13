@@ -75,7 +75,7 @@ screen() {
     export COLUMNS=$oldcols
 }
 
-zsh_preexec_update_screen_title() {
+_zsh_preexec_update_screen_title() {
     if [[ -n $__EXPLICIT_SCREEN_TITLE ]]; then
         __set_screen_title "$__EXPLICIT_SCREEN_TITLE"
     else
@@ -95,7 +95,7 @@ zsh_preexec_update_screen_title() {
     fi
 }
 
-zsh_precmd_update_screen_title() {
+_zsh_precmd_update_screen_title() {
     if [[ $__RESET_SCREEN_TITLE == 1 ]]; then
         default_screen_title
         __RESET_SCREEN_TITLE=
@@ -104,8 +104,8 @@ zsh_precmd_update_screen_title() {
 
 if [[ -n $STY || $TERM[0,6] == "screen" ]]; then
     default_screen_title
-    preexec_functions[$((${#preexec_functions} + 1))]='zsh_preexec_update_screen_title'
-    precmd_functions[$((${#precmd_functions} + 1))]='zsh_precmd_update_screen_title'
+    add-zsh-hook preexec _zsh_preexec_update_screen_title
+    add-zsh-hook precmd _zsh_precmd_update_screen_title
 fi
 
 alias sx='screen -x'

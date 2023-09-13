@@ -5,7 +5,7 @@ __TOUCH_D=
 __AUTORELOAD_FILE=~/.zsh.d/.autoreload
 
 # automatically reload .zshrc when necessary.
-autoreload() {
+_autoreload() {
     # only run this once an hour at most
     if (( $(($(date +%s) - __AUTORELOAD_LAST_RUN)) > 3600 )); then
         if (( $(stat -c %Y ~/.zshrc) > __AUTORELOAD_LAST_RUN )); then
@@ -44,4 +44,4 @@ autoreload() {
     fi
 }
 
-preexec_functions[$((${#preexec_functions} + 1))]='autoreload'
+add-zsh-hook preexec _autoreload

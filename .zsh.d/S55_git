@@ -4,7 +4,7 @@ export __CURRENT_GIT_REPO=
 export __CURRENT_GIT_BRANCH=
 export __CURRENT_GIT_UNPUSHED=
 
-parse_git_repo() {
+_parse_git_repo() {
     export __CURRENT_GIT_REPO="$(git remote -v 2> /dev/null | \
         awk '/^origin[[:space:]].*\(fetch\)$/ {
                  split($2,a,"[:/]");
@@ -25,7 +25,7 @@ parse_git_repo() {
     fi
 }
 
-zsh_update_git_vars() {
+_zsh_update_git_vars() {
     case "$1" in
         *git*)
             parse_git_repo
@@ -36,7 +36,7 @@ zsh_update_git_vars() {
     esac
 }
 
-get_git_prompt_info() {
+_get_git_prompt_info() {
     if [[ -n $__CURRENT_GIT_REPO && -n $__CURRENT_GIT_BRANCH ]]; then
         if [[ $__CURRENT_GIT_UNPUSHED > 0 ]]; then
             echo "${PR_CYAN}${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH} ${PR_BRIGHT_CYAN}(${__CURRENT_GIT_UNPUSHED})${PR_RESET}"
@@ -56,9 +56,9 @@ if type git >& /dev/null; then
     # 1.  When this file is first loaded;
     # 2.  When a git command is run; and
     # 3.  When cd is run
-    parse_git_repo
-    preexec_functions[$(($#preexec_functions + 1))]='zsh_update_git_vars'
-    chpwd_functions[$(($#chpwd_functions + 1))]='parse_git_repo'
+    _parse_git_repo
+    add-zsh-hook preexec _zsh_update_git_vars
+    add-zsh-hook chpwd _parse_git_repo
 
     if type hub >& /dev/null; then
         eval "$(hub alias -s)"
