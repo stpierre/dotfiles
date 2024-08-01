@@ -8,7 +8,7 @@ _get_prompt() {
     local time="${PR_BRIGHT_YELLOW}%T${PR_RESET} "
 
     local venv="$(get_venv_prompt_info)"
-    local git_info="$(get_git_prompt_info)"
+    local git_info="$(_get_git_prompt_info)"
     local svn_info="$(get_svn_prompt_info)"
 
     if [[ -n $venv && ( -n $git_info || -n $svn_info ) ]]; then
@@ -50,7 +50,7 @@ _rprompt() {
 }
 
 _get_pwd_length() {
-    local prompt="$(get_venv_prompt_info)$PR_SEP$(get_git_prompt_info)$PR_SEP$(get_svn_prompt_info)"
+    local prompt="$(get_venv_prompt_info)$PR_SEP$(_get_git_prompt_info)$PR_SEP$(get_svn_prompt_info)"
     local zero='%([BSUbfksu]|([FB]|){*})'
     promptlength=${#${(S%%)prompt//$~zero/}}
     PR_PWDLEN=$((COLUMNS - promptlength))

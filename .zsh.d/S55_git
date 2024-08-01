@@ -28,10 +28,10 @@ _parse_git_repo() {
 _zsh_update_git_vars() {
     case "$1" in
         *git*)
-            parse_git_repo
+            _parse_git_repo
             ;;
         g\ *)
-            parse_git_repo
+            _parse_git_repo
             ;;
     esac
 }
