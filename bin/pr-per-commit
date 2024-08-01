@@ -14,18 +14,19 @@ set -euo pipefail
 
 SCRIPT=$(basename "$0")
 
+sleep=10
+reset=1
+
 usage() {
     cat <<EOUSAGE >&2
 Usage: $SCRIPT [-R] [-s <sleep>]
 Options:
-  -s <sleep>: Sleep for <sleep> seconds between PRs. Default: 60
+  -s <sleep>: Sleep for <sleep> seconds between PRs. Default: $sleep
   -R: Do not reset the main git branch to its upstream before creating
       branches for the PRs.
 EOUSAGE
 }
 
-sleep=60
-reset=1
 while getopts ":hRs:" opt; do
     case $opt in
         R)
@@ -51,18 +52,7 @@ if ! command -v hub >& /dev/null; then
     exit 2
 fi
 
-primary_branch=
-for candidate in master main devel; do
-    if git show-ref --verify --quiet refs/heads/"$candidate"; then
-        primary_branch="$candidate"
-        break
-    fi
-done
-if [[ -z "$primary_branch" ]]; then
-    echo "No primary branch found. Tried master, main, devel" 1>&2
-    exit 2;
-fi
-
+primary_branch="$(git primary-branch)"
 if command -v petname >& /dev/null; then
     random_suffix() {
         petname
@@ -79,7 +69,6 @@ if [[ $reset -eq 1 ]]; then
     git checkout "$primary_branch"
     git reset --hard "@{upstream}"
     git fetch --all
-    git fetch --tags --force
     git pull --rebase --ff-only
     git checkout "$parent_branch"
 fi
