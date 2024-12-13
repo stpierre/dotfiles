@@ -31,6 +31,4 @@ clean_retry() {
     find "$(git rev-parse --show-toplevel)" -name \*.retry | xargs rm
 }
 
-alias yarn=nodejs-yarn
-
 alias tf=terraform

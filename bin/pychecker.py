@@ -46,7 +46,7 @@ except ImportError:
 
 SCRIPT_NAME = os.path.basename(__file__)
 LOG = logging.getLogger(SCRIPT_NAME if __name__ == "__main__" else __name__)
-DEBUG = False
+DEBUG = True
 
 
 class RCFinder(object):

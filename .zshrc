@@ -13,8 +13,3 @@ for zshrc_snipplet in ~/.zsh.d/S[0-9][0-9]*; do
     fi
     source "$zshrc_snipplet"
 done
-
-autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /home/stpierre/bin/vault vault
-
-complete -o nospace -C /home/stpierre/bin/packer packer

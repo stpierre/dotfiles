@@ -23,3 +23,9 @@ if type xmodmap >& /dev/null; then
 fi
 
 __zsh_version=$(zsh --version | awk '{print $2}')
+
+if [[ $(uname) == "Darwin" ]]; then
+    __is_macos=true
+else
+    __is_macos=false
+fi

@@ -8,15 +8,9 @@
                          (pyenv-mode)
                          (jedi:setup)
                          (sphinx-doc-mode t)
-                         (python-black-on-save-mode)
                          (add-hook 'before-save-hook 'py-isort-before-save)
                          (flycheck-select-checker 'pylint-pychecker)
 	                 )))
-
-(use-package python-black
-  :demand t
-  :after python
-  :config (setq python-black-extra-args '("--line-length=79")))
 
 (use-package pyenv-mode
   :ensure t
@@ -39,6 +33,9 @@
   :ensure t)
 
 (use-package py-isort
+  :ensure t)
+
+(use-package poetry
   :ensure t)
 
 ;; flycheck settings

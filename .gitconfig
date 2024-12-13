@@ -70,20 +70,6 @@
         }; f"
         pu = "pull --rebase --ff-only"
         pull-push = "!git pu; git p"
-        # we frequently have local changes to dotfiles, so this makes
-        # it easier to pull and push commits
-        pulldot = "!f() { \
-          set -euo pipefail; \
-          git stash; \
-          git p; \
-          git stash apply; \
-        }; f"
-        pushdot = "!f() { \
-          set -euo pipefail; \
-          git stash; \
-          git pull-push; \
-          git stash apply; \
-        }; f"
         r = rebase
         rc = "rebase --continue"
         rebase-branch = "!f() { \
@@ -119,8 +105,9 @@
         status = "status --show-stash"
         u = up
         up = upstream
-        upstream = "!git remote -v | grep -q dotfiles || ( git reset --hard @{upstream}; git f; git pu )"
+        upstream = "!git reset --hard @{upstream}; git f; git pu"
         what-branch = "!git branch --no-color 2> /dev/null | sed -e '/^[^*]/d; s/^* //;'"
+        wherewasi = "!git checkout \"$(git branch --sort=-committerdate --format='%(refname:short)' | fzf +m)\""
 
 [push]
         default = current

@@ -22,19 +22,19 @@
 (setq default-frame-alist
       (append (list '(width  . 164)
                     '(height . 80)
-                    '(font . "liberation mono-9"))
+                    ;;                    '(font . "liberation mono-9")
+                    )
               default-frame-alist))
 
+;; (defun hidpi-font-on ()
+;;   "Convenience method for setting font size on HiDPI monitors."
+;;   (interactive)
+;;   (set-frame-font "liberation mono-11"))
 
-(defun hidpi-font-on ()
-  "Convenience method for setting font size on HiDPI monitors."
-  (interactive)
-  (set-frame-font "liberation mono-11"))
-
-(defun hidpi-font-off ()
-  "Convenience method for setting font size on HiDPI monitors."
-  (interactive)
-  (set-frame-font "liberation mono-9"))
+;; (defun hidpi-font-off ()
+;;   "Convenience method for setting font size on HiDPI monitors."
+;;   (interactive)
+;;   (set-frame-font "liberation mono-9"))
 
 (setq inhibit-startup-message t
       size-indication-mode t

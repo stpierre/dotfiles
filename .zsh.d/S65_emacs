@@ -1,22 +1,18 @@
 #!/bin/zsh
 
-# set this to 1 to use one emacs server per virtualenv.  anything else
-# uses a single emacs server for everything, and delegates venv
-# management to emacs itself.
-EMACS_SERVER_PER_VIRTUALENV=0
-
-function _emacs_server_name() {
-    if [[ $EMACS_SERVER_PER_VIRTUALENV == 1 && -n $VIRTUAL_ENV ]]; then
-        basename "$VIRTUAL_ENV"
-    else
-        echo server
-    fi
-}
+# once upon a time we had logic that would allow us to run multiple
+# emacs servers. that's unused, but since we had the logic below, it
+# makes sense to preserve that logic just in case we need it again
+_emacs_server_name=server
 
 function __start_emacs_server() {
     # start emacs server
-    name=$(_emacs_server_name)
-    for pid in $(pgrep -U "$USER" -f "$__emacs_bin"); do
+    name=$_emacs_server_name
+    if [[ $__is_macos == true ]]; then
+        pgrep -U "$USER" -i emacs
+    else
+        pgrep -U "$USER" -f "$__emacs_bin"
+    fi | while read -r pid; do
         if lsof -F n -a -U -p "$pid" | grep -q "^n.*/$name"; then
             # already running
             return
@@ -39,24 +35,52 @@ if type emacs >& /dev/null; then
     if type emacsclient >& /dev/null && [[ $__emacs_version -ge 23.1 ]]; then
         function emacs() {
             __start_emacs_server
-            args="-n -s $(_emacs_server_name)"
-            if [[ $(uname) == "Darwin" || -n $DISPLAY ]]; then
-                args="$args -c"
-            else
-                args="$args -t"
+            local args
+            args="-s $_emacs_server_name"
+            # check to see if any of -nw, -t, or --tty were provided
+            # as arugments. if they were, we respect them; if not, we
+            # figure out whether to open a new frame (and how)
+            if [[ ${@[(ie)-nw]} -gt ${#@} && ${@[(ie)-t]} -gt ${#@} && ${@[(ie)--tty]} -gt ${#@} ]]; then
+                if [[ $__is_macos == true ]]; then
+                    # on Mac OS, the frame behavior is broken and it
+                    # won't reuse a frame if `-r` is given, but it
+                    # also won't open a new frame *unless* `-c` is
+                    # given. see
+                    # https://emacs.stackexchange.com/questions/79292/why-is-emacsclient-not-reusing-the-existing-frame
+                    local gui_frames
+                    gui_frames=$(emacsclient -e -s server '(visible-frame-list)' | \
+                                     sed 's/^(#<frame //; s/)$//; s/ 0x[0-9a-f]*>//g; s/ #<frame /\n/;' | \
+                                     grep -v '^F[0-9]*$')
+                    if [[ -z $gui_frames ]]; then
+                        args="$args -n -c"
+                    fi
+                elif [[ -n $DISPLAY ]]; then
+                    # on linux, if we have a GUI, `-c` Just Works
+                    # (although it seems like maybe we should use `-r`
+                    # here instead?)
+                    args="$args -n -c"
+                else
+                    # no GUI, run in the terminal. we have to omit the
+                    # `-n` flag, which causes emacsclient to exit
+                    # immediately; that's great for GUI emacs, but not
+                    # so much for the terminal.
+                    args="$args -t"
+                fi
             fi
             args="$args $@"
             emacsclient ${=args}
         }
 
         function emacs-kill() {
-            emacsclient -e -s "$(_emacs_server_name)" '(kill-emacs)'
+            emacsclient -e -s "$_emacs_server_name" '(kill-emacs)'
         }
 
         export ALTERNATIVE_EDITOR=""
     fi
+
     export EDITOR="emacs -nw"
     alias emcas=emacs
+    alias vi=$EDITOR
 elif type vim >& /dev/null; then
     export EDITOR=vim
     alias emcas=$EDITOR
@@ -64,8 +88,6 @@ else
     export EDITOR=vi
     alias emcas=$EDITOR
 fi
-
-alias vi=$EDITOR
 
 # don't use python inside a virtualenv to run pymacs
 export PYMACS_PYTHON=$(which python)

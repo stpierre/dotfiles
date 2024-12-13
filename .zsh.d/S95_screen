@@ -70,8 +70,8 @@ default_screen_title() {
 screen() {
     # some commands run within screen change the value of $COLUMNS, so
     # we save that variable and then restore it
-    oldcols=$COLUMNS
-    /usr/bin/screen "$@"
+    local oldcols=$COLUMNS
+    command screen "$@"
     export COLUMNS=$oldcols
 }
 

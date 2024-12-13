@@ -91,3 +91,16 @@
 (mapc 'load
       (cl-remove-if (lambda (p) (string= (file-name-nondirectory p) "init.el"))
                     (file-expand-wildcards "~/.emacs.d/*.el")))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(kotlin-mode python-black poetry kotlin-ts-mode yaml-mode highlight-indent-guides solarized-theme terraform-mode sqlformat rpm-spec-mode window-jump sphinx-doc scss-mode pyvenv python-mode pyenv-mode py-isort markdown-mode legalese know-your-http-well just-mode json-mode jedi httprepl groovy-mode graphviz-dot-mode gotest go-mode flycheck-color-mode-line dumb-jump dockerfile-mode backup-each-save auto-complete-rst auto-complete-nxml)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

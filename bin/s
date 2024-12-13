@@ -4,6 +4,8 @@
 
 set -euo pipefail
 
+search_paths=(~/devel ~/cortex)
+
 if [[ $# == 1 ]]; then
     name="${1:-}"
     # some versions of screen -ls are broken; in non-interactive shells,
@@ -23,9 +25,25 @@ if [[ $# == 1 ]]; then
         screen -S "$name" -c "$screen_config"
     else
         if [[ -e ~/venv/"$name" ]]; then
-            venv-screen "$name"
+            screen -dm -S "$name"
+            for i in $(seq 0 4); do
+                screen -S "$name" -p $i -X stuff "workon $name"$'\n'
+            done
+            screen -S "$name" -p 0 -X stuff "screen_title py; ptpython"$'\n'
+            screen -dr "$name"
         else
-            # just start a new dumb screen
+            for base in "${search_paths[@]}"; do
+                if [[ -d "$base"/"$name" ]]; then
+                    screen -dm -S "$name"
+                    for i in $(seq 0 4); do
+                        screen -S "$name" -p $i -X stuff "screen_title $name; cd $base/$name"$'\n'
+                    done
+                    screen -dr "$name"
+                    exit 0
+                fi
+            done
+            # we've fallen off the end of the loop without finding a
+            # thing to work on, so just start a new dumb screen
             screen -S "$name"
         fi
     fi

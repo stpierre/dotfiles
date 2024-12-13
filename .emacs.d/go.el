@@ -14,4 +14,5 @@
                 standard-indent 2)
   :hook (go-mode . csp/golang-customizations))
 
-(use-package gotest :ensure t)
+(use-package gotest
+  :ensure t)
