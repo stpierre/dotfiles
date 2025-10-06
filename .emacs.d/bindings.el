@@ -15,10 +15,6 @@
 (global-set-key "\M-[" 'backward-paragraph)
 (global-set-key "\M-]" 'forward-paragraph)
 
-;; set C-c, c to comment-region and C-c, u to uncomment-region
-(global-set-key "\C-cc" 'comment-region)
-(global-set-key "\C-cu" 'uncomment-region)
-
 ;; set C-c, p to point-to-register (current [p]oint to register) and
 ;; C-c, j to [j]ump-to-register
 (global-set-key "\C-cp" 'point-to-register)
@@ -31,3 +27,23 @@
          ("C-c w <down>" . window-jump-down)
          ("C-c w <left>" . window-jump-left)
          ("C-c w <right>" . window-jump-right)))
+
+(with-eval-after-load 'prog-mode
+  (define-key prog-mode-map (kbd "C-c c") 'comment-region)
+  (define-key prog-mode-map (kbd "C-c u") 'uncomment-region))
+
+;; define unfill commands (http://www.emacswiki.org/emacs/UnfillParagraph)
+(defun unfill-paragraph ()
+  "Make multi-line paragraph into a single line of text."
+  (interactive)
+  (let ((fill-column (point-max)))
+    (fill-paragraph nil)))
+
+(defun unfill-region ()
+  "Unfill all paragraphs in region."
+  (interactive)
+  (let ((fill-column (point-max)))
+    (fill-region (region-beginning) (region-end) nil)))
+
+(define-key global-map "\M-Q" 'unfill-paragraph)
+(define-key global-map "\M-\C-q" 'unfill-region)

@@ -1,4 +1,6 @@
-(defun csp/golang-customizations ()
+(defun golang-customizations ()
+  (eglot-ensure)
+  
   (subword-mode 1)
 
   (setq display-fill-column-indicator-character ?\u2502)
@@ -12,7 +14,4 @@
   :ensure t
   :config (setq tab-width 2
                 standard-indent 2)
-  :hook (go-mode . csp/golang-customizations))
-
-(use-package gotest
-  :ensure t)
+  :hook (go-mode . golang-customizations))

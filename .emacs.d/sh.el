@@ -3,3 +3,7 @@
 (with-current-buffer
     (generate-new-buffer "*sh-scratch*")
   (sh-mode))
+
+(add-hook 'sh-mode-hook 'eglot-ensure)
+
+;;  (add-to-list 'eglot-server-programs '((sh-mode bash-ts-mode) . ("bash-language-server" "start")))

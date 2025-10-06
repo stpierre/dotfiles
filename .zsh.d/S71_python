@@ -2,15 +2,6 @@
 
 export PIP_DOWNLOAD_CACHE=~/.pip_downloads
 
-if [[ ! -e "$HOME"/.pyenv ]]; then
-    echo "Installing pyenv"
-    curl https://pyenv.run | bash
-fi
-
-export PATH="$HOME/.pyenv/bin:$PATH"
-eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
-
 clean_pyc() {
     if [[ -z $1 ]]; then
         dir=$(pwd)

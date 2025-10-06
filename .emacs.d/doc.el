@@ -3,9 +3,7 @@
 ;; automatically include licenses
 (use-package legalese :ensure t)
 
-(use-package markdown-mode
-  :ensure t
-  :hook (rst-mode . (lambda () (flyspell-mode 1))))
+(use-package markdown-mode :ensure t)
 
 (add-hook 'rst-mode-hook
           #'(lambda () (flyspell-mode 1)))

@@ -8,8 +8,12 @@
 
 (require 'package)
 (setq package-quickstart t)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(add-to-list 'package-archives '("elpa" . "https://elpa.gnu.org/packages/") t)
+(add-to-list
+ 'package-archives '("melpa" . "https://melpa.org/packages/")
+ t)
+(add-to-list
+ 'package-archives '("elpa" . "https://elpa.gnu.org/packages/")
+ t)
 
 (when (not package-archive-contents)
   (package-refresh-contents))
@@ -20,26 +24,23 @@
 ;; install use-package, which is *wonderful*
 (require 'use-package)
 
-(require 'uniquify)
 (require 'saveplace)
+(setq save-place t)
 
 (setq
  auto-save-default nil
- make-backup-files nil
  echo-keystrokes 0.1
- enable-local-variables :all
+ imenu-auto-rescan t
+ imenu-flatten "annotation"
  initial-major-mode 'fundamental-mode
  initial-scratch-message ""
- uniquify-buffer-name-style 'post-forward-angle-brackets
- uniquify-after-kill-buffer-p t
- uniquify-ignore-buffers-re "^\\*"
+ make-backup-files nil
  require-final-newline t
  show-trailing-whitespace t)
 
 (setq-default
  indent-tabs-mode nil
- case-fold-search t
- save-place t)
+ case-fold-search t)
 
 ;; set user-emacs-directory on older versions of emacs
 (if (not (boundp 'user-emacs-directory))
@@ -47,7 +48,8 @@
 
 ;; add a place to put custom packages that aren't in ELPA/MELPA
 (if (file-exists-p user-emacs-directory)
-    (add-to-list 'load-path (concat user-emacs-directory "/packages")))
+    (add-to-list
+     'load-path (concat user-emacs-directory "/packages")))
 
 (auto-fill-mode nil)
 
@@ -85,19 +87,28 @@
 (use-package dumb-jump :ensure t)
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
 
-(use-package find-file-in-repository
-  :bind (("C-x f" . find-file-in-repository)))
+(use-package corfu :ensure t :hook ((prog-mode . corfu-mode)))
 
-(mapc 'load
-      (cl-remove-if (lambda (p) (string= (file-name-nondirectory p) "init.el"))
-                    (file-expand-wildcards "~/.emacs.d/*.el")))
+(use-package
+ emacs
+ :ensure t
+ :custom (tab-always-indent 'complete)
+ (read-extended-command-predicate
+  #'command-completion-default-include-p))
+
+(mapc
+ 'load
+ (cl-remove-if
+  (lambda (p)
+    (string= (file-name-nondirectory p) "init.el"))
+  (file-expand-wildcards "~/.emacs.d/*.el")))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(kotlin-mode python-black poetry kotlin-ts-mode yaml-mode highlight-indent-guides solarized-theme terraform-mode sqlformat rpm-spec-mode window-jump sphinx-doc scss-mode pyvenv python-mode pyenv-mode py-isort markdown-mode legalese know-your-http-well just-mode json-mode jedi httprepl groovy-mode graphviz-dot-mode gotest go-mode flycheck-color-mode-line dumb-jump dockerfile-mode backup-each-save auto-complete-rst auto-complete-nxml)))
+ '(package-selected-packages nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

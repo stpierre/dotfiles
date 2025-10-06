@@ -20,8 +20,12 @@ pathremove ()  {
         sed 's/:$//')
 }
 
-if [ -e ~/bin ]; then
+if [[ -e ~/bin ]]; then
     pathmunge ~/bin
+fi
+
+if [[ -e ~/.local/bin ]]; then
+    pathmunge ~/.local/bin
 fi
 
 # these need to go after /usr/bin to make mock work properly
