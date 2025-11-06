@@ -1,2 +1,5 @@
 alias k=kubectl
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+
+if [[ -d ${KREW_ROOT:-$HOME/.krew} ]]; then
+   pathmunge "${KREW_ROOT:-$HOME/.krew}/bin"
+fi

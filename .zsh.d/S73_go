@@ -1,2 +1,4 @@
-export GOPATH=$HOME/go
-pathmunge $GOPATH/bin
+if [[ -e "$HOME/go" ]]; then
+  export GOPATH=$HOME/go
+  pathmunge "$GOPATH"/bin
+fi

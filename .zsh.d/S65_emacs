@@ -38,21 +38,25 @@ if type emacs >& /dev/null; then
             local args
             args="-s $_emacs_server_name"
             # check to see if any of -nw, -t, or --tty were provided
-            # as arugments. if they were, we respect them; if not, we
+            # as arguments. if they were, we respect them; if not, we
             # figure out whether to open a new frame (and how)
-            if [[ ${@[(ie)-nw]} -gt ${#@} && ${@[(ie)-t]} -gt ${#@} && ${@[(ie)--tty]} -gt ${#@} ]]; then
+            if [[ ${@[(ie)-nw]} -gt ${#@} && \
+                      ${@[(ie)-t]} -gt ${#@} && \
+                      ${@[(ie)--tty]} -gt ${#@} ]]; then
                 if [[ $__is_macos == true ]]; then
+                    args="$args -n"
                     # on Mac OS, the frame behavior is broken and it
                     # won't reuse a frame if `-r` is given, but it
                     # also won't open a new frame *unless* `-c` is
                     # given. see
                     # https://emacs.stackexchange.com/questions/79292/why-is-emacsclient-not-reusing-the-existing-frame
                     local gui_frames
-                    gui_frames=$(emacsclient -e -s server '(visible-frame-list)' | \
+                    gui_frames=$(emacsclient -e -s "$_emacs_server_name" \
+                                             '(visible-frame-list)' | \
                                      sed 's/^(#<frame //; s/)$//; s/ 0x[0-9a-f]*>//g; s/ #<frame /\n/;' | \
                                      grep -v '^F[0-9]*$')
                     if [[ -z $gui_frames ]]; then
-                        args="$args -n -c"
+                        args="$args -c"
                     fi
                 elif [[ -n $DISPLAY ]]; then
                     # on linux, if we have a GUI, `-c` Just Works
@@ -88,6 +92,3 @@ else
     export EDITOR=vi
     alias emcas=$EDITOR
 fi
-
-# don't use python inside a virtualenv to run pymacs
-export PYMACS_PYTHON=$(which python)

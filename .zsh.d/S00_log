@@ -1,3 +1,5 @@
+#!/bin/zsh
+
 _ZSHRC_LOGDIR=$HOME/.zshrc.log
 
 _zshrc_log() {

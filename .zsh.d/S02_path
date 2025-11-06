@@ -1,10 +1,10 @@
 #!/bin/zsh
 
-_zshrc_log "PATH: $PATH"
+_zshrc_log "Starting PATH: $PATH"
 
-pathmunge () {
+pathmunge() {
     if ! echo "$PATH" | grep -Eq "(^|:)$1(\$|:)" ; then
-	if [ "$2" = "after" ] ; then
+	if [[ ${2:-} == "after" ]]; then
             _zshrc_log "Adding $1 to end of PATH"
 	    PATH=$PATH:$1
 	else
@@ -14,23 +14,33 @@ pathmunge () {
     fi
 }
 
-pathremove ()  {
+pathremove() {
     _zshrc_log "Removing $1 from PATH"
     export PATH=$(echo -n "$PATH" | awk -v RS=: -v ORS=: '$0 != "'"$1"'"' | \
-        sed 's/:$//')
+                      sed 's/:$//')
 }
 
-if [[ -e ~/bin ]]; then
-    pathmunge ~/bin
-fi
+for binpath in "$HOME/bin" "$HOME/.local/bin"; do
+    if [[ -e $binpath ]]; then
+        _zshrc_log "$binpath exists, adding to PATH"
+        pathmunge "$binpath"
+    else
+        _zshrc_log "$binpath does not exist"
+    fi
+done
 
-if [[ -e ~/.local/bin ]]; then
-    pathmunge ~/.local/bin
-fi
+HOMEBREW_HOME=/opt/homebrew
 
-# these need to go after /usr/bin to make mock work properly
-pathmunge /sbin after
-pathmunge /usr/sbin after
+if [[ -e $HOMEBREW_HOME ]]; then
+    _zshrc_log "Moving $HOMEBREW_HOME/bin to front of PATH"
+    pathremove "$HOMEBREW_HOME/bin"
+    pathmunge "$HOMEBREW_HOME/bin"
+
+    find "$HOMEBREW_HOME/Cellar" -type d -name gnubin | \
+        while read -r gnubin_path; do
+            pathmunge "$gnubin_path"
+        done
+fi
 
 [ -e "$HOME"/.zsh.d/path.local ] && source "$HOME"/.zsh.d/path.local
 
