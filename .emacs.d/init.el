@@ -40,7 +40,8 @@
 
 (setq-default
  indent-tabs-mode nil
- case-fold-search t)
+ case-fold-search t
+ fill-column 79)
 
 ;; set user-emacs-directory on older versions of emacs
 (if (not (boundp 'user-emacs-directory))
@@ -87,7 +88,9 @@
 (use-package dumb-jump :ensure t)
 (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
 
-(use-package corfu :ensure t :hook ((prog-mode . corfu-mode)))
+(use-package corfu
+  :ensure t
+  :hook ((prog-mode . corfu-mode)))
 
 (use-package
  emacs

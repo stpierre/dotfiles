@@ -28,10 +28,6 @@
          ("C-c w <left>" . window-jump-left)
          ("C-c w <right>" . window-jump-right)))
 
-(with-eval-after-load 'prog-mode
-  (define-key prog-mode-map (kbd "C-c c") 'comment-region)
-  (define-key prog-mode-map (kbd "C-c u") 'uncomment-region))
-
 ;; define unfill commands (http://www.emacswiki.org/emacs/UnfillParagraph)
 (defun unfill-paragraph ()
   "Make multi-line paragraph into a single line of text."

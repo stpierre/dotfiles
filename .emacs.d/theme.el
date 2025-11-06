@@ -6,35 +6,44 @@
 (put 'scroll-left 'disabled nil)
 
 ;; set font
-(defun font-exists (font-name)
+(defun font-exists-p (font-name)
   "Return t if FONT-NAME exists, nil otherwise."
   (if (functionp 'font-family-list)
-      (member font-name (font-family-list))
+      (> (length (member font-name (font-family-list))) 0)
     nil))
 
-;; TODO: really need to make this autodiscover the best font to use,
-;; but I ran into strange issues with that. on OS X this (and the
-;; other references below) should be Andale Mono
-(if (font-exists "liberation mono")
-    (set-face-attribute 'default nil :font "liberation mono" :height 90))
+(defun default-font ()
+  "Discover the default font to use."
+  (if (font-exists-p "liberation mono")
+      "liberation mono"
+    (if (font-exists-p "Monaco")
+        "Monaco")))
+;; todo add an else here in case neither exists
 
-;; set initial window size
-(setq default-frame-alist
-      (append (list '(width  . 164)
-                    '(height . 80)
-                    '(font . "liberation mono-9")
-                    )
-              default-frame-alist))
+(defun default-font-size ()
+  "Discover the default font size to use."
+  (if (eq (default-font) "liberation mono")
+      9 ;; linux, adjust for hidpi monitor
+    11)) ;; mac os
 
 (defun hidpi-font-on ()
   "Convenience method for setting font size on HiDPI monitors."
   (interactive)
-  (set-frame-font "liberation mono-11"))
+  (set-frame-font (concat (default-font) "-11")))
 
 (defun hidpi-font-off ()
   "Convenience method for setting font size on HiDPI monitors."
   (interactive)
-  (set-frame-font "liberation mono-9"))
+  (set-frame-font (concat (default-font) "-9")))
+
+;;(set-face-attribute 'default nil
+;;                    :family (default-font)
+;;                    :height (* 10 (default-font-size)))
+
+;; set initial window size
+(setq default-frame-alist
+     '((width  . 164)
+       (height . 80)))
 
 (setq inhibit-startup-message t
       size-indication-mode t

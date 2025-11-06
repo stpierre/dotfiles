@@ -1,17 +1,16 @@
 (defun golang-customizations ()
   (eglot-ensure)
   
+  (add-hook 'before-save-hook #'gofmt nil t)
+  
   (subword-mode 1)
 
-  (setq display-fill-column-indicator-character ?\u2502)
-  (display-fill-column-indicator-mode +1)
-
-  (when (executable-find "gofumpt") (setq gofmt-command "gofumpt"))
-
-  (gofmt-before-save))
+  (setq tab-width 2)
+  (setq standard-indent 2)
+  
+  (when (executable-find "gofumpt")
+    (setq gofmt-command "gofumpt")))
 
 (use-package go-mode
   :ensure t
-  :config (setq tab-width 2
-                standard-indent 2)
   :hook (go-mode . golang-customizations))
