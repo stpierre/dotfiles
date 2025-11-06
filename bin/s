@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-search_paths=(~/devel ~/cortex)
+search_paths=(~/devel ~/temporal)
 
 if [[ $# == 1 ]]; then
     name="${1:-}"
