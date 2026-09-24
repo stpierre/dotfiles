@@ -1,6 +1,9 @@
 #!/bin/zsh
 
 export PIP_DOWNLOAD_CACHE=~/.pip_downloads
+export PROJECT_HOME=~/devel
+export VIRTUAL_ENV_DISABLE_PROMPT=1
+export NODE_VIRTUAL_ENV_DISABLE_PROMPT=1
 
 clean_pyc() {
     if [[ -z $1 ]]; then
@@ -15,3 +18,23 @@ clean_pyc() {
 if [[ -e $HOME/.poetry/env ]]; then
     source $HOME/.poetry/env
 fi
+
+_get_venv_prompt_info() {
+    if [[ -n $VIRTUAL_ENV ]]; then
+        basename "$VIRTUAL_ENV"
+    fi
+}
+
+venv_install_node_js() {
+    if [[ -z $VIRTUAL_ENV ]]; then
+        echo "This command must be run inside an active virtual environment"
+        exit 1
+    fi
+    pip install nodeenv
+    nodeenv -p
+    proj=$VIRTUAL_ENV
+    deactivate
+    workon "$proj"
+}
+
+add_prompt_hook _get_venv_prompt_info

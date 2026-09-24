@@ -40,6 +40,11 @@ if [[ -e $HOMEBREW_HOME ]]; then
         while read -r gnubin_path; do
             pathmunge "$gnubin_path"
         done
+
+    site_functions="$HOMEBREW_HOME"/share/zsh/site-functions
+    if [[ -e $site_functions ]]; then
+        pathmunge "$site_functions"
+    fi
 fi
 
 [ -e "$HOME"/.zsh.d/path.local ] && source "$HOME"/.zsh.d/path.local

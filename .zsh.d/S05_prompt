@@ -1,0 +1,67 @@
+#!/bin/zsh
+
+setopt prompt_subst
+
+nbsp=$'\u00A0'
+
+declare -a _prompt_hooks=()
+declare -a _rprompt_hooks=()
+
+_prompt_colors=(blue cyan green yellow magenta)
+_prompt_sep=" %F{blue}|%f "
+
+add_prompt_hook() {
+    if [[ $1 == "--right" ]]; then
+        local hook_func=$2
+        if ! (( $_rprompt_hooks[(Ie)$hook_func] )); then
+            _zshrc_log "Registering right prompt hook $hook_func"
+            _rprompt_hooks+=("$hook_func")
+        fi
+    else
+        local hook_func=$1
+        if ! (( $_prompt_hooks[(Ie)$hook_func] )); then
+            _zshrc_log "Registering prompt hook $hook_func"
+            _prompt_hooks+=("$hook_func")
+        fi
+    fi
+}
+
+_lprompt() {
+    local time="%B%F{yellow}%T%f%b"
+
+    i=1
+    local prompt_data=("%F{${_prompt_colors[i]}}%~%f")
+    for hook in ${_prompt_hooks[@]}; do
+        local data="$("$hook")"
+        if [[ -n "$data" ]]; then
+            i=$(((i % ${#_prompt_colors}) + 1))
+            prompt_data+=("%F{${_prompt_colors[i]}}$data%f")
+        fi
+    done
+    # todo: switch to single-line prompt when there's not much data
+    local retval="%(?##%F{red}[%?]%f)"
+    echo "${(pj:$_prompt_sep:)prompt_data}
+$time $retval%#$nbsp"
+}
+
+_rprompt() {
+    local prompt_data=()
+    i=1
+    for hook in ${_rprompt_hooks[@]}; do
+        local data="$("$hook")"
+        if [[ -n "$data" ]]; then
+            prompt_data+=("%F{${_prompt_colors[i]}}$data%f")
+            i=$(((i % ${#_prompt_colors}) + 1))
+        fi
+    done
+    echo "${(pj:$_prompt_sep:)prompt_data}"
+}
+
+export PROMPT='$(_lprompt)'
+export RPROMPT='$(_rprompt)'
+
+# our prompt ends with a non-breaking space. this makes it clear the
+# input buffer, so we can triple-click to copy and paste full
+# lines. See #4 at
+# http://chneukirchen.org/blog/archive/2013/03/10-fresh-zsh-tricks-you-may-not-know.html
+bindkey -s "$nbsp" '^u'

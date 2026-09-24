@@ -1,27 +1,44 @@
 #!/bin/zsh
 
-export __CURRENT_GIT_REPO=
-export __CURRENT_GIT_BRANCH=
-export __CURRENT_GIT_UNPUSHED=
+_current_git_repo=
+_current_git_branch=
+_current_git_unpushed=
+
+_has_gh=
+if type gh >& /dev/null; then
+    _has_gh=1
+fi
 
 _parse_git_repo() {
-    export __CURRENT_GIT_REPO="$(git remote -v 2> /dev/null | \
-        awk '/^origin[[:space:]].*\(fetch\)$/ {
-                 split($2,a,"[:/]");
-                 sub(/\.git$/, "", a[length(a)]);
-                 print a[length(a)]; }' | \
-        tail -n 1)"
-    if [[ -n $__CURRENT_GIT_REPO && $__CURRENT_GIT_REPO != "dotfiles" ]]; then
-        export __CURRENT_GIT_BRANCH="$(git what-branch)"
+    if [[ $_has_gh -eq 1 ]]; then
+        _current_git_repo="$(gh repo view --json nameWithOwner -q .nameWithOwner 2> /dev/null)"
+    fi
+    if [[ -z $_current_git_repo && -d .git ]]; then
+        _current_git_repo="$(git remote -v 2> /dev/null | \
+          awk '/^origin[[:space:]].*\(fetch\)$/ {
+                   split($2,a,"[:/]");
+                   sub(/\.git$/, "", a[length(a)]);
+                   print a[length(a)]; }' | \
+          tail -n 1)"
+        if [[ -z $_current_git_repo ]]; then
+            _current_git_repo="$(basename "$(pwd)")"
+        fi
+    fi
+
+    if [[ -n $_current_git_repo && \
+              $_current_git_repo != "dotfiles" && \
+              $_current_git_repo != */dotfiles \
+        ]]; then
+        _current_git_branch="$(git what-branch)"
         local _unpushed="$(git log @{u}.. --oneline 2>&1)"
         if [[ -n $_unpushed ]] && ! echo "$_unpushed" | grep -q fatal; then
-            export __CURRENT_GIT_UNPUSHED="$(echo $_unpushed | wc -l | tr -d ' ')"
+            _current_git_unpushed="$(echo $_unpushed | wc -l | tr -d ' ')"
         else
-            export __CURRENT_GIT_UNPUSHED=
+            _current_git_unpushed=
         fi
     else
-        export __CURRENT_GIT_BRANCH=
-        export __CURRENT_GIT_UNPUSHED=
+        _current_git_branch=
+        _current_git_unpushed=
     fi
 }
 
@@ -37,16 +54,17 @@ _zsh_update_git_vars() {
 }
 
 _get_git_prompt_info() {
-    if [[ -n $__CURRENT_GIT_REPO && -n $__CURRENT_GIT_BRANCH ]]; then
-        if [[ $__CURRENT_GIT_UNPUSHED > 0 ]]; then
-            echo "${PR_CYAN}${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH} ${PR_BRIGHT_CYAN}(${__CURRENT_GIT_UNPUSHED})${PR_RESET}"
-        else
-            echo "${PR_CYAN}${__CURRENT_GIT_REPO}:${__CURRENT_GIT_BRANCH}${PR_RESET}"
+    if [[ -n $_current_git_repo && -n $_current_git_branch ]]; then
+        echo -n "$_current_git_repo:$_current_git_branch"
+        if [[ $_current_git_unpushed > 0 ]]; then
+            echo -n " %B($_current_git_unpushed)%b"
         fi
     fi
 }
 
 if type git >& /dev/null; then
+    add_prompt_hook _get_git_prompt_info
+
     if [[ $(type git) == "git is a shell function" ]]; then
         unfunction git
     fi
@@ -63,11 +81,11 @@ if type git >& /dev/null; then
     if type hub >& /dev/null; then
         eval "$(hub alias -s)"
     fi
-fi
 
-alias g=git
-alias gg='git grep'
-alias grim='git rebase -i master'
-alias grp='git rebase-push'
-alias gs='git status'
-alias gu='git up'
+    alias g=git
+    alias gg='git grep'
+
+    if type git-spice >& /dev/null; then
+        alias gs='git spice'
+    fi
+fi
