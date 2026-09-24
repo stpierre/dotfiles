@@ -1,7 +1,6 @@
-;; solarized == teh business
 (use-package solarized-theme
   :ensure t
-  :init (load-theme 'solarized-light t))
+  :init (load-theme 'solarized-dark t))
 
 (put 'scroll-left 'disabled nil)
 
