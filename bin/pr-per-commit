@@ -2,36 +2,25 @@
 #
 # Enter one PR per commit on the current branch.
 #
-# Sleeps between each PR to avoid overloading CI. This branch is
-# compared with either `master` or `main`, depending on which exists.
-#
-# https://github.com/github/hub must be installed and available on
-# your $PATH.
-#
-# Install https://github.com/go-petname/petname for cuter branch names.
+# Optionally sleeps between each PR to avoid overloading CI. This branch is
+# compared with the primary branch as found by `git primary-branch`
 
 set -euo pipefail
 
 SCRIPT=$(basename "$0")
 
-sleep=10
-reset=1
+sleep=0
 
 usage() {
     cat <<EOUSAGE >&2
-Usage: $SCRIPT [-R] [-s <sleep>]
+Usage: $SCRIPT [-s <sleep>]
 Options:
-  -s <sleep>: Sleep for <sleep> seconds between PRs. Default: $sleep
-  -R: Do not reset the main git branch to its upstream before creating
-      branches for the PRs.
+  -s <sleep>: Sleep for <sleep> seconds between PRs. Default: ${sleep}s
 EOUSAGE
 }
 
-while getopts ":hRs:" opt; do
+while getopts ":hs:" opt; do
     case $opt in
-        R)
-            reset=
-            ;;
         s)
             sleep=$OPTARG
             ;;
@@ -47,47 +36,17 @@ while getopts ":hRs:" opt; do
 done
 shift $((OPTIND - 1))
 
-if ! command -v hub >& /dev/null; then
-    echo "'hub' command not found in PATH. Please install it from https://github.com/github/hub!" >&2
-    exit 2
-fi
-
+current_branch="$(git rev-parse --abbrev-ref HEAD)"
 primary_branch="$(git primary-branch)"
-if command -v petname >& /dev/null; then
-    random_suffix() {
-        petname
-    }
-else
-    random_suffix() {
-        date +%s
-    }
-fi
-
-parent_branch=$(git rev-parse --abbrev-ref HEAD)
-
-if [[ $reset -eq 1 ]]; then
-    git checkout "$primary_branch"
-    git reset --hard "@{upstream}"
-    git fetch --all
-    git pull --rebase --ff-only
-    git checkout "$parent_branch"
-fi
 
 remaining=$(git cherry "$primary_branch" | grep -c '^+')
 git cherry "$primary_branch" | awk '/^+/ { print $NF }' | \
     while read -r hash; do
-        suffix=$(git log -n 1 --pretty=format:%s "$hash" | \
-                     sed -E 's/(\[([^][]*)\])?.*/\2/')
-        if [[ -z $suffix ]]; then
-            suffix=$(random_suffix)
-        else
-            suffix="$suffix"-"$(random_suffix)"
+        if [[ $current_branch != "HEAD" ]]; then
+            git checkout "$current_branch"
         fi
 
-        git checkout "$primary_branch"
-        git checkout -b "$parent_branch"-"$suffix"
-        git cherry-pick "$hash"
-        hub pull-request --push --no-edit --draft
+        pr-from-commit "$hash"
 
         remaining=$((remaining - 1))
         if [[ $remaining -gt 0 ]]; then

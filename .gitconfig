@@ -20,9 +20,28 @@
         cia = "ci -a"
         co = checkout
         d = diff
+        dependabot-list = "!gh search prs --repo \"$(git gh-repo)\" --label dependencies --state open --json url --jq '.[] | .url'"
+        dependabot-merge = "!git dependabot-list | while read -r url; do \
+          if [[ -z $(gh pr checks \"$url\" --json state --jq '.[] | select(.state == \"FAILURE\")') ]]; then \
+            gh pr merge --auto --squash \"$url\"; \
+            gh pr review --approve \"$url\"; \
+          else \
+            echo \"$url has failed checks, skipping\" >&2; \
+          fi; \
+        done"
+        dependabot-rebase = "!git dependabot-list | xargs -I '{}' gh pr comment {} -b '@dependabot rebase'"
         f = "!git fetch --all; git fetch --tags --force"
         fixup = cia --amend --no-edit
         fr = full-rebase
+        frim = "!f() { \
+          set -euo pipefail; \
+          branch=$(git what-branch); \
+          parent=$(git primary-branch); \
+          git co \"$parent\"; \
+          git upstream; \
+          git co \"$branch\"; \
+          git rebase -i \"$parent\"; \
+        }; f"
         fu = fixup
         full-rebase = "!f() { \
           set -euo pipefail; \
@@ -31,9 +50,10 @@
           git co \"$parent\"; \
           git upstream; \
           git co \"$branch\"; \
-          git rebase \"$parent\"; \
+          git-smart-rebase \"$parent\"; \
         }; f"
         g = grep
+        gh-repo = "!gh repo view --json nameWithOwner -q .nameWithOwner"
         h = hist
         hist = "log --color --pretty=format:'%Cred%h%Creset %C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
         low = !echo '___________________ ____ __________   ____  __.\n\\_   ___ \\______   \\    |   \\      \\ |    |/ _|\n/    \\  \\/|       _/    |   /   |   \\|      <\n\\     \\___|    |   \\    |  /    |    \\    |  \\\n \\______  /____|_  /______/\\____|__  /____|__ \\\n        \\/       \\/                \\/        \\/\n     ____.____ ___.____________ ___________\n    |    |    |   \\   \\_   ___ \\\\_   _____/\n    |    |    |   /   /    \\  \\/ |    __)_\n/\\__|    |    |  /|   \\     \\____|        \\\n\\________|______/ |___|\\______  /_______  /\n                              \\/        \\/'
@@ -133,3 +153,9 @@
 
 [advice]
         skippedCherryPicks = false
+
+[url "ssh://git@github.com/"]
+        insteadOf = https://github.com/
+
+[spice "submit"]
+	draft = true
