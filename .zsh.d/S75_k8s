@@ -1,5 +1,0 @@
-alias k=kubectl
-
-if [[ -d ${KREW_ROOT:-$HOME/.krew} ]]; then
-   pathmunge "${KREW_ROOT:-$HOME/.krew}/bin"
-fi

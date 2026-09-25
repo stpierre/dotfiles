@@ -1,4 +1,0 @@
-#!/bin/zsh
-
-# remove duplicates from hooks
-typeset -U preexec_functions precmd_functions postexec_functions postcmd_functions chpwd_functions

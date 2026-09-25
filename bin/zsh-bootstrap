@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+#
+# Install oh-my-zsh and the external zsh plugins that ~/.zshrc expects. Safe
+# to re-run: anything already present is left alone. This deliberately does
+# not use the oh-my-zsh installer, which would overwrite ~/.zshrc.
+
+set -euo pipefail
+
+OMZ_REPO=https://github.com/ohmyzsh/ohmyzsh.git
+declare -A EXTERNAL_PLUGINS=(
+  [zsh-syntax-highlighting]=https://github.com/zsh-users/zsh-syntax-highlighting.git
+)
+
+usage() {
+  cat >&2 <<EOF
+Usage: $(basename "$0") [-v] [-h]
+
+Clone oh-my-zsh into \$ZSH (default ~/.oh-my-zsh) and external plugins into
+\$ZSH_CUSTOM/plugins (default ~/.zsh.d/plugins), skipping any that exist.
+
+  -v  Verbose (set -x)
+  -h  Show this help
+EOF
+}
+
+clone() {
+  local repo="$1"
+  local dest="$2"
+  if [[ -e $dest ]]; then
+    echo "$dest already exists, skipping"
+  else
+    echo "Cloning $repo into $dest"
+    git clone --depth=1 "$repo" "$dest"
+  fi
+}
+
+while getopts "vh" opt; do
+  case "$opt" in
+    v)
+      set -x
+      ;;
+    h)
+      usage
+      exit 0
+      ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+if [[ $# -gt 0 ]]; then
+  usage
+  exit 1
+fi
+
+zsh_dir="${ZSH:-$HOME/.oh-my-zsh}"
+zsh_custom="${ZSH_CUSTOM:-$HOME/.zsh.d}"
+
+clone "$OMZ_REPO" "$zsh_dir"
+
+mkdir -p "$zsh_custom"/plugins
+for plugin in "${!EXTERNAL_PLUGINS[@]}"; do
+  clone "${EXTERNAL_PLUGINS[$plugin]}" "$zsh_custom"/plugins/"$plugin"
+done

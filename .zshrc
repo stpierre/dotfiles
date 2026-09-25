@@ -1,50 +1,38 @@
-#! /bin/zsh
+# oh-my-zsh setup. Most of the config lives in ~/.zsh.d, which is
+# $ZSH_CUSTOM: pre/*.zsh are sourced here before oh-my-zsh, and
+# oh-my-zsh sources *.zsh itself, after its libs and plugins and before
+# the theme. Run ~/bin/zsh-bootstrap to install oh-my-zsh.
 
-autoload -U compinit
+ZSH=$HOME/.oh-my-zsh
+ZSH_CUSTOM=$HOME/.zsh.d
+ZSH_COMPDUMP=$ZSH_CUSTOM/cache/zcompdump-$HOST
+ZSH_THEME=stpierre
+DISABLE_AUTO_TITLE=true
+HISTFILE=$HOME/.history
 
-zsh_cache=${HOME}/.zsh.d/cache
-mkdir -p $zsh_cache
+zstyle ':omz:update' mode auto
+# gnubin puts GNU ls first, where -G means --no-group, not color
+zstyle ':omz:lib:theme-and-appearance' gnu-ls yes
 
-compinit -d $zsh_cache/zcomp-$HOST
+# zsh-syntax-highlighting must be last
+plugins=(gh kubectl mise docker golang gcloud zsh-syntax-highlighting)
 
-for zshrc_snipplet in ~/.zsh.d/S[0-9][0-9]*; do
-    if type _zshrc_log >& /dev/null; then
-        _zshrc_log "Loading snipplet $zshrc_snipplet"
-    fi
-    source "$zshrc_snipplet"
+mkdir -p "$ZSH_CUSTOM"/cache
+
+for zshrc_pre in "$ZSH_CUSTOM"/pre/*.zsh(N); do
+    source "$zshrc_pre"
 done
+unset zshrc_pre
 
-# bun completions
-[ -s "/Users/stpierre/.bun/_bun" ] && source "/Users/stpierre/.bun/_bun"
-
-# bun
-export BUN_INSTALL="$HOME/.bun"
-export PATH="$BUN_INSTALL/bin:$PATH"
-
-alias claude-mem='/Users/stpierre/.bun/bin/bun "/Users/stpierre/.claude/plugins/cache/thedotmack/claude-mem/10.5.2/scripts/worker-service.cjs"'
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
-export PATH="/opt/homebrew/sbin:$PATH"
+if [[ -r $ZSH/oh-my-zsh.sh ]]; then
+    source "$ZSH"/oh-my-zsh.sh
+else
+    print -P "%F{red}oh-my-zsh is not installed; run ~/bin/zsh-bootstrap%f"
+    autoload -Uz compinit add-zsh-hook
+    compinit -d "$ZSH_COMPDUMP"
+    for zshrc_snippet in "$ZSH_CUSTOM"/*.zsh(N) \
+                         "$ZSH_CUSTOM"/themes/"$ZSH_THEME".zsh-theme(N); do
+        source "$zshrc_snippet"
+    done
+    unset zshrc_snippet
+fi

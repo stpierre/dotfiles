@@ -1,5 +1,3 @@
-#!/bin/zsh
-
 export LESS_TERMCAP_mb=$'\E[01;31m'
 export LESS_TERMCAP_md=$'\E[01;31m'
 export LESS_TERMCAP_me=$'\E[0m'
@@ -16,15 +14,11 @@ export LESS_TERMCAP_us=$'\E[01;32m'
 # -X: Do not clear the screen on quit
 export LESS="-iFMRX"
 
-if type xmodmap >& /dev/null; then
-    if [[ -n "$DISPLAY" && -e ~/.Xmodmap ]]; then
-        xmodmap ~/.Xmodmap
-    fi
+if (( $+commands[xmodmap] )) && [[ -n $DISPLAY && -e ~/.Xmodmap ]]; then
+    xmodmap ~/.Xmodmap
 fi
 
-__zsh_version=$(zsh --version | awk '{print $2}')
-
-if [[ $(uname) == "Darwin" ]]; then
+if [[ $OSTYPE == darwin* ]]; then
     __is_macos=true
 else
     __is_macos=false

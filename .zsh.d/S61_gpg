@@ -1,9 +1,0 @@
-#!/bin/zsh
-
-function start-gpg-agent() {
-    if type gpg-agent >& /dev/null; then
-        eval $(gpg-agent --daemon)
-    fi
-}
-
-start-gpg-agent

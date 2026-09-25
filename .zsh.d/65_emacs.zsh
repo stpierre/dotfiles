@@ -1,13 +1,11 @@
-#!/bin/zsh
-
 # once upon a time we had logic that would allow us to run multiple
 # emacs servers. that's unused, but since we had the logic below, it
 # makes sense to preserve that logic just in case we need it again
 _emacs_server_name=server
 
-function __start_emacs_server() {
-    # start emacs server
-    name=$_emacs_server_name
+__start_emacs_server() {
+    local name=$_emacs_server_name
+    local pid
     if [[ $__is_macos == true ]]; then
         pgrep -U "$USER" -i emacs
     else
@@ -18,64 +16,59 @@ function __start_emacs_server() {
             return
         fi
     done
-    $__emacs_bin --daemon="$name"
+    "$__emacs_bin" --daemon="$name"
 }
 
-if type emacs >& /dev/null; then
-    if [[ -z $__emacs_bin ]]; then
-        if [[ $(type emacs) == "emacs is a shell function" ]]; then
-            unfunction emacs
-        fi
-
-        __emacs_bin=$(which emacs)
+if (( $+commands[emacs] )); then
+    # $commands ignores functions, so this finds the real binary even
+    # after the emacs() function below has been defined
+    __emacs_bin=$commands[emacs]
+    if [[ -z $__emacs_version ]]; then
+        __emacs_version=$("$__emacs_bin" --version | head -n 1 | \
+            awk '{ split($NF, v, "."); print v[1] "." v[2]; }')
     fi
-    __emacs_version=$($__emacs_bin --version | head -n 1 | \
-        awk '{ split($NF, v, "."); print v[1] "." v[2]; }')
 
-    if type emacsclient >& /dev/null && [[ $__emacs_version -ge 23.1 ]]; then
-        function emacs() {
+    if (( $+commands[emacsclient] && __emacs_version >= 23.1 )); then
+        emacs() {
             __start_emacs_server
-            local args
-            args="-s $_emacs_server_name"
+            local -a args=(-s "$_emacs_server_name")
+            local gui_frames
             # check to see if any of -nw, -t, or --tty were provided
             # as arguments. if they were, we respect them; if not, we
             # figure out whether to open a new frame (and how)
-            if [[ ${@[(ie)-nw]} -gt ${#@} && \
-                      ${@[(ie)-t]} -gt ${#@} && \
-                      ${@[(ie)--tty]} -gt ${#@} ]]; then
+            if [[ ${argv[(Ie)-nw]} == 0 && ${argv[(Ie)-t]} == 0 && \
+                      ${argv[(Ie)--tty]} == 0 ]]; then
                 if [[ $__is_macos == true ]]; then
-                    args="$args -n"
+                    args+=(-n)
                     # on Mac OS, the frame behavior is broken and it
                     # won't reuse a frame if `-r` is given, but it
                     # also won't open a new frame *unless* `-c` is
                     # given. see
                     # https://emacs.stackexchange.com/questions/79292/why-is-emacsclient-not-reusing-the-existing-frame
-                    local gui_frames
                     gui_frames=$(emacsclient -e -s "$_emacs_server_name" \
                                              '(visible-frame-list)' | \
                                      sed 's/^(#<frame //; s/)$//; s/ 0x[0-9a-f]*>//g; s/ #<frame /\n/;' | \
                                      grep -v '^F[0-9]*$')
                     if [[ -z $gui_frames ]]; then
-                        args="$args -c"
+                        args+=(-c)
                     fi
                 elif [[ -n $DISPLAY ]]; then
                     # on linux, if we have a GUI, `-c` Just Works
                     # (although it seems like maybe we should use `-r`
                     # here instead?)
-                    args="$args -n -c"
+                    args+=(-n -c)
                 else
                     # no GUI, run in the terminal. we have to omit the
                     # `-n` flag, which causes emacsclient to exit
                     # immediately; that's great for GUI emacs, but not
                     # so much for the terminal.
-                    args="$args -t"
+                    args+=(-t)
                 fi
             fi
-            args="$args $@"
-            emacsclient ${=args}
+            emacsclient "${args[@]}" "$@"
         }
 
-        function emacs-kill() {
+        emacs-kill() {
             emacsclient -e -s "$_emacs_server_name" '(kill-emacs)'
         }
 
@@ -85,7 +78,7 @@ if type emacs >& /dev/null; then
     export EDITOR="emacs -nw"
     alias emcas=emacs
     alias vi=$EDITOR
-elif type vim >& /dev/null; then
+elif (( $+commands[vim] )); then
     export EDITOR=vim
     alias emcas=$EDITOR
 else
