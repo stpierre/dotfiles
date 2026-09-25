@@ -1,5 +1,12 @@
-(add-hook 'org-mode-hook
-          #'(lambda ()
-              (local-set-key "\C-cl" 'org-store-link)))
+;;; org.el --- Org mode -*- lexical-binding: t -*-
 
-(setq org-hide-leading-stars t)
+;;; Commentary:
+
+;;; Code:
+
+(global-set-key (kbd "C-c l") #'org-store-link)
+
+(use-package org
+  :custom (org-hide-leading-stars t))
+
+;;; org.el ends here

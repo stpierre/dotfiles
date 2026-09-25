@@ -1,21 +1,26 @@
-;;; miscellaneous documentation format settings
+;;; doc.el --- Documentation formats -*- lexical-binding: t -*-
+
+;;; Commentary:
+;;; Miscellaneous documentation format settings.
+
+;;; Code:
 
 ;; automatically include licenses
 (use-package legalese :ensure t)
 
 (use-package markdown-mode :ensure t)
 
-(add-hook 'rst-mode-hook
-          #'(lambda () (flyspell-mode 1)))
+(defun graphviz-customizations ()
+  "Set up `graphviz-dot-mode' buffers."
+  (setq-local tab-width 4))
 
-;; graphviz mode settings
 (use-package graphviz-dot-mode
   :ensure t
-  :mode (("\\.dot\\'" . graphviz-dot-mode)
-         ("\\.gv\\'" . graphviz-dot-mode))
-  :hook (graphviz-dot-mode . (lambda ()
-                               (setq tab-width 4)
-                               (setq graphviz-dot-indent-width 4)
-                               (setq graphviz-dot-auto-indent-on-newline nil)
-                               (setq graphviz-dot-auto-indent-on-braces nil)
-                               (setq graphviz-dot-auto-indent-on-semi nil))))
+  :custom
+  (graphviz-dot-indent-width 4)
+  (graphviz-dot-auto-indent-on-newline nil)
+  (graphviz-dot-auto-indent-on-braces nil)
+  (graphviz-dot-auto-indent-on-semi nil)
+  :hook (graphviz-dot-mode . graphviz-customizations))
+
+;;; doc.el ends here

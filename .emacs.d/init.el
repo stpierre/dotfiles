@@ -1,4 +1,4 @@
-;;; package --- .emacs customizations
+;;; init.el --- .emacs customizations -*- lexical-binding: t -*-
 
 ;;; Commentary:
 ;;; Initial emacs startup bits. Most stuff should be organized into
@@ -7,66 +7,57 @@
 ;;; Code:
 
 (require 'package)
-(setq package-quickstart t)
 (add-to-list
  'package-archives '("melpa" . "https://melpa.org/packages/")
  t)
-(add-to-list
- 'package-archives '("elpa" . "https://elpa.gnu.org/packages/")
- t)
 
-(when (not package-archive-contents)
-  (package-refresh-contents))
+;; packages' autoloads cover almost everything, so only load a package
+;; when it's first used
+(setq use-package-always-defer t)
 
-(require 'cl-lib)
-(require 'subword)
+(setq custom-file (locate-user-emacs-file "custom.el"))
+(load custom-file t t)
 
-;; install use-package, which is *wonderful*
-(require 'use-package)
+(use-package emacs
+  :custom
+  (auto-save-default nil)
+  (auto-save-list-file-prefix nil)
+  (make-backup-files nil)
+  (echo-keystrokes 0.1)
+  (imenu-auto-rescan t)
+  (imenu-flatten 'annotation)
+  (initial-major-mode 'fundamental-mode)
+  (initial-scratch-message "")
+  (require-final-newline t)
+  (use-short-answers t)
+  (indent-tabs-mode nil)
+  (fill-column 79)
+  (tab-always-indent 'complete)
+  (read-extended-command-predicate
+   #'command-completion-default-include-p)
+  (user-mail-address "chris.a.st.pierre@gmail.com")
+  (user-full-name "Chris St. Pierre")
+  (recentf-max-saved-items 200)
+  (global-auto-revert-non-file-buffers t)
+  :config
+  (put 'upcase-region 'disabled nil)
+  (put 'downcase-region 'disabled nil)
+  (put 'narrow-to-region 'disabled nil)
 
-(require 'saveplace)
-(setq save-place t)
+  (save-place-mode 1)
+  (savehist-mode 1)
+  (recentf-mode 1)
+  (global-auto-revert-mode 1)
+  (which-key-mode 1)
+  (editorconfig-mode 1)
 
-(setq
- auto-save-default nil
- echo-keystrokes 0.1
- imenu-auto-rescan t
- imenu-flatten "annotation"
- initial-major-mode 'fundamental-mode
- initial-scratch-message ""
- make-backup-files nil
- require-final-newline t
- show-trailing-whitespace t)
+  ;; chmod +x files that start with #!
+  (add-hook 'after-save-hook
+            #'executable-make-buffer-file-executable-if-script-p))
 
-(setq-default
- indent-tabs-mode nil
- case-fold-search t
- fill-column 79)
-
-;; set user-emacs-directory on older versions of emacs
-(if (not (boundp 'user-emacs-directory))
-    (setq user-emacs-directory "~/.emacs.d"))
-
-;; add a place to put custom packages that aren't in ELPA/MELPA
-(if (file-exists-p user-emacs-directory)
-    (add-to-list
-     'load-path (concat user-emacs-directory "/packages")))
-
-(auto-fill-mode nil)
-
-(put 'upcase-region 'disabled nil)
-(put 'downcase-region 'disabled nil)
-(put 'narrow-to-region 'disabled nil)
-
-;; set email address and fullname properly
-(setq user-mail-address "chris.a.st.pierre@gmail.com")
-(setq user-full-name "Chris St. Pierre")
-
-;; Handle .gz files
-(auto-compression-mode t)
-
-;; enable y/n answers
-(fset 'yes-or-no-p 'y-or-n-p)
+;; declare it special, so the let below binds it dynamically before
+;; sort.el is loaded
+(defvar sort-fold-case)
 
 (defun sort-lines-nocase ()
   "Sort lines case-insensitively."
@@ -74,47 +65,20 @@
   (let ((sort-fold-case t))
     (call-interactively 'sort-lines)))
 
-(require 'shebang)
-
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
-
-;; define function to shutdown emacs server instance
-(defun server-shutdown ()
-  "Save buffers, quit, and shutdown (kill) server."
-  (interactive)
-  (save-some-buffers)
-  (kill-emacs))
-
-(use-package dumb-jump :ensure t)
-(add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
-
-(use-package corfu
+;; trim trailing whitespace, but only on lines that have been edited
+(use-package ws-butler
   :ensure t
-  :hook ((prog-mode . corfu-mode)))
+  :hook (after-init . ws-butler-global-mode))
 
-(use-package
- emacs
- :ensure t
- :custom (tab-always-indent 'complete)
- (read-extended-command-predicate
-  #'command-completion-default-include-p))
+;; M-x scratch opens a scratch buffer in the current major mode; C-u
+;; M-x scratch prompts for the mode
+(use-package scratch :ensure t)
 
-(mapc
- 'load
- (cl-remove-if
-  (lambda (p)
-    (string= (file-name-nondirectory p) "init.el"))
-  (file-expand-wildcards "~/.emacs.d/*.el")))
+;; load every other *.el file in this directory
+(dolist (file (directory-files user-emacs-directory t "\\`[^.#].*\\.el\\'"))
+  (unless (member (file-name-nondirectory file)
+                  '("init.el" "early-init.el" "custom.el"
+                    "package-quickstart.el"))
+    (load (file-name-sans-extension file) nil t)))
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages nil))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+;;; init.el ends here

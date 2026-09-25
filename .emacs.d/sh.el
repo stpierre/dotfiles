@@ -1,9 +1,17 @@
-;; create a sh-scratch buffer that's just like *scratch*, but with
-;; the sh major mode
-(with-current-buffer
-    (generate-new-buffer "*sh-scratch*")
-  (sh-mode))
+;;; sh.el --- Shell scripts -*- lexical-binding: t -*-
 
-(add-hook 'sh-mode-hook 'eglot-ensure)
+;;; Commentary:
+;;; Bash and sh scripts use `bash-ts-mode' (see treesit.el); other
+;;; shells, like zsh, automatically fall back to `sh-mode'.
 
-;;  (add-to-list 'eglot-server-programs '((sh-mode bash-ts-mode) . ("bash-language-server" "start")))
+;;; Code:
+
+(defun sh-customizations ()
+  "Set up shell script buffers."
+  ;; bash-language-server only understands bash and sh
+  (when (and buffer-file-name (memq sh-shell '(bash sh)))
+    (eglot-ensure)))
+
+(add-hook 'sh-base-mode-hook #'sh-customizations)
+
+;;; sh.el ends here

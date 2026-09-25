@@ -1,53 +1,24 @@
+;;; theme.el --- Theme, frames, and the mode line -*- lexical-binding: t -*-
+
+;;; Commentary:
+
+;;; Code:
+
 (use-package solarized-theme
   :ensure t
-  :init (load-theme 'solarized-dark t))
+  :demand t
+  :config (load-theme 'solarized-dark t))
 
 (put 'scroll-left 'disabled nil)
 
-;; set font
-(defun font-exists-p (font-name)
-  "Return t if FONT-NAME exists, nil otherwise."
-  (if (functionp 'font-family-list)
-      (> (length (member font-name (font-family-list))) 0)
-    nil))
-
-(defun default-font ()
-  "Discover the default font to use."
-  (if (font-exists-p "liberation mono")
-      "liberation mono"
-    (if (font-exists-p "Monaco")
-        "Monaco")))
-;; todo add an else here in case neither exists
-
-(defun default-font-size ()
-  "Discover the default font size to use."
-  (if (eq (default-font) "liberation mono")
-      9 ;; linux, adjust for hidpi monitor
-    11)) ;; mac os
-
-(defun hidpi-font-on ()
-  "Convenience method for setting font size on HiDPI monitors."
-  (interactive)
-  (set-frame-font (concat (default-font) "-11")))
-
-(defun hidpi-font-off ()
-  "Convenience method for setting font size on HiDPI monitors."
-  (interactive)
-  (set-frame-font (concat (default-font) "-9")))
-
-;;(set-face-attribute 'default nil
-;;                    :family (default-font)
-;;                    :height (* 10 (default-font-size)))
-
 ;; set initial window size
-(setq default-frame-alist
-     '((width  . 164)
-       (height . 80)))
+(add-to-list 'default-frame-alist '(width . 164))
+(add-to-list 'default-frame-alist '(height . 80))
 
-(setq inhibit-startup-message t
-      size-indication-mode t
-      line-number-mode t
-      column-number-mode t)
+(setq inhibit-startup-message t)
+
+(size-indication-mode 1)
+(column-number-mode 1)
 
 (setq-default mode-line-position
               '((-3 "%p") (size-indication-mode ("/" (-4 "%I")))
@@ -55,21 +26,13 @@
                 (line-number-mode
                  ("%l" (column-number-mode ":%c")))))
 
-;; better mode line. much of this stolen from
-;; https://github.com/lunaryorn/blog/blob/master/posts/make-your-emacs-mode-line-more-useful.md
-(defvar lunaryorn-vc-mode-line
-  '(" " (:propertize
-         ;; Strip the backend name from the VC status information
-         (:eval (let ((backend (symbol-name (vc-backend (buffer-file-name)))))
-                  (substring vc-mode (+ (length backend) 2))))
-         face font-lock-variable-name-face))
-  "Mode line format for VC Mode.")
-(put 'lunaryorn-vc-mode-line 'risky-local-variable t)
+;; show the branch and status in the mode line, without the "Git" prefix
+(setq vc-display-status 'no-backend)
 (setq-default mode-line-format
               (list ""
                     'mode-line-modified " "
                     'mode-line-buffer-identification
-                    '(vc-mode lunaryorn-vc-mode-line) " "
+                    '(vc-mode vc-mode) " "
                     'mode-line-position " "
                     'mode-line-modes
                     'mode-line-misc-info))
@@ -81,6 +44,28 @@
 ;; the blinking cursor is nothing but an annoyance
 (blink-cursor-mode -1)
 
-(use-package highlight-indent-guides
+;; show colors like #268bd2 in the color they describe
+(use-package colorful-mode
   :ensure t
-  :hook (prog-mode . highlight-indent-guides-mode))
+  :hook (after-init . global-colorful-mode))
+
+;; indentation guides; characters in TTY frames, stipple bars in GUI ones
+(use-package indent-bars
+  :ensure t
+  :custom
+  ;; set up after mode hooks, file/dir-locals and editorconfig have
+  ;; settled the indentation (e.g. 2-column tabs in go.el)
+  (indent-bars-defer-setup t)
+  (indent-bars-treesit-support t)
+  ;; no bars on blank lines between top-level forms
+  (indent-bars-treesit-ignore-blank-lines-types '("module" "source_file"))
+  ;; de-emphasize bars outside the innermost block around point
+  (indent-bars-treesit-scope
+   '((python function_definition class_definition for_statement
+             if_statement with_statement while_statement try_statement)
+     (go function_declaration method_declaration func_literal
+         for_statement if_statement expression_switch_statement
+         type_switch_statement select_statement)))
+  :hook ((prog-mode yaml-ts-mode) . indent-bars-mode))
+
+;;; theme.el ends here

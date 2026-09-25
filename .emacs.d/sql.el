@@ -1,10 +1,16 @@
+;;; sql.el --- SQL -*- lexical-binding: t -*-
+
+;;; Commentary:
+
+;;; Code:
+
 (defun sql-customizations ()
-  (setq sqlformat-command 'sqlformat)
-  (setq tab-width 2)
-  (setq indent-tabs-mode nil)
-  (sqlformat-on-save-mode))
+  "Set up `sql-mode' buffers."
+  (setq-local tab-width 2)
+  (sqlformat-on-save-mode 1))
 
-(use-package sqlformat :ensure t)
+(use-package sqlformat
+  :ensure t
+  :hook (sql-mode . sql-customizations))
 
-(add-hook 'sql-mode-hook 'sql-customizations)
-
+;;; sql.el ends here
